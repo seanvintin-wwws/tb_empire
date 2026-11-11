@@ -44,7 +44,7 @@
         @click="selectedMission = mission; seen = true"
 		>
 		<!--v-click-outside="hide"-->
-		<div v-if="seen" class="description" v-bind:class="'desc_' + selectedMission.position">
+		<div v-if="seen && selectedMission.type !== 'platoon'" class="description" v-bind:class="'desc_' + selectedMission.position">
 			
             <div class="mb-3">
             <h3><i class="fa fa-window-close fa-fw topcorner" @click="hide"></i></h3>
@@ -93,7 +93,7 @@
 				</ul>
 			</div>
 
-			<div class="mb-3 " v-if="selectedMission.requiredToons">
+			<div class="mb-3 " v-if="false">
                 <p class="h4">Operation Requirements</p>
 				<span v-for="item in selectedMission.preqs">&nbsp;&nbsp;{{item}}&nbsp;&nbsp;&nbsp;</span>
 			    
