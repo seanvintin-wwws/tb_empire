@@ -40,6 +40,55 @@ const RATE = { A: '✅ 2/2', B: '👍 ~90%', C: '⚠️ ~75%', D: '➖ 1/2' };
 const HOW = { t: 'Target at battle start', p: 'Pause & target in wave 2', m: 'Manual play needed' };
 const tidy = s => (s || '').replace(/\s+/g, ' ').replace(/\s+,/g, ',').replace(/,\s*$/, '').trim();
 
+// Units a special mission requires. Within the same phase (all planets played together, including
+// the bonus planet), teams elsewhere that use these units are dropped, because each unit can only be
+// used once per phase. Patterns are matched against the team leader and "with" text, not notes.
+const PHASES = [
+  ['mustafar', 'corellia', 'coruscant'],
+  ['geonosis', 'felucia', 'bracca'],
+  ['dathomir', 'tatooine', 'kashyyyk', 'zeffo'],
+  ['haven', 'kessel', 'lothal', 'mandalore'],
+  ['malachor', 'vandor', 'kafrene'],
+  ['deathstar', 'hoth', 'scarif'],
+];
+const JABBA = /\bjabba\b/i, APHRA = /\baphra\b/i, QIRA = /\bqi'?ra\b/i, YHAN = /young han|\bYHS\b/i;
+const RESERVED = {
+  'mustafar:c2': [/\blord vader\b|\bLV\b/i],
+  'corellia:c1': [JABBA], 'corellia:c2': [APHRA], 'corellia:c5': [QIRA, YHAN],
+  'coruscant:c1': [/(?<!master )\bmace\b(?! windu \(jedi master)/i, /\bkit\b|kit fisto/i],
+  'felucia:c1': [JABBA], 'felucia:c2': [/young lando|\bY ?Lando\b/i], 'felucia:c5': [/(?<!king )\bhondo\b/i],
+  'bracca:c4': [/\bcere\b/i, /\bJKCK\b|cal kestis|\bcal\b/i],
+  'dathomir:c1': [APHRA], 'dathomir:c8': [/\bmerrin\b/i],
+  'tatooine:c2': [JABBA], 'tatooine:c3': [/\bfennec\b/i],
+  'tatooine:c5': [/bo[- ]?katan|\bBKM\b|\bBAM\b|beskar/i],
+  'kashyyyk:c8': [/\bsaw\b/i], 'kashyyyk:c6': [/tarf+ul|\bchewbacca\b|\bchewie\b|chewpio|zaalbar|\bCWC\b/i],
+  'zeffo:c8': [/\bJKCK\b|cal kestis|\bcal\b/i],
+  'haven:c3': [/third sister|\breva\b/i],
+  'kessel:c3': [QIRA, /\bL3(-37)?\b/i], 'kessel:c4': [JABBA],
+  'mandalore:c3': [/bo[- ]?katan|\bBKM\b|\bBAM\b/i], 'mandalore:c6': [/dark trooper moff gideon|\bDTMG\b/i],
+  'mandalore:c1': [/gauntlet/i],
+  'malachor:c4': [/eighth brother|\b8B\b|fifth brother|\b5B\b|seventh sister|\b7S\b/i],
+  'vandor:c3': [YHAN, /vandor chew/i], 'vandor:c6': [JABBA],
+  'kafrene:c2': [/cassian/i, /\bK-?2(SO)?\b/i],
+  'deathstar:c2': [/darth vader(?! duel)/i], 'deathstar:c6': [/\biden\b/i],
+  'hoth:c4': [APHRA, /\bBT-?1\b/i, /0-0-0|\b000\b/i], 'hoth:c6': [JABBA],
+  'scarif:c2': [/cassian/i, /\bK-?2(SO)?\b/i, /\bpao\b/i], 'scarif:c6': [/\bbaze\b/i, /chirrut/i, /pathfinder|\bSRP\b/i],
+};
+// Mission notes shown above the team list.
+const NOTES = {
+  'tatooine:c4': 'Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron.',
+};
+const phaseOf = p => PHASES.findIndex(g => g.includes(p));
+const removed = [];
+function clash(key, row) {
+  const [p] = key.split(':'); const text = row.lead + ' | ' + row.with;
+  for (const [rk, pats] of Object.entries(RESERVED)) {
+    if (rk === key || phaseOf(rk.split(':')[0]) !== phaseOf(p)) continue;
+    for (const re of pats) if (re.test(text)) return rk + ' ' + re;
+  }
+  return null;
+}
+
 const out = {};
 const problems = [];
 for (const m of raw) {
@@ -52,11 +101,31 @@ for (const m of raw) {
     how: t[1].slice(1).split('').map(c => HOW[c]).filter(Boolean).join('; '),
     notes: tidy(t[3]).replace(/^(auto|full auto|easy auto|easy full auto)$/i, ''),
   }));
+  // Drop empty-detail entries when the same leader already has a full team listed.
+  for (let i = rows.length - 1; i >= 0; i--) {
+    if (!rows[i].with && rows.some((r, j) => j !== i && r.lead === rows[i].lead && r.with)) rows.splice(i, 1);
+  }
+  // Meta update: Jedi Master Luke leads always run Jedi Training Leia.
+  for (const r of rows) {
+    if (!/^jedi master luke\b/i.test(r.lead) || /jedi training leia|\bJTL\b/i.test(r.with)) continue;
+    const items = (r.with ? r.with.split(',') : []).flatMap(x => x.trim().split(/\s+(?=\+\d)/)).map(x => x.trim()).filter(Boolean);
+    if (items.length >= 4) {
+      // Make room: drop a "+N" filler first, otherwise the last member not named in the team title.
+      let i = items.findIndex(x => /^\+\d/.test(x));
+      if (i < 0) { i = items.length - 1; while (i > 0 && r.lead.toUpperCase().replace('MQJ','MQG').includes(items[i].toUpperCase().replace('MQJ','MQG'))) i--; }
+      items.splice(i, 1);
+    }
+    r.with = ['Jedi Training Leia', ...items].join(', ');
+  }
+  // Drop duplicate teams (same leader and members).
+  for (let i = rows.length - 1; i >= 0; i--) {
+    if (rows.findIndex(r => r.lead === rows[i].lead && r.with === rows[i].with) !== i) rows.splice(i, 1);
+  }
   if (!rows.length) problems.push('no 2/2 team: ' + m.m);
   for (const k of keys) {
     const [p, c] = k.split(':');
     if (!old[p] || !old[p].missions.find(x => x.name === c)) problems.push('missing old mission ' + k);
-    out[k] = rows;
+    out[k] = rows.filter(r => { const c = clash(k, r); if (c) removed.push(k + ': ' + r.lead + ' + ' + r.with + '   <- needed for ' + c); return !c; });
   }
 }
 // old combat/fleet missions with no guide data
@@ -68,7 +137,9 @@ const updated = process.argv[2] || new Date().toISOString().slice(0, 10);
 const js = '// Recommended teams per mission, taken from https://swgohrote.com/ (' + updated + ').\n' +
   '// Generated file: key is "planet:mission" matching the mission names in each planet file.\n' +
   'window.GUIDE_UPDATED = ' + JSON.stringify(updated) + ';\n' +
-  'window.GUIDE = ' + JSON.stringify(out, null, 1) + ';\n';
+  'window.GUIDE = ' + JSON.stringify(out, null, 1) + ';\n' +
+  'window.GUIDE_NOTES = ' + JSON.stringify(NOTES, null, 1) + ';\n';
 fs.writeFileSync(__dirname + '/../../js/guide_data.js', js);
+console.log(removed.join('\n'));
 console.log('missions written:', Object.keys(out).length);
 console.log(problems.join('\n'));

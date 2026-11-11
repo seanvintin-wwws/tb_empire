@@ -360,7 +360,7 @@ window.GUIDE = {
   },
   {
    "lead": "Jedi Master Luke",
-   "with": "Jedi Luke, HYoda, JKA, GMY",
+   "with": "Jedi Training Leia, Jedi Luke, HYoda, JKA",
    "how": "",
    "notes": "auto, Almost any other jedi work"
   },
@@ -816,7 +816,7 @@ window.GUIDE = {
  "bracca:c2": [
   {
    "lead": "Jedi Master Luke",
-   "with": "JKL, Kyle Katarn, Shaak Ti +1",
+   "with": "Jedi Training Leia, JKL, Kyle Katarn, Shaak Ti",
    "how": "",
    "notes": "auto with KK omi"
   },
@@ -829,12 +829,6 @@ window.GUIDE = {
   {
    "lead": "Jedi Master Mace Windu",
    "with": "Jocasta Nu, Shaak Ti, Temple Guard, Depa Billaba (omicron)",
-   "how": "",
-   "notes": ""
-  },
-  {
-   "lead": "Jedi Master Luke",
-   "with": "",
    "how": "",
    "notes": ""
   }
@@ -951,12 +945,6 @@ window.GUIDE = {
  "kashyyyk:c8": [],
  "kashyyyk:c3": [
   {
-   "lead": "Jedi Knight Cal Kestis",
-   "with": "Kyle Katarn, +3 Jedi",
-   "how": "",
-   "notes": "auto, omis on JKCK lead and Kyle Katarn"
-  },
-  {
    "lead": "Ahsoka Tano",
    "with": "Padawan Sabine, Huyang, Fulcrum, Hera",
    "how": "",
@@ -1004,18 +992,6 @@ window.GUIDE = {
    "notes": "auto, platoons not required"
   },
   {
-   "lead": "Reva",
-   "with": "Marrok, GI, 7S, 5B",
-   "how": "",
-   "notes": "marrok omi, auto, platoons not required"
-  },
-  {
-   "lead": "Dark Trooper Moff Gideon",
-   "with": "Scout Trooper, Night Trooper, Death Trooper Peridia, Captain Enoch (omi)",
-   "how": "",
-   "notes": "auto, platoons not required"
-  },
-  {
    "lead": "Great Mothers",
    "with": "Morgan, Spirit, NT, DTP",
    "how": "",
@@ -1036,18 +1012,6 @@ window.GUIDE = {
    "notes": "auto, platoons not required"
   },
   {
-   "lead": "Reva",
-   "with": "Marrok, GI, 7S, 5B",
-   "how": "",
-   "notes": "marrok omi, auto, platoons not required"
-  },
-  {
-   "lead": "Dark Trooper Moff Gideon",
-   "with": "Scout Trooper, Night Trooper, Death Trooper Peridia, Captain Enoch (omi)",
-   "how": "",
-   "notes": "auto, platoons not required"
-  },
-  {
    "lead": "Great Mothers",
    "with": "Morgan, Spirit, NT, DTP",
    "how": "",
@@ -1064,18 +1028,6 @@ window.GUIDE = {
   {
    "lead": "Pirate King Hondo Onaka",
    "with": "SM-33, Vane, Brutus, Silvo",
-   "how": "",
-   "notes": "auto, platoons not required"
-  },
-  {
-   "lead": "Reva",
-   "with": "Marrok, GI, 7S, 5B",
-   "how": "",
-   "notes": "marrok omi, auto, platoons not required"
-  },
-  {
-   "lead": "Dark Trooper Moff Gideon",
-   "with": "Scout Trooper, Night Trooper, Death Trooper Peridia, Captain Enoch (omi)",
    "how": "",
    "notes": "auto, platoons not required"
   },
@@ -1113,12 +1065,6 @@ window.GUIDE = {
   }
  ],
  "haven:c4": [
-  {
-   "lead": "Dark Trooper Moff Gideon",
-   "with": "Scout Trooper, Night Trooper, Death Trooper Peridia, Captain Enoch (omi)",
-   "how": "",
-   "notes": ""
-  },
   {
    "lead": "Pirate King Hondo Onaka",
    "with": "SM-33, Vane, Brutus, Silvo",
@@ -1161,7 +1107,7 @@ window.GUIDE = {
  "lothal:c1": [
   {
    "lead": "Jedi Master Luke with POW/MQJ",
-   "with": "GAS, GMY, POW, MQG",
+   "with": "Jedi Training Leia, GAS, POW, MQG",
    "how": "",
    "notes": ""
   },
@@ -1441,12 +1387,6 @@ window.GUIDE = {
  "scarif:c6": [],
  "zeffo:c8": [
   {
-   "lead": "JKCK (Rebels)",
-   "with": "Han Solo, Chewie, C3PO, Chewpio",
-   "how": "",
-   "notes": ""
-  },
-  {
    "lead": "Jedi Knight Cal Kestis with Jedi Master Luke",
    "with": "JML, Ezra Exile, +2",
    "how": "",
@@ -1543,12 +1483,6 @@ window.GUIDE = {
    "notes": "auto, Ezra or spectre speeds things up"
   },
   {
-   "lead": "Reva",
-   "with": "Marrok (omi), GI, 5B, 7S",
-   "how": "",
-   "notes": ""
-  },
-  {
    "lead": "Boss Nass",
    "with": "other gungans (tarpals omi)",
    "how": "",
@@ -1593,12 +1527,6 @@ window.GUIDE = {
    "notes": "auto, Ezra or spectre speeds things up"
   },
   {
-   "lead": "Reva",
-   "with": "Marrok (omi), GI, 5B, 7S",
-   "how": "",
-   "notes": ""
-  },
-  {
    "lead": "Boss Nass",
    "with": "other gungans (tarpals omi)",
    "how": "",
@@ -1630,12 +1558,6 @@ window.GUIDE = {
  "zeffo:c1": [],
  "mandalore:c2": [
   {
-   "lead": "Reva",
-   "with": "GI, 7S, 5B, Marrok",
-   "how": "",
-   "notes": "Marrok Omi, easy auto"
-  },
-  {
    "lead": "Pirate King Hondo Onaka",
    "with": "Vane, SM-33, Silvo, Brutus",
    "how": "Pause & target in wave 2",
@@ -1655,4 +1577,7 @@ window.GUIDE = {
   }
  ],
  "hoth:c4": []
+};
+window.GUIDE_NOTES = {
+ "tatooine:c4": "Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron."
 };
