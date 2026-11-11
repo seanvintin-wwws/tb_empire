@@ -62,7 +62,7 @@ const RESERVED = {
   'tatooine:c2': [JABBA], 'tatooine:c3': [/\bfennec\b/i],
   'tatooine:c5': [/bo[- ]?katan|\bBKM\b|\bBAM\b|beskar/i],
   'kashyyyk:c8': [/\bsaw\b/i, /kyle( katarn)?\b|\bKK\b/i, /capt(ain)?\.? rex/i, /\bluthen\b/i, /\bdrogan\b/i], 'kashyyyk:c6': [/tarf+ul|\bchewbacca\b|\bchewie\b|chewpio|zaalbar|\bCWC\b/i],
-  'zeffo:c8': [/\bJKCK\b|cal kestis|\bcal\b/i],
+  'zeffo:c8': [/\bJKCK\b|cal kestis|\bcal\b/i, /jedi master luke|\bJML\b/i],
   'haven:c3': [/third sister|\breva\b/i],
   'kessel:c3': [QIRA, /\bL3(-37)?\b/i], 'kessel:c4': [JABBA],
   'mandalore:c3': [/bo[- ]?katan|\bBKM\b|\bBAM\b/i], 'mandalore:c6': [/dark trooper moff gideon|\bDTMG\b/i],

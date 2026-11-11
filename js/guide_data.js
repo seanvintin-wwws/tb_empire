@@ -1413,12 +1413,6 @@ window.GUIDE = {
    "notes": "auto, takes forever, can save Ezra for another mission. Need to take out others before big bot in wave 1"
   },
   {
-   "lead": "Jedi Knight Luke with Jedi Master Luke",
-   "with": "GMY, JKA, Shaak ti",
-   "how": "Target at battle start",
-   "notes": "zero speed on JKL. full auto but target humanoids, then side bots round 1. round 2 full auto"
-  },
-  {
    "lead": "Omega",
    "with": "Bad Batch Mercenaries",
    "how": "Target at battle start",
