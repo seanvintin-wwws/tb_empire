@@ -974,7 +974,7 @@ window.GUIDE = {
    "lead": "Tarfful",
    "with": "Yoda and Chewie, Chewbacca, Chewpio, Clone Wars Chewie",
    "how": "",
-   "notes": "Much easier with Yoda and Chewie. You want decent mods on CWC."
+   "notes": "2/2 on auto (guild tested). Much easier with Yoda and Chewie. You want decent mods on CWC."
   }
  ],
  "haven:c3": [
