@@ -944,9 +944,9 @@ window.GUIDE = {
  "tatooine:c1": [
   {
    "lead": "Executor",
-   "with": "Start: Hound's Tooth, Razor Crest, Xanadu Blood. Reinforcements: IG-2000 (first), Slave I, Punishing One, +1 bounty hunter ship",
+   "with": "Start: Hound's Tooth, Razor Crest, Xanadu Blood. Reinforcements: IG-2000 (first), Slave I, +2 any (e.g. Ebon Hawk, Lando's Millennium Falcon)",
    "how": "Target TIE Advanced first, then TIE Bomber, then TIE Fighter Pilot",
-   "notes": "Bring in IG-2000 as the first reinforcement. Bounty hunter ships only."
+   "notes": "Bring in IG-2000 as the first reinforcement. The last two reinforcements rarely matter; you usually win before you need them."
   }
  ],
  "kashyyyk:c8": [
