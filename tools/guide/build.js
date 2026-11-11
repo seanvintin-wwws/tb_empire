@@ -61,7 +61,7 @@ const RESERVED = {
   'dathomir:c1': [APHRA], 'dathomir:c8': [/\bmerrin\b/i],
   'tatooine:c2': [JABBA], 'tatooine:c3': [/\bfennec\b/i],
   'tatooine:c5': [/bo[- ]?katan|\bBKM\b|\bBAM\b|beskar/i],
-  'kashyyyk:c8': [/\bsaw\b/i], 'kashyyyk:c6': [/tarf+ul|\bchewbacca\b|\bchewie\b|chewpio|zaalbar|\bCWC\b/i],
+  'kashyyyk:c8': [/\bsaw\b/i, /kyle( katarn)?\b|\bKK\b/i, /capt(ain)?\.? rex/i, /\bluthen\b/i, /\bdrogan\b/i], 'kashyyyk:c6': [/tarf+ul|\bchewbacca\b|\bchewie\b|chewpio|zaalbar|\bCWC\b/i],
   'zeffo:c8': [/\bJKCK\b|cal kestis|\bcal\b/i],
   'haven:c3': [/third sister|\breva\b/i],
   'kessel:c3': [QIRA, /\bL3(-37)?\b/i], 'kessel:c4': [JABBA],
@@ -80,6 +80,8 @@ const NOTES = {
 };
 // Manual team lists that replace the guide's for a mission (guild-confirmed picks).
 const OVERRIDES = {
+  'kashyyyk:c8': [{ lead: 'Saw Gerrera', with: 'Kyle Katarn, Captain Rex, Luthen, Drogan', how: '',
+    notes: 'Auto, deselect targeting reticule at the beginning.' }],
   'kashyyyk:c6': [{ lead: 'Tarfful', with: 'Yoda and Chewie, Chewbacca, Chewpio, Clone Wars Chewie', how: '',
     notes: '2/2 on auto (guild tested). Much easier with Yoda and Chewie. You want decent mods on CWC.' }],
 };
@@ -130,6 +132,13 @@ for (const m of raw) {
   for (const k of keys) {
     const [p, c] = k.split(':');
     if (!old[p] || !old[p].missions.find(x => x.name === c)) problems.push('missing old mission ' + k);
+    // Stand-ins: swap a reserved unit for an alternative instead of dropping the whole team.
+    for (const r of rows) {
+      if (/\bdrogan\b/i.test(r.with) && clash(k, r) && /drogan/.test(clash(k, r))) {
+        r.with = r.with.replace(/\bdrogan\b/i, 'Admiral Raddus');
+        r.notes = (r.notes ? r.notes + '. ' : '') + 'Drogan is saved for the Saw mission, so Raddus replaces him';
+      }
+    }
     out[k] = rows.filter(r => { const c = clash(k, r); if (c) removed.push(k + ': ' + r.lead + ' + ' + r.with + '   <- needed for ' + c); return !c; });
   }
 }

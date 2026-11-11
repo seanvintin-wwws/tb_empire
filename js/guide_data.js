@@ -942,7 +942,14 @@ window.GUIDE = {
   }
  ],
  "tatooine:c1": [],
- "kashyyyk:c8": [],
+ "kashyyyk:c8": [
+  {
+   "lead": "Saw Gerrera",
+   "with": "Kyle Katarn, Captain Rex, Luthen, Drogan",
+   "how": "",
+   "notes": "Auto, deselect targeting reticule at the beginning."
+  }
+ ],
  "kashyyyk:c3": [
   {
    "lead": "Ahsoka Tano",
@@ -1048,9 +1055,9 @@ window.GUIDE = {
  "kashyyyk:c2": [
   {
    "lead": "Leia",
-   "with": "R2, Drogan +2",
+   "with": "R2, Admiral Raddus +2",
    "how": "Pause & target in wave 2",
-   "notes": "auto, focus mara wave 2"
+   "notes": "auto, focus mara wave 2. Drogan is saved for the Saw mission, so Raddus replaces him"
   },
   {
    "lead": "Ahsoka Tano",
