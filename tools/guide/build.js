@@ -45,31 +45,14 @@ const problems = [];
 for (const m of raw) {
   const keys = MAP[m.m];
   if (!keys) { problems.push('unmapped guide mission: ' + m.m); continue; }
-  const rated = m.t.filter(t => /[ABCD]/.test(t[1]));
-  if (!rated.length) {
-    // Only use unrated suggestions where the old tool had nothing useful ("Unknown").
-    const names = [...new Set(m.t.map(t => tidy(t[0])))];
-    let used = false;
-    for (const k of keys) {
-      const [p, c] = k.split(':'); const om = old[p].missions.find(x => x.name === c);
-      const oldNames = (om.preferredSquads || []).map(i => old[p].squads[i] && old[p].squads[i].name).join(' ');
-      if (!oldNames || /^Unknown/.test(oldNames)) { out[k] = [{ rate: '❔', lead: 'Suggested (not yet rated)', with: '', how: '', notes: names.join(', ') }]; used = true; }
-    }
-    if (!used) problems.push('no rated teams (old data kept): ' + m.m);
-    continue;
-  }
-  const order = 'ABCD';
-  rated.sort((a, b) => order.indexOf(a[1][0]) - order.indexOf(b[1][0])); // stable: keeps guide order within a rating
-  const rows = rated.map(t => ({
-    rate: RATE[t[1][0]],
+  // Only keep teams rated 2/2 on auto (A). Interaction notes (target/pause/manual) are kept.
+  const rows = m.t.filter(t => t[1][0] === 'A').map(t => ({
     lead: tidy(t[0]),
     with: tidy(t[2]),
     how: t[1].slice(1).split('').map(c => HOW[c]).filter(Boolean).join('; '),
     notes: tidy(t[3]).replace(/^(auto|full auto|easy auto|easy full auto)$/i, ''),
   }));
-  const seen = new Set(rated.map(t => t[0]));
-  const extra = [...new Set(m.t.filter(t => !/[ABCD]/.test(t[1])).map(t => tidy(t[0])))].filter(n => !seen.has(n));
-  if (extra.length) rows.push({ rate: '❔', lead: 'Also suggested (not yet rated)', with: '', how: '', notes: extra.join(', ') });
+  if (!rows.length) problems.push('no 2/2 team: ' + m.m);
   for (const k of keys) {
     const [p, c] = k.split(':');
     if (!old[p] || !old[p].missions.find(x => x.name === c)) problems.push('missing old mission ' + k);
@@ -79,7 +62,7 @@ for (const m of raw) {
 // old combat/fleet missions with no guide data
 for (const [p, d] of Object.entries(old)) for (const ms of d.missions) {
   if (['platoon', 'deploy'].includes(ms.type)) continue;
-  if (!out[p + ':' + ms.name]) problems.push('old mission without new data: ' + p + ':' + ms.name + ' (' + ms.type + ')');
+  if (!out[p + ':' + ms.name]) { out[p + ':' + ms.name] = []; problems.push('no guide data: ' + p + ':' + ms.name + ' (' + ms.type + ')'); }
 }
 const updated = process.argv[2] || new Date().toISOString().slice(0, 10);
 const js = '// Recommended teams per mission, taken from https://swgohrote.com/ (' + updated + ').\n' +
