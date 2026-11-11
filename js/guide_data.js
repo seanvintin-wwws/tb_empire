@@ -770,15 +770,9 @@ window.GUIDE = {
  "dathomir:c3": [
   {
    "lead": "Lord Vader",
-   "with": "Any",
+   "with": "Appo (omicron), CX-2, Disguised Clone Trooper, Scorch",
    "how": "",
-   "notes": "auto, Dont use Piett"
-  },
-  {
-   "lead": "Emperor Palpatine (DVDE)",
-   "with": "",
-   "how": "",
-   "notes": ""
+   "notes": "Dark side clone troopers. Auto, don't use Piett."
   }
  ],
  "dathomir:c1": [

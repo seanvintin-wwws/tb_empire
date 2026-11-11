@@ -80,6 +80,8 @@ const NOTES = {
 };
 // Manual team lists that replace the guide's for a mission (guild-confirmed picks).
 const OVERRIDES = {
+  'dathomir:c3': [{ lead: 'Lord Vader', with: 'Appo (omicron), CX-2, Disguised Clone Trooper, Scorch', how: '',
+    notes: "Dark side clone troopers. Auto, don't use Piett." }],
   'tatooine:c1': [{ lead: 'Executor', with: "Start: Hound's Tooth, Razor Crest, Xanadu Blood. Reinforcements: IG-2000 (first), Slave I, +2 any (e.g. Ebon Hawk, Lando's Millennium Falcon)",
     how: 'Target TIE Advanced first, then TIE Bomber, then TIE Fighter Pilot',
     notes: 'Bring in IG-2000 as the first reinforcement. The last two reinforcements rarely matter; you usually win before you need them.' }],
