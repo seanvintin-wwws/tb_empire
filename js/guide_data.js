@@ -1383,12 +1383,6 @@ window.GUIDE = {
    "with": "JML, GMY, JKL, Shaak ti",
    "how": "",
    "notes": "auto, lead omi mandatory, probably want whirlwind slam as well"
-  },
-  {
-   "lead": "JKCK (GLAT)",
-   "with": "GLAT, Sabine, Hera, Huyang",
-   "how": "",
-   "notes": "Use ezra if possible, auto"
   }
  ],
  "zeffo:c3": [],

@@ -94,6 +94,7 @@ const OVERRIDES = {
 // Guild edits to the guide's list for a mission: drop teams by leader, and move a leader to the top.
 const EDITS = {
   'mustafar:c1': { drop: [/dark trooper moff gideon/i, /emperor palpatine/i], top: /pirate king hondo/i },
+  'zeffo:c8': { drop: [/JKCK \(GLAT\)/i] },
   'dathomir:c2': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
   'dathomir:c6': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
 };
