@@ -80,6 +80,7 @@ const NOTES = {
 };
 // Manual team lists that replace the guide's for a mission (guild-confirmed picks).
 const OVERRIDES = {
+  'mustafar:c6': [{ lead: 'Leviathan', with: 'Sith Bomber, MK6 Interceptor, Sith Fighter, TIE Advanced, Scimitar', how: '', notes: '' }],
   'dathomir:c3': [{ lead: 'Lord Vader', with: 'Appo (omicron), CX-2, Disguised Clone Trooper, Scorch', how: '',
     notes: "Dark side clone troopers. Auto, don't use Piett." }],
   'tatooine:c1': [{ lead: 'Executor', with: "Start: Hound's Tooth, Razor Crest, Xanadu Blood. Reinforcements: IG-2000 (first), Slave I, +2 any (e.g. Ebon Hawk, Lando's Millennium Falcon)",

@@ -106,7 +106,14 @@ window.GUIDE = {
    "notes": ""
   }
  ],
- "mustafar:c6": [],
+ "mustafar:c6": [
+  {
+   "lead": "Leviathan",
+   "with": "Sith Bomber, MK6 Interceptor, Sith Fighter, TIE Advanced, Scimitar",
+   "how": "",
+   "notes": ""
+  }
+ ],
  "corellia:c5": [
   {
    "lead": "Qira (Leia)",
