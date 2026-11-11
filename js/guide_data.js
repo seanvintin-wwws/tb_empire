@@ -722,18 +722,6 @@ window.GUIDE = {
    "with": "",
    "how": "",
    "notes": ""
-  },
-  {
-   "lead": "Dark Trooper Moff Gideon",
-   "with": "",
-   "how": "",
-   "notes": ""
-  },
-  {
-   "lead": "Grand Moff Tarkin",
-   "with": "",
-   "how": "",
-   "notes": ""
   }
  ],
  "dathomir:c6": [
@@ -745,18 +733,6 @@ window.GUIDE = {
   },
   {
    "lead": "Pirate King Hondo Onaka",
-   "with": "",
-   "how": "",
-   "notes": ""
-  },
-  {
-   "lead": "Dark Trooper Moff Gideon",
-   "with": "",
-   "how": "",
-   "notes": ""
-  },
-  {
-   "lead": "Grand Moff Tarkin",
    "with": "",
    "how": "",
    "notes": ""
