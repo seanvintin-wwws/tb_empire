@@ -719,7 +719,7 @@ window.GUIDE = {
   },
   {
    "lead": "Pirate King Hondo Onaka",
-   "with": "",
+   "with": "SM-33, Captain Silvo, Vane (omicron), Brutus",
    "how": "",
    "notes": ""
   }
@@ -733,7 +733,7 @@ window.GUIDE = {
   },
   {
    "lead": "Pirate King Hondo Onaka",
-   "with": "",
+   "with": "SM-33, Captain Silvo, Vane (omicron), Brutus",
    "how": "",
    "notes": ""
   }

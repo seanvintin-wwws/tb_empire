@@ -94,8 +94,8 @@ const OVERRIDES = {
 // Guild edits to the guide's list for a mission: drop teams by leader, and move a leader to the top.
 const EDITS = {
   'mustafar:c1': { drop: [/dark trooper moff gideon/i, /emperor palpatine/i], top: /pirate king hondo/i },
-  'dathomir:c2': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i] },
-  'dathomir:c6': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i] },
+  'dathomir:c2': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
+  'dathomir:c6': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
 };
 const phaseOf = p => PHASES.findIndex(g => g.includes(p));
 const removed = [];
@@ -161,6 +161,7 @@ for (const [p, d] of Object.entries(old)) for (const ms of d.missions) {
 }
 for (const [k, e] of Object.entries(EDITS)) {
   let rows = (out[k] || []).filter(r => !(e.drop || []).some(re => re.test(r.lead)));
+  for (const [re, team] of (e.fill || [])) rows = rows.map(r => re.test(r.lead) ? { ...r, with: team } : r);
   if (e.top) rows = [...rows.filter(r => e.top.test(r.lead)), ...rows.filter(r => !e.top.test(r.lead))];
   out[k] = rows;
 }
