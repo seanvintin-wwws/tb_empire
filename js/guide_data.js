@@ -48,8 +48,8 @@ window.GUIDE = {
  ],
  "mustafar:c1": [
   {
-   "lead": "Dark Trooper Moff Gideon",
-   "with": "Scout Trooper, Captain Enoch (omi), Moff Gideon, Death Trooper",
+   "lead": "Pirate King Hondo Onaka",
+   "with": "SM33, Vane, any",
    "how": "",
    "notes": ""
   },
@@ -58,18 +58,6 @@ window.GUIDE = {
    "with": "Marrok, Shin, any 2 mercs",
    "how": "",
    "notes": "auto, Marrok Omi"
-  },
-  {
-   "lead": "Pirate King Hondo Onaka",
-   "with": "SM33, Vane, any",
-   "how": "",
-   "notes": ""
-  },
-  {
-   "lead": "Emperor Palpatine",
-   "with": "Emperor Palpatine, Darth Vader Duel's End, Admiral Piett, Gar Saxon, Imperial Super Commando",
-   "how": "",
-   "notes": "Easy fast auto"
   },
   {
    "lead": "Great Mothers",

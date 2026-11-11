@@ -91,6 +91,10 @@ const OVERRIDES = {
   'kashyyyk:c6': [{ lead: 'Tarfful', with: 'Yoda and Chewie, Chewbacca, Chewpio, Clone Wars Chewie', how: '',
     notes: '2/2 on auto (guild tested). Much easier with Yoda and Chewie. You want decent mods on CWC.' }],
 };
+// Guild edits to the guide's list for a mission: drop teams by leader, and move a leader to the top.
+const EDITS = {
+  'mustafar:c1': { drop: [/dark trooper moff gideon/i, /emperor palpatine/i], top: /pirate king hondo/i },
+};
 const phaseOf = p => PHASES.findIndex(g => g.includes(p));
 const removed = [];
 function clash(key, row) {
@@ -152,6 +156,11 @@ for (const m of raw) {
 for (const [p, d] of Object.entries(old)) for (const ms of d.missions) {
   if (['platoon', 'deploy'].includes(ms.type)) continue;
   if (!out[p + ':' + ms.name]) { out[p + ':' + ms.name] = []; problems.push('no guide data: ' + p + ':' + ms.name + ' (' + ms.type + ')'); }
+}
+for (const [k, e] of Object.entries(EDITS)) {
+  let rows = (out[k] || []).filter(r => !(e.drop || []).some(re => re.test(r.lead)));
+  if (e.top) rows = [...rows.filter(r => e.top.test(r.lead)), ...rows.filter(r => !e.top.test(r.lead))];
+  out[k] = rows;
 }
 Object.assign(out, OVERRIDES);
 const updated = process.argv[2] || new Date().toISOString().slice(0, 10);
