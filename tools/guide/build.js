@@ -80,6 +80,8 @@ const NOTES = {
 };
 // Manual team lists that replace the guide's for a mission (guild-confirmed picks).
 const OVERRIDES = {
+  'tatooine:c1': [{ lead: 'Executor', with: "Hound's Tooth, Xanadu Blood, Punishing One, IG-2000", how: '',
+    notes: "Rated ~90% on auto by swgohrote.com. If any of these ships are needed for platoons, swap in other bounty hunter ships: Razor Crest, Slave I, Mist Hunter. No Punishing One: Executor + Razor Crest, Hound's Tooth, Xanadu Blood, Slave I works but is less reliable (~75%)." }],
   'kashyyyk:c8': [{ lead: 'Saw Gerrera', with: 'Kyle Katarn, Captain Rex, Luthen, Drogan', how: '',
     notes: 'Auto, deselect targeting reticule at the beginning.' }],
   'kashyyyk:c6': [{ lead: 'Tarfful', with: 'Yoda and Chewie, Chewbacca, Chewpio, Clone Wars Chewie', how: '',

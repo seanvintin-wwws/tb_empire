@@ -941,7 +941,14 @@ window.GUIDE = {
    "notes": "auto basic if no R7 Hutt Cartel"
   }
  ],
- "tatooine:c1": [],
+ "tatooine:c1": [
+  {
+   "lead": "Executor",
+   "with": "Hound's Tooth, Xanadu Blood, Punishing One, IG-2000",
+   "how": "",
+   "notes": "Rated ~90% on auto by swgohrote.com. If any of these ships are needed for platoons, swap in other bounty hunter ships: Razor Crest, Slave I, Mist Hunter. No Punishing One: Executor + Razor Crest, Hound's Tooth, Xanadu Blood, Slave I works but is less reliable (~75%)."
+  }
+ ],
  "kashyyyk:c8": [
   {
    "lead": "Saw Gerrera",
