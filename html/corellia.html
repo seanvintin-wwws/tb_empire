@@ -11,6 +11,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="../css/corellia.css">
 	<link rel="icon" type="image" href="../media/favicon/get3.png">
+<style>
+.guide-src{font-size:0.8em;opacity:0.8;margin-bottom:4px}
+.guide-src a{color:#8cf}
+.guide-table{width:100%;font-size:0.9em;border-collapse:collapse}
+.guide-table td{border-top:1px solid rgba(255,255,255,0.15);padding:4px;vertical-align:top}
+.guide-rate{white-space:nowrap;width:1%}
+.guide-how{font-size:0.85em;color:#8cf}
+.guide-notes{font-size:0.85em;opacity:0.85;font-style:italic}
+</style>
 </head>
 <body>
 <div class="wrapper">
@@ -49,7 +58,22 @@
 			</div>
             
             
-			<div class="mb-3" v-if="selectedMission.preferredSquads">
+			<div class="mb-3 guide" v-if="guide(selectedMission)">
+				<p class="h4">Recommended teams</p>
+				<p class="guide-src">Updated {{ guideUpdated() }} from <a href="https://swgohrote.com/" target="_blank">swgohrote.com</a>. Best first.</p>
+				<table class="guide-table">
+					<tr v-for="t in guide(selectedMission)">
+						<td class="guide-rate">{{ t.rate }}</td>
+						<td class="text-left">
+							<b>{{ t.lead }}</b>
+							<span v-if="t.with"> + {{ t.with }}</span>
+							<div v-if="t.how" class="guide-how">{{ t.how }}</div>
+							<div v-if="t.notes" class="guide-notes">{{ t.notes }}</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div class="mb-3" v-if="selectedMission.preferredSquads && !guide(selectedMission)">
 				<p  class="h4">Preferred teams</p>
 				<div v-for="item in selectedMission.preferredSquads">
                     <p><img v-bind:src="'../media/'+squads[item].videosource+'.png'" onerror="this.src='../media/none.png';" alt="vid" ><a :href="squads[item].video"> {{squads[item].name}}</a></p>
@@ -120,6 +144,8 @@
 </template>
 <div class="top-left"><a href="main.html" style="color:#FFFFFF;"> <i class="fa fa-home fa-fw"></i>Full Map </a><br>
 <script src="../js/vue.min.js"></script>
+<script>window.GUIDE_PLANET = "corellia";</script>
+<script src="../js/guide_data.js"></script>
 <script src="../js/corellia.js"></script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7G9QJXCBX4"></script>

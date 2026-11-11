@@ -710,6 +710,9 @@ Vue.component('mission', {
 	},
 	template: '#mission',
 	methods: {
+		guide: function(m){ return (window.GUIDE && m && window.GUIDE[window.GUIDE_PLANET + ':' + m.name]) || null; },
+		guideUpdated: function(){ return window.GUIDE_UPDATED || ''; },
+		
 		mq () {
 			this.isMobile = window.matchMedia('(max-width: 600px)').matches;
 		},	

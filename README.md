@@ -24,3 +24,9 @@ A squad suggestion form and or discord server will be set up in the future.
 
 ### Authors/Contact
 <a href="https://genskaar.github.io/tb_empire/html/authors.html"> See Authors page </a>
+
+## Recommended teams update (Nov 2026)
+Mission team recommendations now come from the community guide at https://swgohrote.com/
+and are stored in `js/guide_data.js` (best teams first, with how reliable they are on auto).
+Missions the guide hasn't rated yet still show the original suggestions.
+To refresh: update `tools/guide/guide_raw.json`, then run `node tools/guide/dump_old.js && node tools/guide/build.js "Mon YYYY"`.
