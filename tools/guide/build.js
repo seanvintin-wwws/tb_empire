@@ -78,6 +78,11 @@ const RESERVED = {
 const NOTES = {
   'tatooine:c4': 'Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron.',
 };
+// Manual team lists that replace the guide's for a mission (guild-confirmed picks).
+const OVERRIDES = {
+  'kashyyyk:c6': [{ lead: 'Tarfful', with: 'Yoda and Chewie, Chewbacca, Chewpio, Clone Wars Chewie', how: '',
+    notes: 'Much easier with Yoda and Chewie. You want decent mods on CWC.' }],
+};
 const phaseOf = p => PHASES.findIndex(g => g.includes(p));
 const removed = [];
 function clash(key, row) {
@@ -133,6 +138,7 @@ for (const [p, d] of Object.entries(old)) for (const ms of d.missions) {
   if (['platoon', 'deploy'].includes(ms.type)) continue;
   if (!out[p + ':' + ms.name]) { out[p + ':' + ms.name] = []; problems.push('no guide data: ' + p + ':' + ms.name + ' (' + ms.type + ')'); }
 }
+Object.assign(out, OVERRIDES);
 const updated = process.argv[2] || new Date().toISOString().slice(0, 10);
 const js = '// Recommended teams per mission, taken from https://swgohrote.com/ (' + updated + ').\n' +
   '// Generated file: key is "planet:mission" matching the mission names in each planet file.\n' +

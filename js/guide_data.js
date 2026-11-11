@@ -969,7 +969,14 @@ window.GUIDE = {
    "notes": ""
   }
  ],
- "kashyyyk:c6": [],
+ "kashyyyk:c6": [
+  {
+   "lead": "Tarfful",
+   "with": "Yoda and Chewie, Chewbacca, Chewpio, Clone Wars Chewie",
+   "how": "",
+   "notes": "Much easier with Yoda and Chewie. You want decent mods on CWC."
+  }
+ ],
  "haven:c3": [
   {
    "lead": "Reva",
