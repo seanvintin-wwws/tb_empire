@@ -636,7 +636,6 @@ Vue.component('mission', {
 "Razor Crest",	"1","Scythe",	"1","Supreme Leader Kylo Ren",	"1","TIE/IN Interceptor Prototype",	"1",
 "Tusken Chieftain",	"1",      		]],
 		guides:[
-		'See also: 50 Shards of Kam Discord Server',
 		'Its Just Ian Modding and Strategy: www.youtube.com/watch?v=9eLKxWumn_Y',
 		'McMole2 Defeat the Reek: www.youtube.com/watch?v=ktfNTjiUiGY',
 		'Mikayas Sky & Ahsoka guide www.youtube.com/watch?v=rWu4qahiA-g',

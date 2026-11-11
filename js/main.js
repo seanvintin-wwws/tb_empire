@@ -454,7 +454,6 @@ Vue.component('mission', {
         ['Ahsoka Tano  100'], //test platoon 13
 		],
 		guides:[
-		'See also: 50 Shards of Kam Discord Server',
 		'Its Just Ian Modding and Strategy: www.youtube.com/watch?v=9eLKxWumn_Y',
 		'McMole2 Defeat the Reek: www.youtube.com/watch?v=ktfNTjiUiGY',
 		'Mikayas Sky & Ahsoka guide www.youtube.com/watch?v=rWu4qahiA-g',
