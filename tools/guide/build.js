@@ -87,6 +87,12 @@ const OVERRIDES = {
     { lead: 'Ahsoka Tano (GL)', with: 'Cere Junda, Padawan Sabine, Fulcrum, Commander Ahsoka Tano', how: 'Target purge trooper in wave 1',
       notes: 'swgohrote.com rates this about 75% on auto. Without CAT it usually only gets 1/2.' },
   ],
+  'zeffo:c3': [
+    { lead: 'Cody', with: 'Captain Rex, Rex, Echo, Fives', how: '',
+      notes: 'Full auto. Most-voted community team on swgohrote.com (not yet rated).' },
+    { lead: 'Rex', with: 'Captain Rex, Echo, ARC Trooper, Fives', how: 'Clear the target reticule at the start; in wave 2 put it on the Consular (her counterattacks hurt)',
+      notes: 'Auto. swgohrote.com rates this about 75%.' },
+  ],
   'mustafar:c6': [{ lead: 'Leviathan', with: 'Sith Bomber, MK6 Interceptor, Sith Fighter, TIE Advanced, Scimitar', how: '', notes: '' }],
   'dathomir:c3': [{ lead: 'Lord Vader', with: 'Appo (omicron), CX-2, Disguised Clone Trooper, Scorch', how: '',
     notes: "Dark side clone troopers. Auto, don't use Piett." }],

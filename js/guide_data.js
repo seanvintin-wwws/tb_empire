@@ -1385,7 +1385,20 @@ window.GUIDE = {
    "notes": "auto, lead omi mandatory, probably want whirlwind slam as well"
   }
  ],
- "zeffo:c3": [],
+ "zeffo:c3": [
+  {
+   "lead": "Cody",
+   "with": "Captain Rex, Rex, Echo, Fives",
+   "how": "",
+   "notes": "Full auto. Most-voted community team on swgohrote.com (not yet rated)."
+  },
+  {
+   "lead": "Rex",
+   "with": "Captain Rex, Echo, ARC Trooper, Fives",
+   "how": "Clear the target reticule at the start; in wave 2 put it on the Consular (her counterattacks hurt)",
+   "notes": "Auto. swgohrote.com rates this about 75%."
+  }
+ ],
  "zeffo:c2": [
   {
    "lead": "Rey",
