@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/dathomir.png') no-repeat ;
+	background: url('../media/planets/dathomir_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,32 +179,32 @@ td {
 
 /*Mission positions*/
 .c1 {/*P4 middle battle*/
-	top: 35%;
-	left: 55%;
+	top: 29.8%;
+	left: 67.2%;
 }
 .c2 {/*P4 top battle*/
-	top: 44%;
-	left: 44%;
+	top: 44.2%;
+	left: 53.3%;
 }
 .c3 {/*P4 lower battle*/
-	top: 63%;
-	left: 35%;
+	top: 75.7%;
+	left: 39.6%;
 }
 .c6 {/*P3 top special*/
-	top: 55%;
-	left: 58%;
+	top: 58.9%;
+	left: 71.3%;
 }
 .c7 {/*P3 top special*/
-	top: 45%;
-	left: 28%;
+	top: 39.7%;
+	left: 28.6%;
 }
 .c8 {/*P3 top special*/
-	top: 62%;
-	left: 21%;
+	top: 72.5%;
+	left: 20.2%;
 }
 .m2 {/*P3 middle platoons*/
-	top: 32%;
-	left: 37%;
+	top: 27.1%;
+	left: 40.4%;
 }
 }
 @media (min-width: 1700px) {
