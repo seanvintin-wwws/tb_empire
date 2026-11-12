@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/bracca.png') no-repeat ;
+	background: url('../media/planets/bracca_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,32 +179,32 @@ td {
 
 /*Mission positions*/
 .c1 {/*P4 middle battle*/
-	top: 38%;
-	left: 55%;
+	top: 43.5%;
+	left: 61.7%;
 }
 .c2 {/*P4 top battle*/
-	top: 29%;
-	left: 44%;
+	top: 33.1%;
+	left: 50.4%;
 }
 .c3 {/*P4 lower battle*/
-	top: 31%;
-	left: 24%;
+	top: 36.4%;
+	left: 26.9%;
 }
 .c4 {/*New Bracca Special Mission*/
-	top: 61%;
-	left: 26%;
+	top: 67.1%;
+	left: 27.2%;
 }
 .c6 {/*P3 top special*/
-	top: 19%;
-	left: 61%;
+	top: 47.4%;
+	left: 76.8%;
 }
 .c7 {/*P3 top special*/
-	top: 46%;
-	left: 34%;
+	top: 51.9%;
+	left: 39.2%;
 }
 .m2 {/*P3 middle platoons*/
-	top: 62%;
-	left: 48%;
+	top: 71.1%;
+	left: 54.8%;
 }
 }
 @media (min-width: 1700px) {
