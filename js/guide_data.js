@@ -919,13 +919,13 @@ window.GUIDE = {
    "lead": "Saw Gerrera",
    "with": "Vel (omicron), Kleya, Luthen, Cassian Andor (Undercover)",
    "how": "",
-   "notes": "Auto. Needs Vel at Relic 7+ with his omicron (the whole team must be Relic 7+). Use this team so Captain Rex is free for the Zeffo Clones mission."
+   "notes": "Auto. Needs Vel at Relic 7+ with her omicron (the whole team must be Relic 7+). Use this team so Captain Rex is free for the Zeffo Clones mission."
   },
   {
    "lead": "Saw Gerrera",
    "with": "Kyle Katarn, Captain Rex, Luthen, Drogan",
    "how": "Clear the target reticule at the start",
-   "notes": "Only if Vel isn't Relic 7 with his omicron yet. Uses Captain Rex, so you won't be able to do Zeffo Clones."
+   "notes": "Only if Vel isn't Relic 7 with her omicron yet. Uses Captain Rex, so you won't be able to do Zeffo Clones."
   }
  ],
  "kashyyyk:c3": [
