@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/zeffo.png') no-repeat ;
+	background: url('../media/planets/zeffo_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,32 +179,32 @@ td {
 
 /*Mission positions*/
 .c1 {/*Fleets*/
-	top: 72%;
-	left: 50%;
+	top: 70.7%;
+	left: 68.0%;
 }
 .c2 {/*P4 top battle*/
-	top: 38%;
-	left: 49%;
+	top: 29.1%;
+	left: 64.6%;
 }
 .c3 {/*special*/
-	top: 58%;
-	left: 21%;
+	top: 52.0%;
+	left: 28.0%;
 }
 .c6 {/*P3 top special*/
-	top: 58%;
-	left: 43%;
+	top: 53.0%;
+	left: 56.5%;
 }
 .c7 {/*P3 top special*/
-	top: 34%;
-	left: 26%;
+	top: 22.8%;
+	left: 34.6%;
 }
 .c8 {/*P3 top special*/
-	top: 71%;
-	left: 32%;
+	top: 70.5%;
+	left: 41.4%;
 }
 .m2 {/*P3 middle platoons*/
-	top: 34%;
-	left: 38%;
+	top: 22.8%;
+	left: 51.5%;
 }
 }
 @media (min-width: 1700px) {

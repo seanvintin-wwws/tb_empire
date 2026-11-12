@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/tatooine.png') no-repeat ;
+	background: url('../media/planets/tatooine_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,36 +179,36 @@ td {
 
 /*Mission positions*/
 .c1 {/*P4 middle battle*/
-	top: 22%;
-	left: 60%;
+	top: 74.8%;
+	left: 73.5%;
 }
 .c2 {/*P4 top battle*/
-	top: 34%;
-	left: 42%;
+	top: 33.0%;
+	left: 50.4%;
 }
 .c3 {/*P4 lower battle*/
-	top: 56%;
-	left: 23%;
+	top: 67.6%;
+	left: 25.6%;
 }
 .c6 {/*P3 top special*/
-	top: 32%;
-	left: 28%;
+	top: 31.2%;
+	left: 31.2%;
 }
 .c7 {/*P3 top special*/
-	top: 49%;
-	left: 35%;
+	top: 57.4%;
+	left: 46.1%;
 }
 .m2 {/*P3 middle platoons*/
-	top: 46%;
-	left: 52%;
+	top: 76.1%;
+	left: 38.9%;
 }
 .c4 {/*Reva*/
-	top: 64%;
-	left: 46%;
+	top: 73.0%;
+	left: 56.0%;
 }
 .c5 {/*Mandalore*/
-	top: 64%;
-	left: 30%;
+	top: 48.1%;
+	left: 62.0%;
 }
 }
 @media (min-width: 1700px) {
