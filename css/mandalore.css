@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/manalore.png') no-repeat ;
+	background: url('../media/planets/mandalore_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,28 +179,28 @@ td {
 
 /*Mission positions*/
 .c1 {/*fleet*/
-	top: 70%;
-	left: 56%;
+	top: 62.8%;
+	left: 68.5%;
 }
 .c2 {/*P4 top battle*/
-	top: 39%;
-	left: 53%;
+	top: 20.2%;
+	left: 64.3%;
 }
 .c3 {/*BL BK*/
-	top: 70%;
-	left: 33%;
+	top: 62.3%;
+	left: 40.5%;
 }
 .c6 {/*mid dtmg*/
-	top: 55%;
-	left: 45%;
+	top: 44.5%;
+	left: 55.8%;
 }
 .c7 {/*deploy*/
-	top: 44%;
-	left: 30%;
+	top: 23.5%;
+	left: 37.4%;
 }
 .m2 {/*platoons*/
-	top: 32%;
-	left: 42%;
+	top: 13.3%;
+	left: 51.2%;
 }
 }
 @media (min-width: 1700px) {
