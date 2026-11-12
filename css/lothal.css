@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/lothal.png') no-repeat ;
+	background: url('../media/planets/lothal_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,28 +179,28 @@ td {
 
 /*Mission positions*/
 .c1 {/*P4 middle battle*/
-	top: 69%;
-	left: 35%;
+	top: 76.8%;
+	left: 37.9%;
 }
 .c2 {/*P4 top battle*/
-	top: 26%;
-	left: 49%;
+	top: 22.9%;
+	left: 57.3%;
 }
 .c3 {/*P4 lower battle*/
-	top: 63%;
-	left: 21%;
+	top: 69.8%;
+	left: 20.1%;
 }
 .c6 {/*P3 top special*/
-	top: 28%;
-	left: 18%;
+	top: 24.5%;
+	left: 16.0%;
 }
 .c7 {/*P3 top special*/
-	top: 52%;
-	left: 43%;
+	top: 53.9%;
+	left: 48.3%;
 }
 .m2 {/*P3 middle platoons*/
-	top: 47%;
-	left: 27%;
+	top: 48.0%;
+	left: 28.0%;
 }
 }
 @media (min-width: 1700px) {
