@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/deathstar.png') no-repeat ;
+	background: url('../media/planets/deathstar_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,32 +179,32 @@ td {
 
 /*Mission positions*/
 .c1 {/*P4 middle battle*/
-	top: 28%;
-	left: 58%;
+	top: 21.4%;
+	left: 75.5%;
 }
 .c2 {/*P4 top battle*/
-	top: 28%;
-	left: 47%;
+	top: 20.4%;
+	left: 64.9%;
 }
 .c3 {/*P4 lower battle*/
-	top: 61%;
-	left: 29%;
+	top: 71.9%;
+	left: 38.5%;
 }
 .c4 {/*P4 lower battle*/
-	top: 57%;
-	left: 50%;
+	top: 63.4%;
+	left: 68.5%;
 }
 .c6 {/*P3 top special*/
-	top: 50%;
-	left: 19%;
+	top: 57.4%;
+	left: 25.1%;
 }
 .c7 {/*P3 top special*/
-	top: 40%;
-	left: 33%;
+	top: 38.9%;
+	left: 43.5%;
 }
 .m2 {/*P3 middle platoons*/
-	top: 30%;
-	left: 25%;
+	top: 30.4%;
+	left: 31.9%;
 }
 }
 @media (min-width: 1700px) {
