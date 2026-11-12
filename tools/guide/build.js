@@ -102,9 +102,9 @@ const OVERRIDES = {
     notes: 'Bring in IG-2000 as the first reinforcement. The last two reinforcements rarely matter; you usually win before you need them.' }],
   'kashyyyk:c8': [
     { lead: 'Saw Gerrera', with: 'Vel (omicron), Kleya, Luthen, Cassian Andor (Undercover)', how: '',
-      notes: "Auto. Vel's omicron is required. Use this team so Captain Rex is free for the Zeffo Clones mission." },
+      notes: "Auto. Needs Vel at Relic 7+ with his omicron (the whole team must be Relic 7+). Use this team so Captain Rex is free for the Zeffo Clones mission." },
     { lead: 'Saw Gerrera', with: 'Kyle Katarn, Captain Rex, Luthen, Drogan', how: 'Clear the target reticule at the start',
-      notes: "Only if you don't have Vel's omicron yet. Uses Captain Rex, so you won't be able to do Zeffo Clones." },
+      notes: "Only if Vel isn't Relic 7 with his omicron yet. Uses Captain Rex, so you won't be able to do Zeffo Clones." },
   ],
   'kashyyyk:c6': [{ lead: 'Tarfful', with: 'Yoda and Chewie, Chewbacca, Chewpio, Clone Wars Chewie', how: '',
     notes: '2/2 on auto (guild tested). Much easier with Yoda and Chewie. You want decent mods on CWC.' }],
