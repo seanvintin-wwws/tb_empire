@@ -13,3 +13,24 @@ body { background-color: #000; }
 	pointer-events: none;
 	background: linear-gradient(to right, #000 0, rgba(0,0,0,0) 4%, rgba(0,0,0,0) 96%, #000 100%);
 }
+
+/* Planet name, top right */
+.planet-title {
+	position: fixed;
+	top: 0.4vw;
+	right: 1vw;
+	text-align: right;
+	color: #fff;
+	pointer-events: none;
+	z-index: 5;
+	text-shadow: 0 0 6px #000, 0 0 12px #000;
+	line-height: 1.15;
+}
+.planet-title .pt-name { font-size: 2.0vw; }
+.planet-title .pt-sub { font-size: 1.1vw; color: #9cf; }
+
+/* Recommended-team text: same size as the Notes section */
+.guide-src { font-size: 0.95rem !important; }
+.guide-table, .guide-table td, .guide-table b { font-size: 1.1rem !important; }
+.guide-table .guide-how, .guide-table .guide-notes { font-size: 0.95rem !important; }
+.guide-note { font-size: 1rem; }
