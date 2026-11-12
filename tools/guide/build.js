@@ -61,7 +61,7 @@ const RESERVED = {
   'dathomir:c1': [APHRA], 'dathomir:c8': [/\bmerrin\b/i],
   'tatooine:c2': [JABBA], 'tatooine:c3': [/\bfennec\b/i],
   'tatooine:c5': [/bo[- ]?katan|\bBKM\b|\bBAM\b|beskar/i],
-  'kashyyyk:c8': [/\bsaw\b/i, /kyle( katarn)?\b|\bKK\b/i, /capt(ain)?\.? rex/i, /\bluthen\b/i, /\bdrogan\b/i], 'kashyyyk:c6': [/tarf+ul|\bchewbacca\b|\bchewie\b|chewpio|zaalbar|\bCWC\b/i],
+  'kashyyyk:c8': [/\bsaw\b/i, /\bvel\b/i, /\bkleya\b/i, /\bluthen\b/i, /cassian/i], 'kashyyyk:c6': [/tarf+ul|\bchewbacca\b|\bchewie\b|chewpio|zaalbar|\bCWC\b/i],
   'zeffo:c8': [/\bJKCK\b|cal kestis|\bcal\b/i, /jedi master luke|\bJML\b/i],
   'haven:c3': [/third sister|\breva\b/i],
   'kessel:c3': [QIRA, /\bL3(-37)?\b/i], 'kessel:c4': [JABBA],
@@ -76,6 +76,7 @@ const RESERVED = {
 };
 // Mission notes shown above the team list.
 const NOTES = {
+  'zeffo:c3': 'Captain Rex is essential here. A guild test with Kix instead of Captain Rex lost in wave 1. Save Captain Rex for this mission (do Saw on Kashyyyk with the Vel team).',
   'zeffo:c2': 'Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.',
   'tatooine:c4': 'Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron.',
 };
@@ -99,8 +100,12 @@ const OVERRIDES = {
   'tatooine:c1': [{ lead: 'Executor', with: "Start: Hound's Tooth, Razor Crest, Xanadu Blood. Reinforcements: IG-2000 (first), Slave I, +2 any (e.g. Ebon Hawk, Lando's Millennium Falcon)",
     how: 'Target TIE Advanced first, then TIE Bomber, then TIE Fighter Pilot',
     notes: 'Bring in IG-2000 as the first reinforcement. The last two reinforcements rarely matter; you usually win before you need them.' }],
-  'kashyyyk:c8': [{ lead: 'Saw Gerrera', with: 'Kyle Katarn, Captain Rex, Luthen, Drogan', how: '',
-    notes: 'Auto, deselect targeting reticule at the beginning.' }],
+  'kashyyyk:c8': [
+    { lead: 'Saw Gerrera', with: 'Vel (omicron), Kleya, Luthen, Cassian Andor (Undercover)', how: '',
+      notes: "Auto. Vel's omicron is required. Use this team so Captain Rex is free for the Zeffo Clones mission." },
+    { lead: 'Saw Gerrera', with: 'Kyle Katarn, Captain Rex, Luthen, Drogan', how: 'Clear the target reticule at the start',
+      notes: "Only if you don't have Vel's omicron yet. Uses Captain Rex, so you won't be able to do Zeffo Clones." },
+  ],
   'kashyyyk:c6': [{ lead: 'Tarfful', with: 'Yoda and Chewie, Chewbacca, Chewpio, Clone Wars Chewie', how: '',
     notes: '2/2 on auto (guild tested). Much easier with Yoda and Chewie. You want decent mods on CWC.' }],
 };

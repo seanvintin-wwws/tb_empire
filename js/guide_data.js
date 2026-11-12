@@ -917,9 +917,15 @@ window.GUIDE = {
  "kashyyyk:c8": [
   {
    "lead": "Saw Gerrera",
-   "with": "Kyle Katarn, Captain Rex, Luthen, Drogan",
+   "with": "Vel (omicron), Kleya, Luthen, Cassian Andor (Undercover)",
    "how": "",
-   "notes": "Auto, deselect targeting reticule at the beginning."
+   "notes": "Auto. Vel's omicron is required. Use this team so Captain Rex is free for the Zeffo Clones mission."
+  },
+  {
+   "lead": "Saw Gerrera",
+   "with": "Kyle Katarn, Captain Rex, Luthen, Drogan",
+   "how": "Clear the target reticule at the start",
+   "notes": "Only if you don't have Vel's omicron yet. Uses Captain Rex, so you won't be able to do Zeffo Clones."
   }
  ],
  "kashyyyk:c3": [
@@ -1027,9 +1033,9 @@ window.GUIDE = {
  "kashyyyk:c2": [
   {
    "lead": "Leia",
-   "with": "R2, Admiral Raddus +2",
+   "with": "R2, Drogan +2",
    "how": "Pause & target in wave 2",
-   "notes": "auto, focus mara wave 2. Drogan is saved for the Saw mission, so Raddus replaces him"
+   "notes": "auto, focus mara wave 2"
   },
   {
    "lead": "Ahsoka Tano",
@@ -1579,6 +1585,7 @@ window.GUIDE = {
  "hoth:c4": []
 };
 window.GUIDE_NOTES = {
+ "zeffo:c3": "Captain Rex is essential here. A guild test with Kix instead of Captain Rex lost in wave 1. Save Captain Rex for this mission (do Saw on Kashyyyk with the Vel team).",
  "zeffo:c2": "Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.",
  "tatooine:c4": "Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron."
 };
