@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/vandor.png') no-repeat ;
+	background: url('../media/planets/vandor_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,32 +179,32 @@ td {
 
 /*Mission positions*/
 .c1 {/*P4 middle battle*/
-	top: 67%;
-	left: 54%;
+	top: 62.2%;
+	left: 68.2%;
 }
 .c2 {/*P4 top battle*/
-	top: 30%;
-	left: 50%;
+	top: 13.2%;
+	left: 64.0%;
 }
 .c3 {/*P4 lower battle*/
-	top: 54%;
-	left: 29%;
+	top: 43.6%;
+	left: 29.0%;
 }
 .c4 {/*P4 lower battle*/
-	top: 70%;
-	left: 24%;
+	top: 68.4%;
+	left: 22.5%;
 }
 .c6 {/*P3 top special*/
-	top: 50%;
-	left: 45%;
+	top: 36.7%;
+	left: 53.4%;
 }
 .c7 {/*P3 top special*/
-	top: 42%;
-	left: 36%;
+	top: 26.4%;
+	left: 39.7%;
 }
 .m2 {/*P3 middle platoons*/
-	top: 65%;
-	left: 40%;
+	top: 63.0%;
+	left: 46.7%;
 }
 }
 @media (min-width: 1700px) {
