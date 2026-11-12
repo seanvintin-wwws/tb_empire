@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/malachor.png') no-repeat ;
+	background: url('../media/planets/malachor_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,29 +179,29 @@ td {
 
 /*Mission positions*/
 .c1 {/*P4 middle battle*/
-	top: 51%;
-	left: 15%;
+	top: 68.0%;
+	left: 23.7%;
 }
 .c2 {/*P4 top battle*/
-	top: 41%;
-	left: 45%;
+	top: 52.7%;
+	left: 70.4%;
 }
 
 .c4 {/*P4 lower battle*/
-	top: 59%;
-	left: 41%;
+	top: 76.9%;
+	left: 59.9%;
 }
 .c6 {/*P3 top special*/
-	top: 32%;
-	left: 20%;
+	top: 38.8%;
+	left: 30.6%;
 }
 .c7 {/*P3 top special*/
-	top: 55%;
-	left: 25%;
+	top: 70.1%;
+	left: 36.7%;
 }
 .m2 {/*P3 middle platoons*/
-	top: 28%;
-	left: 34%;
+	top: 33.2%;
+	left: 52.3%;
 }
 }
 @media (min-width: 1700px) {
