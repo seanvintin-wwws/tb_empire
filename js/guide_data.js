@@ -1386,7 +1386,20 @@ window.GUIDE = {
   }
  ],
  "zeffo:c3": [],
- "zeffo:c2": [],
+ "zeffo:c2": [
+  {
+   "lead": "Rey",
+   "with": "Commander Ahsoka Tano, Ben Solo, Cere Junda, Jedi Training Rey",
+   "how": "Target purge troopers",
+   "notes": "CAT is mandatory. swgohrote.com rates this about 70% on full auto, higher if you target purge troopers."
+  },
+  {
+   "lead": "Ahsoka Tano (GL)",
+   "with": "Cere Junda, Padawan Sabine, Fulcrum, Commander Ahsoka Tano",
+   "how": "Target purge trooper in wave 1",
+   "notes": "swgohrote.com rates this about 75% on auto. Without CAT it usually only gets 1/2."
+  }
+ ],
  "zeffo:c6": [
   {
    "lead": "Jedi Master Mace Windu",
@@ -1553,5 +1566,6 @@ window.GUIDE = {
  "hoth:c4": []
 };
 window.GUIDE_NOTES = {
+ "zeffo:c2": "Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.",
  "tatooine:c4": "Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron."
 };

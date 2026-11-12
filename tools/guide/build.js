@@ -76,10 +76,17 @@ const RESERVED = {
 };
 // Mission notes shown above the team list.
 const NOTES = {
+  'zeffo:c2': 'Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.',
   'tatooine:c4': 'Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron.',
 };
 // Manual team lists that replace the guide's for a mission (guild-confirmed picks).
 const OVERRIDES = {
+  'zeffo:c2': [
+    { lead: 'Rey', with: 'Commander Ahsoka Tano, Ben Solo, Cere Junda, Jedi Training Rey', how: 'Target purge troopers',
+      notes: 'CAT is mandatory. swgohrote.com rates this about 70% on full auto, higher if you target purge troopers.' },
+    { lead: 'Ahsoka Tano (GL)', with: 'Cere Junda, Padawan Sabine, Fulcrum, Commander Ahsoka Tano', how: 'Target purge trooper in wave 1',
+      notes: 'swgohrote.com rates this about 75% on auto. Without CAT it usually only gets 1/2.' },
+  ],
   'mustafar:c6': [{ lead: 'Leviathan', with: 'Sith Bomber, MK6 Interceptor, Sith Fighter, TIE Advanced, Scimitar', how: '', notes: '' }],
   'dathomir:c3': [{ lead: 'Lord Vader', with: 'Appo (omicron), CX-2, Disguised Clone Trooper, Scorch', how: '',
     notes: "Dark side clone troopers. Auto, don't use Piett." }],
