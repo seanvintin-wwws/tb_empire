@@ -1,5 +1,5 @@
 /* GAC Scout for swgoh.gg
-   How to use: open https://swgoh.gg/p/<OPPONENT ALLY CODE>/gac-history/ in Chrome,
+   How to use: open any of your opponent's pages on swgoh.gg (profile, GAC, etc.) in Chrome,
    press F12 (or Ctrl+Shift+J) to open the Console, paste this whole file, press Enter.
    The first time, it asks for your ally code (saved in your browser) so it can show your relic levels.
    It reads every round of their GAC history (about 1 minute) and replaces the page
@@ -12,7 +12,7 @@
   const ONLY_FORMAT = 'auto';      // 'auto' = same format as their latest season, or '3v3' / '5v5' / 'all'
 
   const ally = (location.pathname.match(/\/p\/(\d+)\//) || [])[1];
-  if (!ally || !/gac-history/.test(location.pathname)) { alert('Open a player\'s GAC history page on swgoh.gg first.'); return; }
+  if (!ally || !/swgoh\.gg$/.test(location.hostname)) { alert('Open your opponent\'s page on swgoh.gg first (their profile or GAC tab).'); return; }
   const status = m => { document.title = m; console.log('[GAC Scout] ' + m); };
   const getDoc = async u => new DOMParser().parseFromString(await (await fetch(u, { credentials: 'include' })).text(), 'text/html');
   const getJson = async u => { const r = await fetch(u); return r.ok ? r.json() : null; };
