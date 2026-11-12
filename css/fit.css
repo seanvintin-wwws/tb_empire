@@ -1,0 +1,15 @@
+/* Fit the whole map in the window (no vertical scrolling), centred. */
+body { background-color: #000; }
+.map {
+	top: 0 !important;
+	width: min(100vw, 148.5vh) !important;
+	margin: 0 auto;
+}
+/* soften the left/right edges of the map image into the black page */
+.map::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background: linear-gradient(to right, #000 0, rgba(0,0,0,0) 4%, rgba(0,0,0,0) 96%, #000 100%);
+}
