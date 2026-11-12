@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/kashyyyk.png') no-repeat ;
+	background: url('../media/planets/kashyyyk_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,32 +179,32 @@ td {
 
 /*Mission positions*/
 .c1 {/*P4 middle battle*/
-	top: 65%;
-	left: 52%;
+	top: 71.0%;
+	left: 71.7%;
 }
 .c2 {/*P4 top battle*/
-	top: 34%;
-	left: 45%;
+	top: 21.7%;
+	left: 61.3%;
 }
 .c3 {/*P4 lower battle*/
-	top: 60%;
-	left: 20%;
+	top: 66.0%;
+	left: 21.7%;
 }
 .c6 {/*P3 top special*/
-	top: 32%;
-	left: 25%;
+	top: 17.8%;
+	left: 27.5%;
 }
 .c7 {/*P3 top special*/
-	top: 45%;
-	left: 35%;
+	top: 32.8%;
+	left: 44.4%;
 }
 .c8 {/*P3 top special*/
-	top: 49%;
-	left: 27%;
+	top: 43.7%;
+	left: 29.3%;
 }
 .m2 {/*P3 middle platoons*/
-	top: 64%;
-	left: 30%;
+	top: 72.6%;
+	left: 36.4%;
 }
 }
 @media (min-width: 1700px) {
