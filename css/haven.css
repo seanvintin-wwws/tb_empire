@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/haven.png') no-repeat ;
+	background: url('../media/planets/haven_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,32 +179,32 @@ td {
 
 /*Mission positions*/
 .c1 {/*P4 middle battle*/
-	top: 47%;
-	left: 50%;
+	top: 55.8%;
+	left: 50.9%;
 }
 .c2 {/*P4 top battle*/
-	top: 16%;
-	left: 47%;
+	top: 22.7%;
+	left: 56.7%;
 }
 .c3 {/*P4 lower battle*/
-	top: 52%;
-	left: 19%;
+	top: 60.6%;
+	left: 24.9%;
 }
 .c4 {/*P4 lower battle*/
-	top: 32%;
-	left: 10%;
+	top: 34.7%;
+	left: 15.1%;
 }
 .c6 {/*P3 top special*/
-	top: 24%;
-	left: 25%;
+	top: 29.4%;
+	left: 29.9%;
 }
 .c7 {/*P3 top special*/
-	top: 22%;
-	left: 37%;
+	top: 28.6%;
+	left: 42.6%;
 }
 .m2 {/*P3 middle platoons*/
-	top: 22%;
-	left: 61%;
+	top: 35.9%;
+	left: 66.8%;
 }
 }
 @media (min-width: 1700px) {
