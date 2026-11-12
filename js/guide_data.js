@@ -917,15 +917,15 @@ window.GUIDE = {
  "kashyyyk:c8": [
   {
    "lead": "Saw Gerrera",
-   "with": "Vel (omicron), Kleya, Luthen, Cassian Andor (Undercover)",
-   "how": "",
-   "notes": "Auto. Needs Vel at Relic 7+ with her omicron (the whole team must be Relic 7+). Use this team so Captain Rex is free for the Zeffo Clones mission."
+   "with": "Kyle Katarn (omicron), Captain Rex, Luthen, Drogan",
+   "how": "Clear the target reticule at the start",
+   "notes": "Use this until Vel has her omicron. It uses Captain Rex, so skip Zeffo Clones."
   },
   {
    "lead": "Saw Gerrera",
-   "with": "Kyle Katarn, Captain Rex, Luthen, Drogan",
-   "how": "Clear the target reticule at the start",
-   "notes": "Only if Vel isn't Relic 7 with her omicron yet. Uses Captain Rex, so you won't be able to do Zeffo Clones."
+   "with": "Vel (omicron), Kleya, Luthen, Cassian Andor (Undercover)",
+   "how": "",
+   "notes": "Switch to this once Vel has her omicron (all Relic 7+). It frees Captain Rex for Zeffo Clones."
   }
  ],
  "kashyyyk:c3": [
@@ -1393,16 +1393,16 @@ window.GUIDE = {
  ],
  "zeffo:c3": [
   {
-   "lead": "Cody",
-   "with": "Captain Rex, Rex, Echo, Fives",
-   "how": "",
-   "notes": "Full auto. Most-voted community team on swgohrote.com (not yet rated)."
-  },
-  {
    "lead": "Rex",
    "with": "Captain Rex, Echo, ARC Trooper, Fives",
    "how": "Clear the target reticule at the start; in wave 2 put it on the Consular (her counterattacks hurt)",
    "notes": "Auto. swgohrote.com rates this about 75%."
+  },
+  {
+   "lead": "Cody",
+   "with": "Captain Rex, Rex, Echo, Fives",
+   "how": "",
+   "notes": "Full auto. Most-voted community team on swgohrote.com (not yet rated). Needs Cody at Relic 7+."
   }
  ],
  "zeffo:c2": [
@@ -1585,7 +1585,7 @@ window.GUIDE = {
  "hoth:c4": []
 };
 window.GUIDE_NOTES = {
- "zeffo:c3": "Captain Rex is essential here. A guild test with Kix instead of Captain Rex lost in wave 1. Save Captain Rex for this mission (do Saw on Kashyyyk with the Vel team).",
+ "zeffo:c3": "Captain Rex is essential here (a test with Kix instead lost in wave 1). Only do this once Saw on Kashyyyk is done with the Vel team; otherwise Captain Rex is already used.",
  "zeffo:c2": "Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.",
  "tatooine:c4": "Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron."
 };
