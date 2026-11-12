@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/kessel.png') no-repeat ;
+	background: url('../media/planets/kessel_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,32 +179,32 @@ td {
 
 /*Mission positions*/
 .c1 {/*P4 middle battle*/
-	top: 65%;
-	left: 68%;
+	top: 70.6%;
+	left: 75.6%;
 }
 .c2 {/*P4 top battle*/
-	top: 39%;
-	left: 55%;
+	top: 30.2%;
+	left: 63.5%;
 }
 .c3 {/*P4 lower battle*/
-	top: 60%;
-	left: 30%;
+	top: 65.9%;
+	left: 27.9%;
 }
 .c4 {/*P4 lower battle*/
-	top: 57%;
-	left: 50%;
+	top: 57.0%;
+	left: 55.2%;
 }
 .c6 {/*P3 top special*/
-	top: 32%;
-	left: 29%;
+	top: 19.1%;
+	left: 26.1%;
 }
 .c7 {/*P3 top special*/
-	top: 44%;
-	left: 35%;
+	top: 35.9%;
+	left: 36.3%;
 }
 .m2 {/*P3 middle platoons*/
-	top: 28%;
-	left: 48%;
+	top: 14.2%;
+	left: 50.8%;
 }
 }
 @media (min-width: 1700px) {
