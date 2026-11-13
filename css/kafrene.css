@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/kafrene.png') no-repeat ;
+	background: url('../media/planets/kafrene_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,32 +179,32 @@ td {
 
 /*Mission positions*/
 .c1 {/*P4 middle battle*/
-	top: 27%;
-	left: 55%;
+	top: 25.9%;
+	left: 71.4%;
 }
 .c2 {/*P4 top battle*/
-	top: 20%;
-	left: 42%;
+	top: 14.1%;
+	left: 58.3%;
 }
 .c3 {/*P4 lower battle*/
-	top: 20%;
-	left: 25%;
+	top: 15.1%;
+	left: 40.4%;
 }
 .c4 {/*P4 lower battle*/
-	top: 65%;
-	left: 46%;
+	top: 62.4%;
+	left: 63.3%;
 }
 .c6 {/*P3 top special*/
-	top: 35%;
-	left: 22%;
+	top: 32.9%;
+	left: 36.2%;
 }
 .c7 {/*P3 top special*/
-	top: 35%;
-	left: 36%;
+	top: 32.7%;
+	left: 50.8%;
 }
 .m2 {/*P3 middle platoons*/
-	top: 69%;
-	left: 33%;
+	top: 67.4%;
+	left: 49.2%;
 }
 }
 @media (min-width: 1700px) {
