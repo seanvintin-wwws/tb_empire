@@ -1005,7 +1005,7 @@ window.GUIDE = {
    "lead": "Supreme Leader Kylo Ren",
    "with": "Dark Side Rey, Kylo Ren (Unmasked), Hux, Sith Trooper",
    "how": "Manual play needed",
-   "notes": "Not an auto team: swgohrote.com says manual play is required and you need full platoons. Only use it if you're short a team."
+   "notes": "Guild tested: only 1/2 (clears wave 1, about 219k points). swgohrote.com says manual play and full platoons are needed. Only use it if you're short a team, for the partial points."
   }
  ],
  "haven:c2": [
@@ -1043,7 +1043,7 @@ window.GUIDE = {
    "lead": "Supreme Leader Kylo Ren",
    "with": "Dark Side Rey, Kylo Ren (Unmasked), Hux, Sith Trooper",
    "how": "Manual play needed",
-   "notes": "Not an auto team: swgohrote.com says manual play is required and you need full platoons. Only use it if you're short a team."
+   "notes": "Guild tested: only 1/2 (clears wave 1, about 219k points). swgohrote.com says manual play and full platoons are needed. Only use it if you're short a team, for the partial points."
   }
  ],
  "haven:c6": [
@@ -1081,7 +1081,7 @@ window.GUIDE = {
    "lead": "Supreme Leader Kylo Ren",
    "with": "Dark Side Rey, Kylo Ren (Unmasked), Hux, Sith Trooper",
    "how": "Manual play needed",
-   "notes": "Not an auto team: swgohrote.com says manual play is required and you need full platoons. Only use it if you're short a team."
+   "notes": "Guild tested: only 1/2 (clears wave 1, about 219k points). swgohrote.com says manual play and full platoons are needed. Only use it if you're short a team, for the partial points."
   }
  ],
  "kashyyyk:c2": [

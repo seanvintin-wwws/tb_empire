@@ -113,7 +113,7 @@ const OVERRIDES = {
 const SEE_HAVEN = { lead: 'Sith Eternal Emperor', with: 'Malak, The Stranger, Darth Revan, Bane', how: '',
   notes: 'swgohrote.com rates this about 90% on auto. Needs all platoons. Use The Stranger instead of Dooku to make it consistent. Use this when Lord Vader is needed for platoons.' };
 const SLKR_HAVEN = { lead: 'Supreme Leader Kylo Ren', with: 'Dark Side Rey, Kylo Ren (Unmasked), Hux, Sith Trooper', how: 'Manual play needed',
-  notes: "Not an auto team: swgohrote.com says manual play is required and you need full platoons. Only use it if you're short a team." };
+  notes: "Guild tested: only 1/2 (clears wave 1, about 219k points). swgohrote.com says manual play and full platoons are needed. Only use it if you're short a team, for the partial points." };
 const INQ_HAVEN = { lead: 'Third Sister (Reva)', with: 'Grand Inquisitor, Seventh Sister, Ninth Sister, Marrok (omicron)', how: '',
   notes: "Full auto, 2/2 (guild tested). Marrok's omicron is what makes it work. Third Sister and Marrok are also needed for the Inquisitor special mission, and each unit can only be used once per phase, so pick one." };
 const EDITS = {
