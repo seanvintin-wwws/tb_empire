@@ -972,6 +972,12 @@ window.GUIDE = {
  ],
  "haven:c1": [
   {
+   "lead": "Third Sister (Reva)",
+   "with": "Grand Inquisitor, Seventh Sister, Ninth Sister, Marrok (omicron)",
+   "how": "",
+   "notes": "Full auto, 2/2 (guild tested). Marrok's omicron is what makes it work. Third Sister and Marrok are also needed for the Inquisitor special mission, and each unit can only be used once per phase, so pick one."
+  },
+  {
    "lead": "Lord Vader",
    "with": "DS Clones",
    "how": "",
@@ -1004,6 +1010,12 @@ window.GUIDE = {
  ],
  "haven:c2": [
   {
+   "lead": "Third Sister (Reva)",
+   "with": "Grand Inquisitor, Seventh Sister, Ninth Sister, Marrok (omicron)",
+   "how": "",
+   "notes": "Full auto, 2/2 (guild tested). Marrok's omicron is what makes it work. Third Sister and Marrok are also needed for the Inquisitor special mission, and each unit can only be used once per phase, so pick one."
+  },
+  {
    "lead": "Lord Vader",
    "with": "DS Clones",
    "how": "",
@@ -1035,6 +1047,12 @@ window.GUIDE = {
   }
  ],
  "haven:c6": [
+  {
+   "lead": "Third Sister (Reva)",
+   "with": "Grand Inquisitor, Seventh Sister, Ninth Sister, Marrok (omicron)",
+   "how": "",
+   "notes": "Full auto, 2/2 (guild tested). Marrok's omicron is what makes it work. Third Sister and Marrok are also needed for the Inquisitor special mission, and each unit can only be used once per phase, so pick one."
+  },
   {
    "lead": "Lord Vader",
    "with": "DS Clones",

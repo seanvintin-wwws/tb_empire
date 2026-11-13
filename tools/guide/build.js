@@ -114,8 +114,10 @@ const SEE_HAVEN = { lead: 'Sith Eternal Emperor', with: 'Malak, The Stranger, Da
   notes: 'swgohrote.com rates this about 90% on auto. Needs all platoons. Use The Stranger instead of Dooku to make it consistent. Use this when Lord Vader is needed for platoons.' };
 const SLKR_HAVEN = { lead: 'Supreme Leader Kylo Ren', with: 'Dark Side Rey, Kylo Ren (Unmasked), Hux, Sith Trooper', how: 'Manual play needed',
   notes: "Not an auto team: swgohrote.com says manual play is required and you need full platoons. Only use it if you're short a team." };
+const INQ_HAVEN = { lead: 'Third Sister (Reva)', with: 'Grand Inquisitor, Seventh Sister, Ninth Sister, Marrok (omicron)', how: '',
+  notes: "Full auto, 2/2 (guild tested). Marrok's omicron is what makes it work. Third Sister and Marrok are also needed for the Inquisitor special mission, and each unit can only be used once per phase, so pick one." };
 const EDITS = {
-  'haven:c1': { add: [[1, SEE_HAVEN], [99, SLKR_HAVEN]] }, 'haven:c2': { add: [[1, SEE_HAVEN], [99, SLKR_HAVEN]] }, 'haven:c6': { add: [[1, SEE_HAVEN], [99, SLKR_HAVEN]] },
+  'haven:c1': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [99, SLKR_HAVEN]] }, 'haven:c2': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [99, SLKR_HAVEN]] }, 'haven:c6': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [99, SLKR_HAVEN]] },
   'mustafar:c1': { drop: [/dark trooper moff gideon/i, /emperor palpatine/i], top: /pirate king hondo/i },
   'zeffo:c8': { drop: [/JKCK \(GLAT\)/i] },
   'dathomir:c2': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
