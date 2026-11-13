@@ -1571,16 +1571,16 @@ window.GUIDE = {
  "scarif:c6": [],
  "zeffo:c8": [
   {
-   "lead": "Jedi Knight Cal Kestis with Jedi Master Luke",
-   "with": "JML, Ezra Exile, +2",
+   "lead": "Jedi Knight Cal Kestis",
+   "with": "Jedi Master Luke Skywalker, Leia (Jedi Training), Jedi Knight Luke Skywalker, Grand Master Yoda",
    "how": "",
-   "notes": "auto, lead omi mandatory, probably want whirlwind slam as well"
+   "notes": "Easy full auto (guild tested). Cal Kestis lead omicron is mandatory; Whirlwind Slam helps. Keep Ezra (Exile) for the Ahsoka team on Lothal."
   },
   {
-   "lead": "Jedi Knight Cal Kestis with Jedi Master Luke",
-   "with": "JML, GMY, JKL, Shaak ti",
+   "lead": "Jedi Knight Cal Kestis",
+   "with": "Jedi Master Luke Skywalker, Grand Master Yoda, Jedi Knight Luke Skywalker, Shaak Ti",
    "how": "",
-   "notes": "auto, lead omi mandatory, probably want whirlwind slam as well"
+   "notes": "auto, lead omi mandatory, probably want Whirlwind Slam as well"
   }
  ],
  "zeffo:c3": [

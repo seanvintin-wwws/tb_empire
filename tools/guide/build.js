@@ -125,7 +125,11 @@ const EDITS = {
     [/^home one/i, 'Use this one here: Profundity is needed for the Kessel fleet mission in the same phase (if you have no Executor for Kessel).'],
     [/^negotiator/i, 'Better saved for the Zeffo fleet mission.'],
     [/^profundity/i, 'Better saved for the Kessel fleet mission (same phase) if you have no Executor.']] },
-  'zeffo:c8': { drop: [/JKCK \(GLAT\)/i] },
+  'zeffo:c8': { drop: [/.*/], add: [
+    [0, { lead: 'Jedi Knight Cal Kestis', with: 'Jedi Master Luke Skywalker, Leia (Jedi Training), Jedi Knight Luke Skywalker, Grand Master Yoda', how: '',
+      notes: 'Easy full auto (guild tested). Cal Kestis lead omicron is mandatory; Whirlwind Slam helps. Keep Ezra (Exile) for the Ahsoka team on Lothal.' }],
+    [1, { lead: 'Jedi Knight Cal Kestis', with: 'Jedi Master Luke Skywalker, Grand Master Yoda, Jedi Knight Luke Skywalker, Shaak Ti', how: '',
+      notes: 'auto, lead omi mandatory, probably want Whirlwind Slam as well' }]] },
   'dathomir:c2': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
   'dathomir:c6': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
 };
