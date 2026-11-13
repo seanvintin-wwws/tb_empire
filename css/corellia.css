@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/corellia.png') no-repeat ;
+	background: url('../media/planets/corellia_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,32 +179,32 @@ td {
 
 /*Mission positions*/
 .c1 {/*P4 middle battle*/
-	top: 36%;
-	left: 50%;
+	top: 38.9%;
+	left: 67.1%;
 }
 .c2 {/*P4 top battle*/
-	top: 20%;
-	left: 44%;
+	top: 13.4%;
+	left: 60.8%;
 }
 .c3 {/*P4 lower battle*/
-	top: 38%;
-	left: 38%;
+	top: 40.1%;
+	left: 51.2%;
 }
 .c5 {/*P3 top battle*/
-	top: 63%;
-	left: 29%;
+	top: 72.7%;
+	left: 36.0%;
 }
 .c6 {/*P3 top special*/
-	top: 64%;
-	left: 53%;
+	top: 75.4%;
+	left: 65.3%;
 }
 .c7 {/*P3 top special*/
-	top: 38%;
-	left: 29%;
+	top: 31.9%;
+	left: 37.7%;
 }
 .m2 {/*P3 middle platoons*/
-	top: 53%;
-	left: 20%;
+	top: 56.2%;
+	left: 21.8%;
 }
 }
 @media (min-width: 1700px) {

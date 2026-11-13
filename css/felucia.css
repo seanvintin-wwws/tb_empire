@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/felucia.png') no-repeat ;
+	background: url('../media/planets/felucia_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,32 +179,32 @@ td {
 
 /*Mission positions*/
 .c1 {/*P4 middle battle*/
-	top: 56%;
-	left: 55%;
+	top: 49.2%;
+	left: 70.1%;
 }
 .c2 {/*P4 top battle*/
-	top: 44%;
-	left: 24%;
+	top: 27.6%;
+	left: 25.8%;
 }
 .c3 {/*P4 lower battle*/
-	top: 45%;
-	left: 48%;
+	top: 32.2%;
+	left: 61.2%;
 }
 .c5 {/*P3 top battle*/
-	top: 63%;
-	left: 29%;
+	top: 66.1%;
+	left: 32.8%;
 }
 .c6 {/*P3 top special*/
-	top: 22%;
-	left: 61%;
+	top: 9.1%;
+	left: 77.4%;
 }
 .c7 {/*P3 top special*/
-	top: 50%;
-	left: 38%;
+	top: 41.5%;
+	left: 45.3%;
 }
 .m2 {/*P3 middle platoons*/
-	top: 70%;
-	left: 50%;
+	top: 70.8%;
+	left: 64.0%;
 }
 }
 @media (min-width: 1700px) {

@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/hoth.png') no-repeat ;
+	background: url('../media/planets/hoth_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,32 +179,32 @@ td {
 
 /*Mission positions*/
 .c1 {/*P4 middle battle*/
-	top: 25%;
-	left: 58%;
+	top: 13.8%;
+	left: 71.7%;
 }
 .c2 {/*P4 top battle*/
-	top: 27%;
-	left: 42%;
+	top: 25.2%;
+	left: 51.8%;
 }
 .c3 {/*P4 lower battle*/
-	top: 60%;
-	left: 28%;
+	top: 77.0%;
+	left: 28.3%;
 }
 .c4 {/*P4 lower battle*/
-	top: 44%;
-	left: 50%;
+	top: 48.3%;
+	left: 66.4%;
 }
 .c6 {/*P3 top special*/
-	top: 32%;
-	left: 25%;
+	top: 31.2%;
+	left: 25.5%;
 }
 .c7 {/*P3 top special*/
-	top: 44%;
-	left: 35%;
+	top: 48.6%;
+	left: 39.9%;
 }
 .m2 {/*P3 middle platoons*/
-	top: 60%;
-	left: 46%;
+	top: 76.5%;
+	left: 57.8%;
 }
 }
 @media (min-width: 1700px) {
