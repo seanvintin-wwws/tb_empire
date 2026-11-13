@@ -119,7 +119,10 @@ const INQ_HAVEN = { lead: 'Third Sister (Reva)', with: 'Grand Inquisitor, Sevent
 const EDITS = {
   'haven:c1': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [99, SLKR_HAVEN]] }, 'haven:c2': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [99, SLKR_HAVEN]] }, 'haven:c6': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [99, SLKR_HAVEN]] },
   'mustafar:c1': { drop: [/dark trooper moff gideon/i, /emperor palpatine/i], top: /pirate king hondo/i },
-  'lothal:c6': { top: /^profundity/i },
+  'lothal:c6': { top: /^home one/i, note: [
+    [/^home one/i, 'Use this one here: Profundity is needed for the Kessel fleet mission in the same phase (if you have no Executor for Kessel).'],
+    [/^negotiator/i, 'Better saved for the Zeffo fleet mission.'],
+    [/^profundity/i, 'Better saved for the Kessel fleet mission (same phase) if you have no Executor.']] },
   'zeffo:c8': { drop: [/JKCK \(GLAT\)/i] },
   'dathomir:c2': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
   'dathomir:c6': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
@@ -189,6 +192,7 @@ for (const [p, d] of Object.entries(old)) for (const ms of d.missions) {
 for (const [k, e] of Object.entries(EDITS)) {
   let rows = (out[k] || []).filter(r => !(e.drop || []).some(re => re.test(r.lead)));
   for (const [re, team] of (e.fill || [])) rows = rows.map(r => re.test(r.lead) ? { ...r, with: team } : r);
+  for (const [re, txt] of (e.note || [])) rows = rows.map(r => re.test(r.lead) ? { ...r, notes: (r.notes ? r.notes + '. ' : '') + txt } : r);
   if (e.top) rows = [...rows.filter(r => e.top.test(r.lead)), ...rows.filter(r => !e.top.test(r.lead))];
   for (const [i, row] of (e.add || [])) rows.splice(i, 0, row);
   out[k] = rows;

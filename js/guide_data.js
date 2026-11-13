@@ -1429,22 +1429,22 @@ window.GUIDE = {
  ],
  "lothal:c6": [
   {
-   "lead": "Profundity",
-   "with": "MF, Outrider, Y Wing, Wedge, Biggs, Phantom, Ghost",
+   "lead": "Home One (MF)",
+   "with": "MF, Y Wing, Ravens Claw, Outrider, Phantom, Ghost, Cassian",
    "how": "",
-   "notes": "auto, Dont use Ghost if required in Mixed"
+   "notes": "auto, Dont use Ghost if required in Mixed. Use this one here: Profundity is needed for the Kessel fleet mission in the same phase (if you have no Executor for Kessel)."
   },
   {
    "lead": "Negotiator",
    "with": "JKA, Y Wing, Marauder, Plo, Ahsoka, Fives, Rex",
    "how": "",
-   "notes": ""
+   "notes": "Better saved for the Zeffo fleet mission."
   },
   {
-   "lead": "Home One (MF)",
-   "with": "MF, Y Wing, Ravens Claw, Outrider, Phantom, Ghost, Cassian",
+   "lead": "Profundity",
+   "with": "MF, Outrider, Y Wing, Wedge, Biggs, Phantom, Ghost",
    "how": "",
-   "notes": "auto, Dont use Ghost if required in Mixed"
+   "notes": "auto, Dont use Ghost if required in Mixed. Better saved for the Kessel fleet mission (same phase) if you have no Executor."
   }
  ],
  "vandor:c1": [
