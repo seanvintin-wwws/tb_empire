@@ -1005,7 +1005,7 @@ window.GUIDE = {
    "lead": "Supreme Leader Kylo Ren",
    "with": "Dark Side Rey, Kylo Ren (Unmasked), Hux, Sith Trooper",
    "how": "Manual play needed",
-   "notes": "Guild tested: only 1/2 (clears wave 1, about 219k points). swgohrote.com says manual play and full platoons are needed. Only use it if you're short a team, for the partial points."
+   "notes": "Guild tested: only 1/2 (clears wave 1, about 219k points). swgohrote.com says manual play and full platoons are needed. Wait until all 6 operations (platoons) are done before attempting: that disables the enemy's Hope buff, which otherwise gives them up to 100% Turn Meter and 3 Morale at the start. Only use it if you're short a team, for the partial points."
   }
  ],
  "haven:c2": [
@@ -1043,7 +1043,7 @@ window.GUIDE = {
    "lead": "Supreme Leader Kylo Ren",
    "with": "Dark Side Rey, Kylo Ren (Unmasked), Hux, Sith Trooper",
    "how": "Manual play needed",
-   "notes": "Guild tested: only 1/2 (clears wave 1, about 219k points). swgohrote.com says manual play and full platoons are needed. Only use it if you're short a team, for the partial points."
+   "notes": "Guild tested: only 1/2 (clears wave 1, about 219k points). swgohrote.com says manual play and full platoons are needed. Wait until all 6 operations (platoons) are done before attempting: that disables the enemy's Hope buff, which otherwise gives them up to 100% Turn Meter and 3 Morale at the start. Only use it if you're short a team, for the partial points."
   }
  ],
  "haven:c6": [
@@ -1081,7 +1081,7 @@ window.GUIDE = {
    "lead": "Supreme Leader Kylo Ren",
    "with": "Dark Side Rey, Kylo Ren (Unmasked), Hux, Sith Trooper",
    "how": "Manual play needed",
-   "notes": "Guild tested: only 1/2 (clears wave 1, about 219k points). swgohrote.com says manual play and full platoons are needed. Only use it if you're short a team, for the partial points."
+   "notes": "Guild tested: only 1/2 (clears wave 1, about 219k points). swgohrote.com says manual play and full platoons are needed. Wait until all 6 operations (platoons) are done before attempting: that disables the enemy's Hope buff, which otherwise gives them up to 100% Turn Meter and 3 Morale at the start. Only use it if you're short a team, for the partial points."
   }
  ],
  "kashyyyk:c2": [
