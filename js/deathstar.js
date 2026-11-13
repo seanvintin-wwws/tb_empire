@@ -638,7 +638,6 @@ Vue.component('mission', {
 			preferredSquads: [83],//vader
 			dangerousEnemies: [52],
 			modifiers: [5],
-		    notes: [3],
             reqs: [23],
 			}, {
 			id: 2,
@@ -681,7 +680,6 @@ Vue.component('mission', {
 				dangerousEnemies: [53],
 				modifiers: [5],
             reqs: [22],
-		    notes: [3],
 			}, 
             {
 			id: 6,

@@ -573,7 +573,7 @@ Vue.component('mission', {
         "Currently Bugged!",
         "Lord Vader is without Ultimate",
         "Use the Democracy ability whenever possible to control the enemy team and then take them out",
-        "Currently Bugged! If using JML, keep ultimate until phase 2.",
+        "If using Jedi Master Luke, keep his ultimate until phase 2.",
         ],
         reqs:[
         'Lord Vader (Relic 5+)',
@@ -624,7 +624,7 @@ Vue.component('mission', {
 			dangerousEnemies: [38,39],
 			modifiers: [2,3],
             reqs: [13],
-            notes: [3,4,5]
+            notes: [4,5]
 			}, {
 			id: 2,
 			name: 'c3',

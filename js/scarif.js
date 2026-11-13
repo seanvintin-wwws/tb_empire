@@ -626,7 +626,6 @@ Vue.component('mission', {
 				],
 			preferredSquads: [83],//tr
 			dangerousEnemies: [50],
-			notes: [3],
 			modifiers: [4,5],
             reqs: [23],
 			}, {
@@ -640,7 +639,6 @@ Vue.component('mission', {
 				],
             preferredSquads: [24],//special
 			dangerousEnemies: [50],
-            notes: [3],
 			reqs: [22],
             modifiers: [4,5],
 			},
@@ -655,7 +653,6 @@ Vue.component('mission', {
 				],
 			preferredSquads: [24],//br Jabba
 			dangerousEnemies: [50],
-			notes: [3],
 			modifiers: [4,5],
             reqs: [22],
 			},
@@ -671,7 +668,6 @@ Vue.component('mission', {
 				preferredSquads: [84],//tl
 				dangerousEnemies: [50],
 				modifiers: [4,5],
-            notes: [3],
 		    reqs: [21],
 			}, 
             {
