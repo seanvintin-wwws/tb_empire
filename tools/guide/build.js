@@ -110,7 +110,10 @@ const OVERRIDES = {
     notes: '2/2 on auto (guild tested). Much easier with Yoda and Chewie. You want decent mods on CWC.' }],
 };
 // Guild edits to the guide's list for a mission: drop teams by leader, and move a leader to the top.
+const SEE_HAVEN = { lead: 'Sith Eternal Emperor', with: 'Malak, The Stranger, Darth Revan, Bane', how: '',
+  notes: 'swgohrote.com rates this about 90% on auto. Needs all platoons. Use The Stranger instead of Dooku to make it consistent. Use this when Lord Vader is needed for platoons.' };
 const EDITS = {
+  'haven:c1': { add: [[1, SEE_HAVEN]] }, 'haven:c2': { add: [[1, SEE_HAVEN]] }, 'haven:c6': { add: [[1, SEE_HAVEN]] },
   'mustafar:c1': { drop: [/dark trooper moff gideon/i, /emperor palpatine/i], top: /pirate king hondo/i },
   'zeffo:c8': { drop: [/JKCK \(GLAT\)/i] },
   'dathomir:c2': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
@@ -182,6 +185,7 @@ for (const [k, e] of Object.entries(EDITS)) {
   let rows = (out[k] || []).filter(r => !(e.drop || []).some(re => re.test(r.lead)));
   for (const [re, team] of (e.fill || [])) rows = rows.map(r => re.test(r.lead) ? { ...r, with: team } : r);
   if (e.top) rows = [...rows.filter(r => e.top.test(r.lead)), ...rows.filter(r => !e.top.test(r.lead))];
+  for (const [i, row] of (e.add || [])) rows.splice(i, 0, row);
   out[k] = rows;
 }
 Object.assign(out, OVERRIDES);

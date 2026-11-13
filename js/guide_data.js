@@ -978,6 +978,12 @@ window.GUIDE = {
    "notes": "Auto with Appo omi"
   },
   {
+   "lead": "Sith Eternal Emperor",
+   "with": "Malak, The Stranger, Darth Revan, Bane",
+   "how": "",
+   "notes": "swgohrote.com rates this about 90% on auto. Needs all platoons. Use The Stranger instead of Dooku to make it consistent. Use this when Lord Vader is needed for platoons."
+  },
+  {
    "lead": "Pirate King Hondo Onaka",
    "with": "SM-33, Vane, Brutus, Silvo",
    "how": "",
@@ -998,6 +1004,12 @@ window.GUIDE = {
    "notes": "Auto with Appo omi"
   },
   {
+   "lead": "Sith Eternal Emperor",
+   "with": "Malak, The Stranger, Darth Revan, Bane",
+   "how": "",
+   "notes": "swgohrote.com rates this about 90% on auto. Needs all platoons. Use The Stranger instead of Dooku to make it consistent. Use this when Lord Vader is needed for platoons."
+  },
+  {
    "lead": "Pirate King Hondo Onaka",
    "with": "SM-33, Vane, Brutus, Silvo",
    "how": "",
@@ -1016,6 +1028,12 @@ window.GUIDE = {
    "with": "DS Clones",
    "how": "",
    "notes": "Auto with Appo omi"
+  },
+  {
+   "lead": "Sith Eternal Emperor",
+   "with": "Malak, The Stranger, Darth Revan, Bane",
+   "how": "",
+   "notes": "swgohrote.com rates this about 90% on auto. Needs all platoons. Use The Stranger instead of Dooku to make it consistent. Use this when Lord Vader is needed for platoons."
   },
   {
    "lead": "Pirate King Hondo Onaka",
