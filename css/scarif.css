@@ -24,7 +24,7 @@ p {
 	top: -10%;
 	width: 100vw;
 	height: auto;
-	background: url('../media/planets/scarif.png') no-repeat ;
+	background: url('../media/planets/scarif_hd.jpg') no-repeat ;
 	background-size: contain;
 
 }
@@ -179,32 +179,32 @@ td {
 
 /*Mission positions*/
 .c1 {/*P4 middle battle*/
-	top: 28%;
-	left: 55%;
+	top: 22.1%;
+	left: 68.1%;
 }
 .c2 {/*P4 top battle*/
-	top: 29%;
-	left: 40%;
+	top: 25.4%;
+	left: 49.1%;
 }
 .c3 {/*P4 lower battle*/
-	top: 63%;
-	left: 27%;
+	top: 78.9%;
+	left: 31.0%;
 }
 .c4 {/*P4 lower battle*/
-	top: 51%;
-	left: 49%;
+	top: 59.4%;
+	left: 61.4%;
 }
 .c6 {/*P3 top special*/
-	top: 36%;
-	left: 27%;
+	top: 35.2%;
+	left: 31.4%;
 }
 .c7 {/*P3 top special*/
-	top: 53%;
-	left: 40%;
+	top: 62.4%;
+	left: 49.2%;
 }
 .m2 {/*P3 middle platoons*/
-	top: 58%;
-	left: 56%;
+	top: 74.1%;
+	left: 70.6%;
 }
 }
 @media (min-width: 1700px) {
