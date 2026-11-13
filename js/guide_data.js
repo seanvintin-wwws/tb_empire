@@ -1379,6 +1379,12 @@ window.GUIDE = {
  "vandor:c6": [],
  "lothal:c2": [
   {
+   "lead": "Ahsoka Tano",
+   "with": "Any",
+   "how": "",
+   "notes": "Use this first: by this point most teams are used, and Ahsoka carries any leftover units"
+  },
+  {
    "lead": "Leia",
    "with": "Han, Cassian, Raddus, R2-D2",
    "how": "",
@@ -1395,12 +1401,6 @@ window.GUIDE = {
    "with": "Gungans",
    "how": "",
    "notes": "Tarpals omi, auto"
-  },
-  {
-   "lead": "Ahsoka Tano",
-   "with": "Any",
-   "how": "",
-   "notes": ""
   },
   {
    "lead": "Omega",

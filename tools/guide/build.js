@@ -120,6 +120,7 @@ const EDITS = {
   'haven:c1': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [99, SLKR_HAVEN]] }, 'haven:c2': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [99, SLKR_HAVEN]] }, 'haven:c6': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [99, SLKR_HAVEN]] },
   'mustafar:c1': { drop: [/dark trooper moff gideon/i, /emperor palpatine/i], top: /pirate king hondo/i },
   'lothal:c1': { top: /^jedi master mace windu/i, note: [[/^jedi master mace windu/i, 'Use this first: super easy full auto, and it saves your GLs (Jedi Master Luke, Jedi Master Kenobi) for elsewhere']] },
+  'lothal:c2': { top: /^ahsoka tano/i, note: [[/^ahsoka tano/i, 'Use this first: by this point most teams are used, and Ahsoka carries any leftover units']] },
   'lothal:c6': { top: /^home one/i, note: [
     [/^home one/i, 'Use this one here: Profundity is needed for the Kessel fleet mission in the same phase (if you have no Executor for Kessel).'],
     [/^negotiator/i, 'Better saved for the Zeffo fleet mission.'],
