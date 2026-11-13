@@ -170,6 +170,48 @@ window.GUIDE = {
    "with": "JTR, BB8, Han, Chewbacca",
    "how": "",
    "notes": ""
+  },
+  {
+   "lead": "Emperor Palpatine (Starkiller)",
+   "with": "Starkiller, Mara Jade, Old Ben, Visas",
+   "how": "",
+   "notes": "auto, last two can be any jedi/LS UFU. Suggested by egnards"
+  },
+  {
+   "lead": "Finn (omi)",
+   "with": "Rose, Poe, RH Finn, Zorii",
+   "how": "",
+   "notes": "auto. Suggested by Pico"
+  },
+  {
+   "lead": "Cobb Vanth",
+   "with": "CUP, Nebit, Jawa Scavenger, Cara Dune",
+   "how": "",
+   "notes": "auto, no omicron needed"
+  },
+  {
+   "lead": "Carth Onasi",
+   "with": "Zaalbar, Mission, Canderous, and 5OR-T",
+   "how": "",
+   "notes": "Omicron on Carth required, full auto, fast and easy. Actually works easily on every Mixed Phase up to P4 on full auto. After that (P5, P6, and Mandalore) the team still works, just have to go manual usually. No remodding required. Garbage mods work just fine. Suggested by DyloBin"
+  },
+  {
+   "lead": "Boss Nass",
+   "with": "Team of Gungans",
+   "how": "",
+   "notes": "Auto. Suggested by BailWritte"
+  },
+  {
+   "lead": "Maul",
+   "with": "Jango, Canderous, Gar Saxon, ISC.",
+   "how": "",
+   "notes": "Easy auto."
+  },
+  {
+   "lead": "Leia Organa",
+   "with": "R2-D2, Captain Drogan, +2 Rebels",
+   "how": "",
+   "notes": ""
   }
  ],
  "corellia:c1": [
@@ -610,6 +652,42 @@ window.GUIDE = {
    "with": "Appo, CX, Disguised Clone Trooper, Scorch",
    "how": "",
    "notes": ""
+  },
+  {
+   "lead": "Rey with Resistance",
+   "with": "Ben, C3PO, BB8 and JTR",
+   "how": "",
+   "notes": ""
+  },
+  {
+   "lead": "Rey",
+   "with": "JTR, BB8, Han, Chewbacca",
+   "how": "",
+   "notes": ""
+  },
+  {
+   "lead": "Stormtrooper Luke",
+   "with": "Princess Leia, Stormtrooper Han, C3PO, Chewpio",
+   "how": "",
+   "notes": ""
+  },
+  {
+   "lead": "Aphra (IG-90)",
+   "with": "BT1, 000, HK-47, IG-90",
+   "how": "",
+   "notes": ""
+  },
+  {
+   "lead": "Mother Talzin",
+   "with": "Merrin, Spirit, Daka, Zombie",
+   "how": "",
+   "notes": ""
+  },
+  {
+   "lead": "Cobb Vanth",
+   "with": "CUP, Nebit, Jawa Scavenger, +1 Constable",
+   "how": "",
+   "notes": "auto, no omicron needed"
   }
  ],
  "felucia:c6": [
@@ -780,6 +858,12 @@ window.GUIDE = {
  ],
  "bracca:c2": [
   {
+   "lead": "Jedi Master Mace Windu",
+   "with": "Jocasta Nu, Shaak Ti, Temple Guard, Depa Billaba (omicron)",
+   "how": "",
+   "notes": ""
+  },
+  {
    "lead": "Jedi Master Luke",
    "with": "Jedi Training Leia, JKL, Kyle Katarn, Shaak Ti",
    "how": "",
@@ -792,24 +876,24 @@ window.GUIDE = {
    "notes": ""
   },
   {
-   "lead": "Jedi Master Mace Windu",
-   "with": "Jocasta Nu, Shaak Ti, Temple Guard, Depa Billaba (omicron)",
+   "lead": "Jedi Master Luke",
+   "with": "Jedi Training Leia, 3 other Jedi",
    "how": "",
    "notes": ""
   }
  ],
  "tatooine:c6": [
   {
-   "lead": "The Stranger",
-   "with": "Starkiller, Malicos, Scavenger Rey, Plo Koon",
-   "how": "",
-   "notes": "full auto, last two replaceable"
-  },
-  {
    "lead": "Cere Junda",
    "with": "UFUs",
    "how": "",
    "notes": "auto, I had Cere JTR Scav Rey Malicos Starkiller but you can probably use whatever leftover UFUs you have"
+  },
+  {
+   "lead": "The Stranger",
+   "with": "Starkiller, Malicos, Scavenger Rey, Plo Koon",
+   "how": "",
+   "notes": "full auto, last two replaceable"
   },
   {
    "lead": "Queen Amidala",
@@ -846,6 +930,54 @@ window.GUIDE = {
    "with": "Ithano, Quiggold, Kix, SM-33",
    "how": "",
    "notes": ""
+  },
+  {
+   "lead": "Pirate King Hondo Onaka",
+   "with": "Silvo, Hondo, Vane, Brutus",
+   "how": "",
+   "notes": ""
+  },
+  {
+   "lead": "Jedi Master Mace Windu",
+   "with": "Jocasta Nu, Temple Guard, Depa Billaba (omicron), +1 JV",
+   "how": "",
+   "notes": ""
+  },
+  {
+   "lead": "Kelleran Beq",
+   "with": "Jocasta Nu, Shaak Ti, Temple Guard, Depa Billaba (omicron)",
+   "how": "",
+   "notes": ""
+  },
+  {
+   "lead": "SLKR",
+   "with": "KRU, Sith Trooper, +2 First Order (Use Rey if you have her)",
+   "how": "",
+   "notes": ""
+  },
+  {
+   "lead": "Satele Shan",
+   "with": "Jedi Knight Revan, Bastila Shan, Jolee Bindo, Juhani",
+   "how": "",
+   "notes": ""
+  },
+  {
+   "lead": "Dark Trooper Moff Gideon",
+   "with": "Scout Trooper, Death Trooper, Moff Gideon, Enoch",
+   "how": "",
+   "notes": "auto. Enoch omi makes it easier but not required"
+  },
+  {
+   "lead": "Cobb Vanth",
+   "with": "CUP, Nebit, Jawa Scavenger, +1",
+   "how": "",
+   "notes": "auto, no omicron needed, Lobot is probably best for 5th"
+  },
+  {
+   "lead": "Leia Organa",
+   "with": "R2-D2, Admiral Raddus, +2 Rebels",
+   "how": "",
+   "notes": "Drogan is saved for the Saw mission, so Raddus replaces him"
   }
  ],
  "tatooine:c3": [
@@ -896,6 +1028,12 @@ window.GUIDE = {
    "with": "Scout Trooper, Death Trooper, Moff Gideon, Fennec",
    "how": "",
    "notes": "auto. Enoch omi makes it easier but not required"
+  },
+  {
+   "lead": "Ahsoka Tano",
+   "with": "Any",
+   "how": "",
+   "notes": ""
   }
  ],
  "tatooine:c2": [
@@ -1171,7 +1309,7 @@ window.GUIDE = {
   },
   {
    "lead": "Satele Shan",
-   "with": "",
+   "with": "Jedi Knight Revan, Bastila Shan, Jolee Bindo, +1",
    "how": "",
    "notes": ""
   }
@@ -1209,9 +1347,9 @@ window.GUIDE = {
   },
   {
    "lead": "Pirate King Hondo Onaka",
-   "with": "",
+   "with": "Hondo, Vane, +2",
    "how": "",
-   "notes": ""
+   "notes": "auto, the more pirates you have R9, the easier it is. You need Vane though. Very laggy"
   }
  ],
  "vandor:c4": [
@@ -1266,25 +1404,25 @@ window.GUIDE = {
   },
   {
    "lead": "Omega",
-   "with": "",
+   "with": "other Bad Batch Mercenaries",
    "how": "",
-   "notes": ""
+   "notes": "easy auto with omi"
   },
   {
    "lead": "Kelleran Beq",
-   "with": "",
+   "with": "Jocasta Nu, Shaak Ti, Depa Billaba (omicron), Temple Guard",
    "how": "",
-   "notes": ""
+   "notes": "auto, dont need platoons, very fast"
   },
   {
    "lead": "Jedi Master Mace Windu",
-   "with": "",
+   "with": "Jocasta Nu, Shaak Ti, Depa Billaba (omicron), Temple Guard",
    "how": "",
-   "notes": ""
+   "notes": "auto, dont need platoons, very fast"
   },
   {
    "lead": "Finn",
-   "with": "",
+   "with": "RH Finn, RH Poe, Zorii, Rose",
    "how": "",
    "notes": ""
   }
@@ -1298,15 +1436,15 @@ window.GUIDE = {
   },
   {
    "lead": "Profundity",
-   "with": "",
+   "with": "MF, Outrider, Y Wing, Wedge, Biggs, Phantom, Ghost",
    "how": "",
-   "notes": ""
+   "notes": "auto, Dont use Ghost if required in Mixed"
   },
   {
    "lead": "Home One (MF)",
-   "with": "",
+   "with": "MF, Y Wing, Ravens Claw, Outrider, Phantom, Ghost, Cassian",
    "how": "",
-   "notes": ""
+   "notes": "auto, Dont use Ghost if required in Mixed"
   }
  ],
  "vandor:c1": [
@@ -1546,7 +1684,7 @@ window.GUIDE = {
    "lead": "Boss Nass",
    "with": "other gungans (tarpals omi)",
    "how": "",
-   "notes": ""
+   "notes": "aut"
   },
   {
    "lead": "Omega",
@@ -1559,6 +1697,24 @@ window.GUIDE = {
    "with": "SM-33, Hondo, Vane",
    "how": "",
    "notes": "easy full auto, Brutus and Silvo are good if you have them R8+"
+  },
+  {
+   "lead": "Kelleran Beq",
+   "with": "Jocasta Nu, Shaak Ti, Depa Billaba (omicron), Temple Guard",
+   "how": "",
+   "notes": ""
+  },
+  {
+   "lead": "Lord Vader (Clones)",
+   "with": "DS clones",
+   "how": "",
+   "notes": ""
+  },
+  {
+   "lead": "Great Mothers",
+   "with": "Morgan, Spirit, NT, DTP",
+   "how": "",
+   "notes": "Auto. Platoons optional."
   }
  ],
  "kessel:c6": [
@@ -1590,7 +1746,7 @@ window.GUIDE = {
    "lead": "Boss Nass",
    "with": "other gungans (tarpals omi)",
    "how": "",
-   "notes": ""
+   "notes": "aut"
   },
   {
    "lead": "Omega",
@@ -1603,6 +1759,24 @@ window.GUIDE = {
    "with": "SM-33, Hondo, Vane",
    "how": "",
    "notes": "easy full auto, Brutus and Silvo are good if you have them R8+"
+  },
+  {
+   "lead": "Kelleran Beq",
+   "with": "Jocasta Nu, Shaak Ti, Depa Billaba (omicron), Temple Guard",
+   "how": "",
+   "notes": ""
+  },
+  {
+   "lead": "Lord Vader (Clones)",
+   "with": "DS clones",
+   "how": "",
+   "notes": ""
+  },
+  {
+   "lead": "Great Mothers",
+   "with": "Morgan, Spirit, NT, DTP",
+   "how": "",
+   "notes": "Auto. Platoons optional."
   }
  ],
  "malachor:c1": [

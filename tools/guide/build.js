@@ -173,7 +173,7 @@ for (const m of raw) {
     // Stand-ins: swap a reserved unit for an alternative instead of dropping the whole team.
     for (const r of rows) {
       if (/\bdrogan\b/i.test(r.with) && clash(k, r) && /drogan/.test(clash(k, r))) {
-        r.with = r.with.replace(/\bdrogan\b/i, 'Admiral Raddus');
+        r.with = r.with.replace(/\b(captain )?drogan\b/i, 'Admiral Raddus');
         r.notes = (r.notes ? r.notes + '. ' : '') + 'Drogan is saved for the Saw mission, so Raddus replaces him';
       }
     }
