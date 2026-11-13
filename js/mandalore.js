@@ -740,7 +740,6 @@ Vue.component('mission', {
 				preferredSquads: [90],//DTMG
 				dangerousEnemies: [50,51],
             reqs: [23],
-		    notes: [7],
 			modifiers: [2]
 			}, 
             {
