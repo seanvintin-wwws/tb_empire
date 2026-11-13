@@ -1429,16 +1429,16 @@ window.GUIDE = {
  ],
  "lothal:c6": [
   {
-   "lead": "Negotiator",
-   "with": "JKA, Y Wing, Marauder, Plo, Ahsoka, Fives, Rex",
-   "how": "",
-   "notes": ""
-  },
-  {
    "lead": "Profundity",
    "with": "MF, Outrider, Y Wing, Wedge, Biggs, Phantom, Ghost",
    "how": "",
    "notes": "auto, Dont use Ghost if required in Mixed"
+  },
+  {
+   "lead": "Negotiator",
+   "with": "JKA, Y Wing, Marauder, Plo, Ahsoka, Fives, Rex",
+   "how": "",
+   "notes": ""
   },
   {
    "lead": "Home One (MF)",
