@@ -994,6 +994,12 @@ window.GUIDE = {
    "with": "Morgan, Spirit, NT, DTP",
    "how": "",
    "notes": "Auto. Full Platoons required."
+  },
+  {
+   "lead": "Supreme Leader Kylo Ren",
+   "with": "Dark Side Rey, Kylo Ren (Unmasked), Hux, Sith Trooper",
+   "how": "Manual play needed",
+   "notes": "Not an auto team: swgohrote.com says manual play is required and you need full platoons. Only use it if you're short a team."
   }
  ],
  "haven:c2": [
@@ -1020,6 +1026,12 @@ window.GUIDE = {
    "with": "Morgan, Spirit, NT, DTP",
    "how": "",
    "notes": "Auto. Full Platoons required."
+  },
+  {
+   "lead": "Supreme Leader Kylo Ren",
+   "with": "Dark Side Rey, Kylo Ren (Unmasked), Hux, Sith Trooper",
+   "how": "Manual play needed",
+   "notes": "Not an auto team: swgohrote.com says manual play is required and you need full platoons. Only use it if you're short a team."
   }
  ],
  "haven:c6": [
@@ -1046,6 +1058,12 @@ window.GUIDE = {
    "with": "Morgan, Spirit, NT, DTP",
    "how": "",
    "notes": "Auto. Full Platoons required."
+  },
+  {
+   "lead": "Supreme Leader Kylo Ren",
+   "with": "Dark Side Rey, Kylo Ren (Unmasked), Hux, Sith Trooper",
+   "how": "Manual play needed",
+   "notes": "Not an auto team: swgohrote.com says manual play is required and you need full platoons. Only use it if you're short a team."
   }
  ],
  "kashyyyk:c2": [

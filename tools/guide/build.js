@@ -112,8 +112,10 @@ const OVERRIDES = {
 // Guild edits to the guide's list for a mission: drop teams by leader, and move a leader to the top.
 const SEE_HAVEN = { lead: 'Sith Eternal Emperor', with: 'Malak, The Stranger, Darth Revan, Bane', how: '',
   notes: 'swgohrote.com rates this about 90% on auto. Needs all platoons. Use The Stranger instead of Dooku to make it consistent. Use this when Lord Vader is needed for platoons.' };
+const SLKR_HAVEN = { lead: 'Supreme Leader Kylo Ren', with: 'Dark Side Rey, Kylo Ren (Unmasked), Hux, Sith Trooper', how: 'Manual play needed',
+  notes: "Not an auto team: swgohrote.com says manual play is required and you need full platoons. Only use it if you're short a team." };
 const EDITS = {
-  'haven:c1': { add: [[1, SEE_HAVEN]] }, 'haven:c2': { add: [[1, SEE_HAVEN]] }, 'haven:c6': { add: [[1, SEE_HAVEN]] },
+  'haven:c1': { add: [[1, SEE_HAVEN], [99, SLKR_HAVEN]] }, 'haven:c2': { add: [[1, SEE_HAVEN], [99, SLKR_HAVEN]] }, 'haven:c6': { add: [[1, SEE_HAVEN], [99, SLKR_HAVEN]] },
   'mustafar:c1': { drop: [/dark trooper moff gideon/i, /emperor palpatine/i], top: /pirate king hondo/i },
   'zeffo:c8': { drop: [/JKCK \(GLAT\)/i] },
   'dathomir:c2': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
