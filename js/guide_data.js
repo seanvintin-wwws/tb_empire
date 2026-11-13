@@ -1290,6 +1290,12 @@ window.GUIDE = {
  ],
  "lothal:c1": [
   {
+   "lead": "Jedi Master Mace Windu",
+   "with": "Jocasta Nu, Shaak Ti, Depa Billaba (omicron), Temple Guard",
+   "how": "",
+   "notes": "auto, dont need platoons, very fast. Use this first: super easy full auto, and it saves your GLs (Jedi Master Luke, Jedi Master Kenobi) for elsewhere"
+  },
+  {
    "lead": "Jedi Master Luke with POW/MQJ",
    "with": "Jedi Training Leia, GAS, POW, MQG",
    "how": "",
@@ -1300,12 +1306,6 @@ window.GUIDE = {
    "with": "GAS, GK, POW, MQG",
    "how": "",
    "notes": ""
-  },
-  {
-   "lead": "Jedi Master Mace Windu",
-   "with": "Jocasta Nu, Shaak Ti, Depa Billaba (omicron), Temple Guard",
-   "how": "",
-   "notes": "auto, dont need platoons, very fast"
   },
   {
    "lead": "Satele Shan",
