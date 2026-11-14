@@ -1354,6 +1354,12 @@ window.GUIDE = {
  ],
  "vandor:c4": [
   {
+   "lead": "Leia Organa",
+   "with": "Admiral Raddus, R2-D2, Captain Drogan, R5-D4",
+   "how": "",
+   "notes": "Easy win (guild tested). Use this here and save Pirate King Hondo for the Dark Side planet."
+  },
+  {
    "lead": "Pirate King Hondo Onaka",
    "with": "Hondo, Vane, +2",
    "how": "",

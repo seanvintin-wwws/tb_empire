@@ -121,6 +121,8 @@ const EDITS = {
   'mustafar:c1': { drop: [/dark trooper moff gideon/i, /emperor palpatine/i], top: /pirate king hondo/i },
   'lothal:c1': { top: /^jedi master mace windu/i, note: [[/^jedi master mace windu/i, 'Use this first: super easy full auto, and it saves your GLs (Jedi Master Luke, Jedi Master Kenobi) for elsewhere']] },
   'lothal:c2': { top: /^ahsoka tano/i, note: [[/^ahsoka tano/i, 'Use this first: by this point most teams are used, and Ahsoka carries any leftover units']] },
+  'vandor:c4': { add: [[0, { lead: 'Leia Organa', with: 'Admiral Raddus, R2-D2, Captain Drogan, R5-D4', how: '',
+    notes: 'Easy win (guild tested). Use this here and save Pirate King Hondo for the Dark Side planet.' }]] },
   'lothal:c6': { top: /^home one/i, note: [
     [/^home one/i, 'Use this one here: Profundity is needed for the Kessel fleet mission in the same phase (if you have no Executor for Kessel).'],
     [/^negotiator/i, 'Better saved for the Zeffo fleet mission.'],
