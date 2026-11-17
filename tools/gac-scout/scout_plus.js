@@ -12,7 +12,7 @@
    - Round by round tab (from Arrikhan): result, score, first attack time and delay, their holds and their drops.
 */
 (async () => {
-  const VERSION = '2.8.1';
+  const VERSION = '2.8.2';
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
     alert('GAC Scout+ runs on swgoh.gg. Open https://swgoh.gg in this tab, then click the bookmark again.');
     return;
@@ -474,8 +474,17 @@
         if (!I.ok) return null;
         try {
           const r = await fetch(url, { credentials: 'include' });
-          if (r.ok) return (await r.json()).data || null;
+          if (r.ok) { I.throttled = 0; return (await r.json()).data || null; }
           if (r.status === 401 || r.status === 403) { I.ok = false; I.code = r.status; return null; }
+          // throttled: swgoh.gg limits how many Insight requests an account can make. Wait as asked and try again, but after
+          // several refusals in a row stop using Insight for this scout, so it never looks frozen
+          if (r.status === 429) {
+            I.throttled = (I.throttled || 0) + 1;
+            if (I.throttled >= 6) { I.ok = false; I.code = 429; return null; }
+            const ra = parseFloat(r.headers.get('retry-after'));
+            await sleep(Math.min(ra > 0 ? ra * 1000 : 2000, 5000) + 500 * I.throttled);
+            continue;
+          }
           if (r.status === 400 || r.status === 404) return null;
         } catch (e) {}
         await sleep(1200 * (i + 1));
@@ -978,7 +987,7 @@
         // skip squads the Suggested defence can't use anyway: ships, anything already on your defence, and GL teams while they're kept for attack
         defenceCandidates(S).filter(c => !c.squad.some(u => SHIP[u] || S.locked.has(u)) && !(S.keepGL && c.hasGL)).slice(0, 24).forEach(c => jobs.push(...candJobs(c)));
         let k = 0, total = jobs.length;
-        const runJobs = js => pool(js, 4, async j => { const v = await insightSquad(I, j.sq, j.band, j.keys, j.oq); status(`Reading swgoh.gg GAC Insight for ${nice(I.league)}${I.div ? ' Division ' + I.dn : ''}, split by datacron and omicron: ${++k}/${total}…`); return v; });
+        const runJobs = js => pool(js, 2, async j => { const v = await insightSquad(I, j.sq, j.band, j.keys, j.oq); status(`Reading swgoh.gg GAC Insight for ${nice(I.league)}${I.div ? ' Division ' + I.dn : ''}, split by datacron and omicron: ${++k}/${total}…`); return v; });
         const takeJobs = (js, got) => {
           js.forEach((j, i) => {
             const key = sqKey(j.sq);
@@ -998,7 +1007,7 @@
           });
         };
         const got = await runJobs(jobs);
-        if (I.ok && got.some(Boolean)) {
+        if (got.some(Boolean)) {
           S.INS = { league: I.league, dn: I.dn, ctr: {}, hold: {}, cand: {} };
           takeJobs(jobs, got);
           gsave();
@@ -1015,8 +1024,9 @@
             gsave();
             analyse(S);
           }
-        } else if (!I.ok) S.insNote = `swgoh.gg's GAC Insight (battles for your own league and division) needs you to be signed in to swgoh.gg${I.code === 403 ? ' with access to Insights' : ''}. Without it, counters come from swgoh.gg's all-league counters pages, and datacrons can't be taken into account.`;
+        } else if (!I.ok && I.code !== 429) S.insNote = `swgoh.gg's GAC Insight (battles for your own league and division) needs you to be signed in to swgoh.gg${I.code === 403 ? ' with access to Insights' : ''}. Without it, counters come from swgoh.gg's all-league counters pages, and datacrons can't be taken into account.`;
       }
+      S.insWarn = I && I.code === 429 ? `swgoh.gg is limiting how many GAC Insight requests your account can make right now, so ${S.INS ? 'only some squads have Insight numbers; the rest use' : 'this scout uses'} swgoh.gg's all-league pages instead. Insight usually comes back after a while: press Scout again later. Anything already read is saved for a day, so the next scout needs far fewer requests.` : '';
       S.defCands = defenceCandidates(S);
       plan(S);
       S.note = fails.n ? `${fails.n} swgoh.gg page${fails.n === 1 ? '' : 's'} didn't load (error ${esc(Object.keys(fails.codes).join(', '))}), so this report is missing some battles. Press Scout again in a minute to fill the gaps.` : '';
@@ -1114,7 +1124,7 @@
     const head = `<div class="vs"><div><b>${esc(S.me.name)}</b><small>${gpTxt(S.me.gp)} GP</small></div><div class="v">vs</div><div><b>${esc(S.opp.name)}</b><small>${gpTxt(S.opp.gp)} GP${S.opp.guild ? ' · ' + esc(S.opp.guild) : ''}</small></div></div>
       <p class="sub">${S.oppHist.battles.length} battles from ${S.oppHist.rounds.length} of their ${S.oppHist.fmt} rounds (seasons ${(S.oppHist.seasons || []).join(', ') || '–'}), plus ${S.myBattles} of your own attacks, blended with swgoh.gg's GAC counters page. <a href="#" data-t="about">How it works</a></p>
       ${S.autoFmt ? `<p class="sub">Format: ${S.oppHist.fmt}, from their latest finished event. swgoh.gg only lists an event once it's over, so in the first week of a new season pick the format yourself at the top.</p>` : ''}
-      ${S.note ? `<p class="warn">${S.note}</p>` : ''}
+      ${S.note ? `<p class="warn">${S.note}</p>` : ''}${S.insWarn ? `<p class="warn">${S.insWarn}</p>` : ''}
       ${S.INS ? `<p class="sub"><b class="me">Using swgoh.gg GAC Insight for ${nice(S.INS.league)}${S.INS.dn ? ' Division ' + S.INS.dn : ''}</b> (this season, exact squads) for counters and defence holds. Squads with too few battles in your division use your whole league.</p>
         <p class="sub"><b class="me">Datacrons counted:</b> ${(S.me.dcs || []).filter(dcLive).length} of yours and ${(S.opp.dcs || []).filter(dcLive).length} of ${esc(S.opp.name)}'s (live sets). Every number is from battles where each side had a datacron of the same strength as the one you or they can actually put on that team.${S.myDcRes && S.myDcRes.size ? ` ${S.myDcRes.size} of yours are taken as already on your defence.` : ''}</p>` : S.insNote ? `<p class="sub">${S.insNote}</p>` : ''}
       ${S.HU ? `<p class="sub"><b class="me">${S.INS ? `HotUtils ${nice(S.HU.league)} hold % shown beside Insight's in Suggested defence` : `Suggested defence uses HotUtils ${nice(S.HU.league)} hold %`}</b> (season ${S.HU.season}, whole league, live datacrons only)${S.INS ? ', and used for squads where Insight has under 50 battles' : ''}. <a href="#" data-act="hureset">Drop it</a></p>`
