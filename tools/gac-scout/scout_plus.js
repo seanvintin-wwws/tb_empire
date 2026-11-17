@@ -12,7 +12,7 @@
    - Round by round tab (from Arrikhan): result, score, first attack time and delay, their holds and their drops.
 */
 (async () => {
-  const VERSION = '2.7';
+  const VERSION = '2.8';
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
     alert('GAC Scout+ runs on swgoh.gg. Open https://swgoh.gg in this tab, then click the bookmark again.');
     return;
@@ -755,7 +755,11 @@
     const poolHold = tot[1] ? tot[0] / tot[1] : 0.25;
     const attN = atts.reduce((a, o) => a + o.n, 0) || 1;
     // candidate squads: every meta defence you own at R5+, plus the squad you'd field for each leader in the histories
-    const meta = S.HU ? S.HU.meta : S.metaSG || {};
+    // HotUtils' pasted league meta (whole league, live datacrons only) stands in for swgoh.gg's all-league squad meta,
+    // and with GAC Insight on it is shown next to Insight's division hold % and used where Insight is thin
+    const huMeta = S.HU ? S.HU.meta : null;
+    const meta = huMeta || S.metaSG || {};
+    const metaSrc = huMeta ? 'hu' : 'gg';
     // a squad missing from the meta list is rarely set or rarely holds: start it at the lower quartile of meta holds
     const mh = Object.values(meta).map(m => m.h).sort((a, b) => a - b);
     const floor = mh.length ? mh[Math.floor(mh.length / 4)] : poolHold;
@@ -770,8 +774,13 @@
       const L = squad[0], o = C[L] || { n: 0, held: 0, myN: 0, myHeld: 0 };
       const cd = S.INS && S.INS.cand && S.INS.cand[key];
       // v = Insight battles for this squad with one datacron strength on it; without Insight, the older all-datacron sources
+      const hu = huMeta ? huMeta[key] || null : null;
       const variant = v => {
-        const mt = v && v.n >= 50 ? { n: v.n, h: v.h, scope: v.scope } : !v && !cd ? meta[key] : null;
+        // meta hold %: Insight for this exact squad when it has 50+ battles; HotUtils' league figure when Insight is thinner
+        // than that (and says so); without Insight, the pasted HotUtils meta or swgoh.gg's squad meta
+        const mt = v && v.n >= 50 ? { n: v.n, h: v.h, scope: v.scope, src: 'ins' }
+          : hu ? { n: hu.n, h: hu.h, src: 'hu', insThin: v ? v.n : cd ? 0 : undefined }
+          : !v && !cd && meta[key] ? { ...meta[key], src: metaSrc } : null;
         const mine = !v && S.HU && S.HU.mine[key];
         const oneAtt = lead => {
           if (v) {
@@ -804,9 +813,9 @@
       const evidence = o.n + A.gN + (A.mt ? A.mt.n : 0);
       return {
         lead: L, n: o.n, held: o.held, myN: o.myN, myHeld: o.myHeld, squad, prior: A.prior, gN: A.gN, gHold: A.gHold, score: A.score,
-        meta: A.mt || null, metaSrc: A.mt && A.mt.scope ? 'ins' : S.HU && A.mt ? 'hu' : 'gg', exactVs: A.exactVs,
+        meta: A.mt || null, metaSrc: A.mt ? A.mt.src : 'gg', hu, exactVs: A.exactVs,
         vs: A.vs.filter(v => v.n || v.gN).sort((a, b) => b.weight - a.weight),
-        dc: myX, dBand: cd ? (cd.dc ? cd.dc.dBand : 0) : undefined, no: B ? { score: B.score, meta: B.mt, vs: B.vs.filter(v => v.n || v.gN).sort((a, b) => b.weight - a.weight) } : null,
+        dc: myX, dBand: cd ? (cd.dc ? cd.dc.dBand : cd.no ? 0 : null) : undefined, no: B ? { score: B.score, meta: B.mt, vs: B.vs.filter(v => v.n || v.gN).sort((a, b) => b.weight - a.weight) } : null,
         conf: evidence >= 20 ? 'high' : evidence >= 6 ? 'med' : 'low', hasGL: squad.some(u => me.units[u] && me.units[u].gl),
       };
     }).sort((a, b) => b.score - a.score);
@@ -954,36 +963,58 @@
         const jobs = Object.values(theirs).map(d => { const om = gacOmis(d.squad, fmt); return { kind: 'ctr', sq: d.squad, band: S.oppDcDef[d.lead] ? S.oppDcDef[d.lead].band : 0, keys: ['none', 'low', 'high'], oq: OQ(om), om }; });
         // your defence options: with the best datacron you have free for them, and without one in case it's needed elsewhere;
         // with the GAC omicrons you actually have, and minus battles where the defender had one you're missing
-        defenceCandidates(S).filter(c => !c.squad.some(u => SHIP[u])).slice(0, 16).forEach(c => {
+        const candJobs = c => {
+          const out = [];
           const x = bestDc(me.dcs, c.squad, S.myDcRes);
           const have = gacOmis(c.squad, fmt, me), lack = gacOmis(c.squad, fmt).filter(o => !have.includes(o) && !have.some(h => h.key === o.key));
           const add = (band, which) => {
-            jobs.push({ kind: 'cand', sq: c.squad, band, keys: ['none', 'has'], which, oq: OQ(have), have, lack });
-            if (lack.length) jobs.push({ kind: 'cand', sq: c.squad, band, keys: ['none', 'has'], which: which + 'Lack', oq: OQ([...have, ...lack]) });
+            out.push({ kind: 'cand', sq: c.squad, band, keys: ['none', 'has'], which, oq: OQ(have), have, lack });
+            if (lack.length) out.push({ kind: 'cand', sq: c.squad, band, keys: ['none', 'has'], which: which + 'Lack', oq: OQ([...have, ...lack]) });
           };
           add(x ? x.band : 0, 'dc');
           if (x) add(0, 'no');
-        });
-        let k = 0;
-        const got = await pool(jobs, 4, async j => { const v = await insightSquad(I, j.sq, j.band, j.keys, j.oq); status(`Reading swgoh.gg GAC Insight for ${nice(I.league)}${I.div ? ' Division ' + I.dn : ''}, split by datacron and omicron: ${++k}/${jobs.length}…`); return v; });
-        if (I.ok && got.some(Boolean)) {
-          S.INS = { league: I.league, dn: I.dn, ctr: {}, hold: {}, cand: {} };
-          jobs.forEach((j, i) => {
-            const v = got[i]; if (!v) return;
+          return out;
+        };
+        // skip squads the Suggested defence can't use anyway: ships, anything already on your defence, and GL teams while they're kept for attack
+        defenceCandidates(S).filter(c => !c.squad.some(u => SHIP[u] || S.locked.has(u)) && !(S.keepGL && c.hasGL)).slice(0, 24).forEach(c => jobs.push(...candJobs(c)));
+        let k = 0, total = jobs.length;
+        const runJobs = js => pool(js, 4, async j => { const v = await insightSquad(I, j.sq, j.band, j.keys, j.oq); status(`Reading swgoh.gg GAC Insight for ${nice(I.league)}${I.div ? ' Division ' + I.dn : ''}, split by datacron and omicron: ${++k}/${total}…`); return v; });
+        const takeJobs = (js, got) => {
+          js.forEach((j, i) => {
             const key = sqKey(j.sq);
+            // a checked squad with no Insight battles still gets an (empty) entry, so it isn't reported as unchecked
+            if (j.kind === 'cand') S.INS.cand[key] = S.INS.cand[key] || {};
+            const v = got[i]; if (!v) return;
             if (j.kind === 'ctr') { v.om = j.om; S.INS.ctr[key] = v; S.INS.hold[key] = { n: v.n, h: v.h, scope: v.scope }; }
             else { const c = (S.INS.cand[key] = S.INS.cand[key] || {}); c[j.which] = v; if (j.have) { c.have = j.have; c.lack = j.lack; } }
           });
           // a defence missing an omicron: its battles minus the ones where the defender had the omicron you lack
           Object.values(S.INS.cand).forEach(c => {
             ['dc', 'no'].forEach(w => {
-              if (!c[w] || !c[w + 'Lack']) return;
+              if (!c[w] || !c[w + 'Lack'] || c.lackDone) return;
               const m = minusV(c[w], c[w + 'Lack']);
               if (m.minus && m.n >= 20) { c[w] = m; c.lackDone = true; }
             });
           });
+        };
+        const got = await runJobs(jobs);
+        if (I.ok && got.some(Boolean)) {
+          S.INS = { league: I.league, dn: I.dn, ctr: {}, hold: {}, cand: {} };
+          takeJobs(jobs, got);
           gsave();
           analyse(S);
+          // second pass: the attack plan takes units from the strongest squads, so the defences left free may not have been
+          // among the 24 checked above. Check any suggested defence Insight hasn't seen yet, then plan again.
+          for (let pass = 0; pass < 4 && I.ok; pass++) {
+            S.defCands = defenceCandidates(S);
+            plan(S);
+            const more = S.defPlan.filter(c => !S.INS.cand[sqKey(c.squad)]).flatMap(candJobs);
+            if (!more.length) break;
+            total += more.length;
+            takeJobs(more, await runJobs(more));
+            gsave();
+            analyse(S);
+          }
         } else if (!I.ok) S.insNote = `swgoh.gg's GAC Insight (battles for your own league and division) needs you to be signed in to swgoh.gg${I.code === 403 ? ' with access to Insights' : ''}. Without it, counters come from swgoh.gg's all-league counters pages, and datacrons can't be taken into account.`;
       }
       S.defCands = defenceCandidates(S);
@@ -1086,8 +1117,8 @@
       ${S.note ? `<p class="warn">${S.note}</p>` : ''}
       ${S.INS ? `<p class="sub"><b class="me">Using swgoh.gg GAC Insight for ${nice(S.INS.league)}${S.INS.dn ? ' Division ' + S.INS.dn : ''}</b> (this season, exact squads) for counters and defence holds. Squads with too few battles in your division use your whole league.</p>
         <p class="sub"><b class="me">Datacrons counted:</b> ${(S.me.dcs || []).filter(dcLive).length} of yours and ${(S.opp.dcs || []).filter(dcLive).length} of ${esc(S.opp.name)}'s (live sets). Every number is from battles where each side had a datacron of the same strength as the one you or they can actually put on that team.${S.myDcRes && S.myDcRes.size ? ` ${S.myDcRes.size} of yours are taken as already on your defence.` : ''}</p>` : S.insNote ? `<p class="sub">${S.insNote}</p>` : ''}
-      ${S.INS ? '' : S.HU ? `<p class="sub"><b class="me">Suggested defence uses HotUtils ${nice(S.HU.league)} hold %</b> (season ${S.HU.season}, live datacrons only). <a href="#" data-act="hureset">Go back to swgoh.gg's</a></p>`
-        : `<details class="sub"><summary>Optional: use HotUtils' ${nice(leagueName())} defence meta (your league, live datacrons only)</summary>
+      ${S.HU ? `<p class="sub"><b class="me">${S.INS ? `HotUtils ${nice(S.HU.league)} hold % shown beside Insight's in Suggested defence` : `Suggested defence uses HotUtils ${nice(S.HU.league)} hold %`}</b> (season ${S.HU.season}, whole league, live datacrons only)${S.INS ? ', and used for squads where Insight has under 50 battles' : ''}. <a href="#" data-act="hureset">Drop it</a></p>`
+        : `<details class="sub"><summary>Optional: add HotUtils' ${nice(leagueName())} defence meta (whole league, live datacrons only${S.INS ? '; shown beside Insight and used where Insight is thin' : ''})</summary>
         <p>1. <a class="lnk" href="${esc(huUrl())}" target="_blank" rel="noopener">Open HotUtils' ${nice(leagueName())} ${S.oppHist.fmt} defence data</a> (a page of raw text).<br>2. On that page press <b>Ctrl+A</b> then <b>Ctrl+C</b> (on a Mac, Cmd).<br>3. Paste it here: <input id="hupaste" placeholder="Paste here" autocomplete="off"></p>
         <p>It's remembered for 3 days, so you only do this once per event.</p></details>`}`;
     const body = { plan: viewPlan, defs: viewDefs, atts: viewAtts, rounds: viewRounds, time: viewTime, roster: viewRoster, about: viewAbout }[tab]();
@@ -1214,7 +1245,21 @@
 
   function viewDefPlan() {
     const users = S.atts.slice(0, 3).map(a => esc(nm(a.lead))).join(', ');
-    const src = S.INS ? insLabel('div') : S.HU ? `HotUtils ${nice(S.HU.league)}` : 'swgoh.gg';
+    const huLabel = S.HU ? `HotUtils ${nice(S.HU.league)}` : '';
+    const src = S.INS ? insLabel('div') : S.HU ? huLabel : 'swgoh.gg';
+    const srcTxt = S.INS && S.HU ? `${src} hold %, with ${huLabel}'s whole-league figure beside it and used where Insight has under 50 battles` : `${src} hold %`;
+    const metaLabel = m => (m.src === 'ins' ? insLabel(m.scope) : m.src === 'hu' ? huLabel : 'swgoh.gg');
+    // the meta line: the source that drives the score, then HotUtils' league figure next to it when both are available
+    const metaH = c => {
+      const m = !c.useDc && c.dc && c.no ? c.no.meta : c.meta;
+      if (!m && !c.hu) return '';
+      if (!m) return `<b>Meta: holds ${pct(c.hu.h)} of ${kNum(c.hu.n)}</b> (${huLabel}, not in the score)<br>`;
+      let h = `<b>Meta: holds ${pct(m.h)} of ${kNum(m.n)}</b> (${metaLabel(m)})`;
+      // insThin: Insight's battle count when it was checked and found thin (0 = none); undefined when Insight never checked this squad
+      if (m.src === 'hu' && S.INS && m.insThin !== undefined) h += ` <span class="warn">· ${insLabel('div')} had ${m.insThin ? `only ${m.insThin}` : 'no'} battles for this squad, so HotUtils is used</span>`;
+      else if (m.src === 'ins' && c.hu) h += ` · ${huLabel}: ${pct(c.hu.h)} of ${kNum(c.hu.n)}`;
+      return h + '<br>';
+    };
     // the datacron line for a suggested defence: which of yours to put on it, or why it's rated without one
     const dcAdvice = c => c.dBand === undefined ? (S.INS ? '<span class="warn">Not split by datacron (outside the squads checked in Insight).</span><br>' : '')
       : c.useDc ? `<b class="me">Put your ${dcTxt(c.dc, '')} on it.</b>${c.dc.band < 9 ? ` <small>(${c.dc.band === 6 ? 'faction' : 'alignment'} tier only)</small>` : ''}${c.dBand == null ? ' <small>(too few battles to split by datacron)</small>' : ''}<br>`
@@ -1227,11 +1272,11 @@
       return (cd.have.length ? `Your GAC omicrons counted: ${omiNames(cd.have)}${v && !v.oq ? ' <span class="warn">(too few battles with them, so not filtered)</span>' : ''}.<br>` : '')
         + (cd.lack.length ? `<span class="warn">You don't have ${omiNames(cd.lack)}${cd.lackDone ? ', so battles where the defender had it are left out' : ', and there were too few battles to leave those out, so this may be optimistic'}.</span><br>` : '');
     };
-    return `<h2>Suggested defence</h2><p class="sub">Squads you own, ranked half on how often they hold in the current meta (${src} hold %) and half on how they do against the attack teams ${esc(S.opp.name)} uses${users ? ` (mostly ${users})` : ''}${S.INS ? ', each with the datacron you can actually put on it and the datacron they would bring' : ''}. Kept clear of your attack plan and each other. Tap "I've set this" once it's placed.</p>
+    return `<h2>Suggested defence</h2><p class="sub">Squads you own, ranked half on how often they hold in the current meta (${srcTxt}) and half on how they do against the attack teams ${esc(S.opp.name)} uses${users ? ` (mostly ${users})` : ''}${S.INS ? ', each with the datacron you can actually put on it and the datacron they would bring' : ''}. Kept clear of your attack plan and each other. Tap "I've set this" once it's placed.</p>
       <div class="filters"><label class="tog"><input type="checkbox" id="keepgl" ${S.keepGL ? 'checked' : ''}> Keep Galactic Legends for attack</label></div>
       ${S.defPlan.length ? `<table class="stack"><tr><th>Your defence</th><th>Holds (est.)</th><th>Evidence</th><th></th></tr>${S.defPlan.map(c => { const m = !c.useDc && c.dc && c.no ? c.no.meta : c.meta, vs = !c.useDc && c.dc && c.no ? c.no.vs : c.vs; return `<tr>
       <td>${squadH(c.squad, 'me')}</td><td>${bar(c.eff ?? c.score)}${confH({ conf: c.conf, total: c.n + c.gN + (m ? m.n : 0) })}</td>
-      <td class="sub">${dcAdvice(c)}${omiAdvice(c)}${m ? `<b>Meta: holds ${pct(m.h)} of ${kNum(m.n)}</b> (${c.metaSrc === 'ins' ? insLabel(m.scope) : c.metaSrc === 'hu' ? src : 'swgoh.gg'})<br>` : ''}${c.n ? `Held ${c.held}/${c.n} in these histories` : 'Not in these histories'}${c.myN ? ` · on your defence ${c.myHeld}/${c.myN}` : ''}${vs.slice(0, 3).map(v => `<br>vs ${esc(nm(v.lead))}${S.INS && c.dBand !== undefined ? (v.theirDc ? ' (with their datacron)' : ' (no datacron of theirs fits)') : ''}: ${v.n ? `held ${v.held}/${v.n}` : ''}${v.n && v.gN ? ' · ' : ''}${v.gN ? `${c.exactVs ? src : 'swgoh.gg, any ' + esc(nm(c.lead)) + ' team,'} ${pct(v.gHold)} of ${kNum(v.gN)}` : ''}`).join('')}</td>
+      <td class="sub">${dcAdvice(c)}${omiAdvice(c)}${metaH(c)}${c.n ? `Held ${c.held}/${c.n} in these histories` : 'Not in these histories'}${c.myN ? ` · on your defence ${c.myHeld}/${c.myN}` : ''}${vs.slice(0, 3).map(v => `<br>vs ${esc(nm(v.lead))}${S.INS && c.dBand !== undefined ? (v.theirDc ? ' (with their datacron)' : ' (no datacron of theirs fits)') : ''}: ${v.n ? `held ${v.held}/${v.n}` : ''}${v.n && v.gN ? ' · ' : ''}${v.gN ? `${c.exactVs ? src : 'swgoh.gg, any ' + esc(nm(c.lead)) + ' team,'} ${pct(v.gHold)} of ${kNum(v.gN)}` : ''}`).join('')}</td>
       <td><button class="chip" data-lock="${esc(c.squad.join(','))}">I've set this</button></td></tr>`; }).join('')}</table>`
         : '<p class="sub">No recorded defence squads you own are free. Remove some units from your defence list, or untick "Keep Galactic Legends for attack".</p>'}`;
   }
@@ -1347,8 +1392,8 @@
       <li><b>Battle plan</b> covers up to 18 of their defences (those set in at least 10% of the rounds in their two most recent seasons, or at all in the latest one). It tries every combination of your top 4 owned counters for the 9 most likely, then fills any gaps with the best counter whose units are all still free. It never reuses a unit, and leaves out everything in Your defence, fleets included. <b>Most banners</b> ranks by win chance × average banners per win.</li>
       <li><b>Your defence</b> is one list saved in this browser. Your fleet defence starts as the fleets you set in your latest season; remove ships or add a capital ship if you've changed it.</li>
       <li><b>Suggested defence</b> looks at every meta defence squad you own at R5+ (from swgoh.gg's squad meta page, or HotUtils once added), plus the squads in the two histories. Each is scored half on its meta hold %, and half on how it holds against the attack teams your opponent uses, weighted by how often they use them. Galactic Legends are left out unless you untick the switch.</li>
-      <li><b>swgoh.gg GAC Insight</b> is used automatically if you're signed in to swgoh.gg: for each of their defences and your best defence options, it reads this season's battles against that exact squad in your league and division (or your whole league if your division has under 150). Those numbers replace the all-league counters pages and squad meta. Signed out, the tool uses those instead.</li>
-      <li><b>HotUtils defence meta</b> (optional, only offered when GAC Insight isn't available): HotUtils publishes defence hold % for each league, with expired datacrons left out. Their site doesn't let bookmarks or other websites read it, so you open their data page, copy it and paste it into the box under the summary. It then replaces swgoh.gg's (all-league) hold % in the Suggested defence, and is remembered for 3 days. It covers your whole league, because HotUtils' division filter needs a login. Counters still come from swgoh.gg and the two histories.</li>
+      <li><b>swgoh.gg GAC Insight</b> is used automatically if you're signed in to swgoh.gg: for each of their defences and your 24 best free defence options (not already on your defence, and not GL teams while they're kept for attack), it reads this season's battles against that exact squad in your league and division (or your whole league if your division has under 150). Those numbers replace the all-league counters pages and squad meta. Signed out, the tool uses those instead.</li>
+      <li><b>HotUtils defence meta</b> (optional): HotUtils publishes defence hold % for each league, with expired datacrons left out. Their site doesn't let bookmarks or other websites read it, so you open their data page, copy it and paste it into the box under the summary. It's remembered for 3 days and covers your whole league, because HotUtils' division filter needs a login. With GAC Insight on, Insight's division hold % still drives the Suggested defence score and HotUtils' figure is shown beside it as a second opinion with a much bigger sample; where Insight has under 50 battles for a squad, HotUtils' figure is used instead and the line says so. Without Insight, HotUtils replaces swgoh.gg's all-league hold %. Counters never come from HotUtils.</li>
       <li><b>Their usual squad</b> for each leader is the line-up they set most, with the latest season counted 4 times and the one before twice, so a team they changed recently shows the new version.</li>
       <li><b>Zones</b> (Front top, Front bottom, Back, Fleet) are where each of their defences was placed most often, counted once per round.</li>
       <li><b>Round by round</b> lists each of their rounds: result and score, first attack time, delay from attacks opening, the attacks their defence held against, and their own failed attacks.</li>
