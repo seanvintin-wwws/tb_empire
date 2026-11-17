@@ -12,7 +12,7 @@
    - Round by round tab (from Arrikhan): result, score, first attack time and delay, their holds and their drops.
 */
 (async () => {
-  const VERSION = '2.8';
+  const VERSION = '2.8.1';
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
     alert('GAC Scout+ runs on swgoh.gg. Open https://swgoh.gg in this tab, then click the bookmark again.');
     return;
@@ -122,7 +122,7 @@
   nav button.on{background:#1b2440;color:#fff;border-bottom-color:#1b2440}
   main{padding:16px 20px 60px;max-width:1240px}h2{color:#8cc8ff;font-size:17px;margin:24px 0 8px}h3{color:#cfe3ff;font-size:14px;margin:14px 0 6px}
   .vs{display:flex;align-items:center;gap:16px}.vs b{display:block;font-size:18px}.vs small{color:#9aa6c0}.vs .v{color:#ffd166;font-weight:800}
-  .sub{color:#8f9ab5;font-size:12px;margin:4px 0}.sub a,a.lnk{color:#8cc8ff}.warn{color:#ffb86b}
+  .sub{color:#8f9ab5;font-size:12px;margin:4px 0}.sub a,a.lnk{color:#8cc8ff}.warn{color:#ffb86b}.hu{color:#8cc8ff}
   table{border-collapse:collapse;width:100%;color:inherit;font:inherit}th,td{text-align:left;vertical-align:top;padding:8px;border-bottom:1px solid #1e2742}th{color:#8cc8ff;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
   .sq{display:flex;flex-wrap:wrap;gap:4px}.u{display:inline-flex;align-items:center;gap:4px;background:#141b2e;border:1px solid #263050;border-radius:14px;padding:2px 8px 2px 2px;font-size:12px;max-width:230px}
   .u img{width:22px;height:22px;border-radius:50%}.u>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.u i{font-style:normal;font-weight:700;font-size:11px}
@@ -1257,8 +1257,15 @@
       let h = `<b>Meta: holds ${pct(m.h)} of ${kNum(m.n)}</b> (${metaLabel(m)})`;
       // insThin: Insight's battle count when it was checked and found thin (0 = none); undefined when Insight never checked this squad
       if (m.src === 'hu' && S.INS && m.insThin !== undefined) h += ` <span class="warn">· ${insLabel('div')} had ${m.insThin ? `only ${m.insThin}` : 'no'} battles for this squad, so HotUtils is used</span>`;
-      else if (m.src === 'ins' && c.hu) h += ` · ${huLabel}: ${pct(c.hu.h)} of ${kNum(c.hu.n)}`;
-      return h + '<br>';
+      h += '<br>';
+      // HotUtils on its own line under Insight's, and a flag when the two disagree by 5 points or more:
+      // a big gap usually means a small, lucky (or unlucky) Insight sample, or a datacron/omicron effect
+      if (m.src === 'ins' && c.hu) {
+        h += `<span class="hu">${huLabel}: holds ${pct(c.hu.h)} of ${kNum(c.hu.n)}</span><br>`;
+        const gap = Math.round(100 * (m.h - c.hu.h));
+        if (Math.abs(gap) >= 5) h += `<span class="warn">⚠ ${esc(metaLabel(m))} is ${Math.abs(gap)} points ${gap > 0 ? 'higher' : 'lower'} than all of ${esc(nice(S.HU.league))}${m.n < c.hu.n / 4 ? `, on far fewer battles (${kNum(m.n)} vs ${kNum(c.hu.n)})` : ''}. ${gap > 0 ? 'Check it isn\'t a lucky run before relying on it.' : 'It may hold worse than its reputation in your division.'}</span><br>`;
+      }
+      return h;
     };
     // the datacron line for a suggested defence: which of yours to put on it, or why it's rated without one
     const dcAdvice = c => c.dBand === undefined ? (S.INS ? '<span class="warn">Not split by datacron (outside the squads checked in Insight).</span><br>' : '')
