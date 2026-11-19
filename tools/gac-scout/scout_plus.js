@@ -12,13 +12,13 @@
    - Round by round tab (from Arrikhan): result, score, first attack time and delay, their holds and their drops.
 */
 (async () => {
-  const VERSION = '2.8.2';
+  const VERSION = '2.9';
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
     alert('GAC Scout+ runs on swgoh.gg. Open https://swgoh.gg in this tab, then click the bookmark again.');
     return;
   }
 
-  const SKEY = 'gacScoutPlus:settings', RKEY = 'gacScoutPlus:rounds', GKEY = 'gacScoutPlus:global';
+  const SKEY = 'gacScoutPlus:settings', RKEY = 'gacScoutPlus:rounds', GKEY = 'gacScoutPlus:global', REPKEY = 'gacScoutPlus:report';
   const DAY = 864e5, G_TTL = 3 * DAY;
 
   // ---------- small helpers ----------
@@ -157,7 +157,7 @@
   <form id="f"><label>Your ally code <input id="me" inputmode="numeric" autocomplete="off" placeholder="123-456-789"></label>
   <label>Opponent ally code <input id="opp" inputmode="numeric" autocomplete="off" placeholder="123-456-789"></label>
   <label>Format <select id="fmt"><option value="">Auto</option><option>3v3</option><option>5v5</option></select></label>
-  <button id="go">Scout</button></form>
+  <button id="go">Scout</button><button type="button" id="exp" class="chip" hidden title="Every tab as one text file, for Claude or anyone else">Export report</button></form>
   <button class="x" id="close" title="Close">✕</button></header>
   <div id="status" class="status"></div><nav id="tabs"></nav><main id="out"></main></div>`;
   const $ = s => root.querySelector(s);
@@ -399,12 +399,15 @@
   }
   const metaMap = rows => { const o = {}; (rows || []).forEach(([n, h, b, u]) => (o[sqKey(u)] = { n, h, b, u })); return o; };
 
+  let EVSTART = 0; // when the current GAC event started (from swgoh.gg's GAC config), 0 if unknown
   // ---------- swgoh.gg GAC Insight: your league and division, exact squads (needs a swgoh.gg login) ----------
   async function insightInit(fmt, me) {
     try {
       const r = await fetch('/api/v1/gac/config-data/', { credentials: 'include' });
       if (!r.ok) return null;
       const c = (await r.json()).data || {};
+      const ev = ((c.activeSeason && c.activeSeason.events) || []).find(e => e.id === c.activeEventId);
+      EVSTART = ev && Date.parse(String(ev.startTime).replace(' ', 'T')) || 0;
       const sz = fmt === '5v5' ? 5 : 3;
       const ids = c.latestBattleSeasonIdsBySquadSize || {};
       const season = ids[sz] || ids[String(sz)] || ((c.seasons || []).find(x => x.squadSize === sz) || {}).id;
@@ -1121,7 +1124,120 @@
   function show(tab) {
     $('#tabs').innerHTML = TABS.map(([k, l]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${l}</button>`).join('');
     $('#tabs').querySelectorAll('button').forEach(b => (b.onclick = () => show(b.dataset.t)));
-    const head = `<div class="vs"><div><b>${esc(S.me.name)}</b><small>${gpTxt(S.me.gp)} GP</small></div><div class="v">vs</div><div><b>${esc(S.opp.name)}</b><small>${gpTxt(S.opp.gp)} GP${S.opp.guild ? ' · ' + esc(S.opp.guild) : ''}</small></div></div>
+    const body = VIEWS[tab]();
+    $('#out').innerHTML = headH() + body;
+    wire(tab);
+    $('#exp').hidden = false;
+    saveReportSoon();
+  }
+
+  // ---------- report export: every tab as one Markdown file ----------
+  // Download it with "Export report", or read it straight from this browser: the latest report is also kept in
+  // localStorage under gacScoutPlus:report (on swgoh.gg), so a helper running in another swgoh.gg tab can pick it up.
+  const VIEWS = { plan: () => viewPlan(), defs: () => viewDefs(), atts: () => viewAtts(), rounds: () => viewRounds(), time: () => viewTime(), roster: () => viewRoster(), about: () => viewAbout() };
+  function mdOf(html) {
+    const d = document.createElement('div'); d.innerHTML = html;
+    const T = s => String(s || '').replace(/\s+/g, ' ').trim();
+    const SKIP = /^(INPUT|DATALIST|SELECT|OPTION|IMG|SCRIPT|STYLE|NAV|TEXTAREA)$/;
+    const BLOCK = 'p,div:not(.sq),table,h1,h2,h3,h4,section,ul,ol,details,li';
+    const unit = el => { const n = el.querySelector('span'), l = el.querySelector('i'); return T(`${n ? n.textContent : el.textContent} ${l ? l.textContent.replace('✕', '') : ''}`); };
+    const tidy = s => T(s).replace(/( ·)+/g, ' ·').replace(/^· |\s·$/g, '').replace(/· ·/g, '·');
+    const inline = el => {
+      let o = '';
+      el.childNodes.forEach(n => {
+        if (n.nodeType === 3) { o += n.textContent; return; }
+        if (n.nodeType !== 1) return;
+        const t = n.tagName, c = n.classList;
+        if (SKIP.test(t)) return;
+        if (c.contains('u')) { o += ` ${unit(n)} `; return; }
+        if (c.contains('sq')) { o += ` ${[...n.querySelectorAll('.u')].map(unit).join(' / ')} `; return; }
+        if (c.contains('bar')) { o += ` ${T(n.textContent)} `; return; }
+        if (t === 'BUTTON') return; // filters and actions
+        if (t === 'BR') { o += ' · '; return; }
+        const blk = /^(P|DIV|LI|H\d|SECTION|DETAILS|SUMMARY|TABLE|TR)$/.test(t);
+        o += (blk ? ' · ' : ' ') + inline(n) + (blk ? ' · ' : ' ');
+      });
+      return o;
+    };
+    const lines = [];
+    const table = tb => {
+      const rows = [...tb.querySelectorAll('tr')].map(tr => [...tr.children].map(td => tidy(inline(td)).replace(/\|/g, '/') || '–'));
+      if (!rows.length) return;
+      const w = Math.max(...rows.map(r => r.length));
+      const fix = r => '| ' + [...r, ...Array(w - r.length).fill('')].join(' | ') + ' |';
+      lines.push('', fix(rows[0]), '|' + ' --- |'.repeat(w), ...rows.slice(1).map(fix), '');
+    };
+    const block = el => {
+      el.childNodes.forEach(n => {
+        if (n.nodeType === 3) { const t = T(n.textContent); if (t) lines.push(t); return; }
+        if (n.nodeType !== 1) return;
+        const t = n.tagName, c = n.classList;
+        if (SKIP.test(t) || (t === 'BUTTON' && !c.contains('u'))) return;
+        if (/^H[1-6]$/.test(t)) { lines.push('', '#'.repeat(+t[1] + 1) + ' ' + T(n.textContent), ''); return; }
+        if (t === 'TABLE') return table(n);
+        if (t === 'SECTION') { lines.push('', '---'); block(n); return; }
+        if (t === 'UL' || t === 'OL') { [...n.children].forEach(li => lines.push('- ' + tidy(inline(li)))); return; }
+        if (t === 'SUMMARY') { lines.push(tidy(inline(n))); return; }
+        if (c.contains('sq') || c.contains('u')) { const v = tidy(inline({ childNodes: [n] })); if (v) lines.push(v); return; }
+        if (n.querySelector(BLOCK)) { block(n); return; }
+        const v = tidy(inline(n)); if (v) lines.push(v);
+      });
+    };
+    block(d);
+    return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  }
+  function reportData() {
+    const ids = a => [...a];
+    return {
+      app: 'gac-scout-plus', version: VERSION, generated: new Date().toISOString(), format: S.oppHist.fmt,
+      me: { ally: S.me.ally, name: S.me.name, gp: S.me.gp, league: S.me.league, division: S.me.division },
+      opp: { ally: S.opp.ally, name: S.opp.name, gp: S.opp.gp, guild: S.opp.guild, league: S.opp.league, division: S.opp.division },
+      insight: S.INS ? { league: S.INS.league, division: S.INS.dn || null } : null, hotutils: S.HU ? { league: S.HU.league, season: S.HU.season } : null,
+      settings: { rank: S.rank, keepGL: S.keepGL, defenceSaved: store.myDefence && store.myDefence.saved || null, eventStart: EVSTART ? new Date(EVSTART).toISOString() : null },
+      myDefence: ids(S.locked), myFleet: ids(S.fleet),
+      attackPlan: (S.plan || []).map(p => ({ their: p.d.squad, likely: p.d.likely, held: p.d.held, attacks: p.d.n, zone: zoneTxt(p.d), counter: p.pick ? p.pick.squad : null, est: p.est ?? null, clash: p.clash ? p.clash.squad : null })),
+      suggestedDefence: (S.defPlan || []).map(c => ({ squad: c.squad, holdEst: c.eff ?? c.score, conf: c.conf, datacron: c.useDc && c.dc ? T0(dcTxt(c.dc, '')) : null })),
+    };
+  }
+  const T0 = h => String(h || '').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
+  function reportMd() {
+    const keep = { filter: S.filter, ships: store.showShips };
+    S.filter = 'own'; store.showShips = true; // counters you own, fleets included
+    const parts = [`# GAC Scout+ report: ${S.me.name} vs ${S.opp.name}`, '',
+      `Generated ${new Date().toLocaleString()} by GAC Scout+ v${VERSION} on swgoh.gg. Format ${S.oppHist.fmt}. Your ally code ${fmtAlly(S.me.ally)}, opponent ${fmtAlly(S.opp.ally)}.`,
+      `Counters shown: teams you own. Attack plan ranked by: ${S.rank === 'banners' ? 'most banners' : 'best win %'}. Keep GLs for attack: ${S.keepGL ? 'yes' : 'no'}.`, '',
+      '## Summary', '', mdOf(headH())];
+    try {
+      TABS.forEach(([k, l]) => { let b; try { b = mdOf(VIEWS[k]()); } catch (e) { b = `(this tab could not be exported: ${e.message})`; } parts.push('', `# Tab: ${l}`, '', b); });
+    } finally { S.filter = keep.filter; store.showShips = keep.ships; }
+    parts.push('', '# Data (machine-readable)', '', '```json', JSON.stringify(reportData(), null, 1), '```', '');
+    return parts.join('\n');
+  }
+  let repTimer = 0;
+  function saveReportSoon() {
+    clearTimeout(repTimer);
+    repTimer = setTimeout(() => {
+      try {
+        const v = JSON.stringify({ t: Date.now(), version: VERSION, me: S.me.ally, opp: S.opp.ally, oppName: S.opp.name, md: reportMd() });
+        try { localStorage.setItem(REPKEY, v); } catch (e) { localStorage.removeItem(REPKEY); try { localStorage.setItem(REPKEY, v); } catch (e2) {} }
+      } catch (e) { console.warn('[GAC Scout+] report not saved', e); }
+    }, 1200);
+  }
+  $('#exp').onclick = async () => {
+    if (!S || !S.me) return;
+    const md = reportMd();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' }));
+    a.download = `gac-scout-${String(S.opp.name).replace(/[^\w-]+/g, '_')}-${new Date().toISOString().slice(0, 10)}.md`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    let copied = false;
+    try { await navigator.clipboard.writeText(md); copied = true; } catch (e) {}
+    status(`Report saved as ${esc(a.download)} (${Math.round(md.length / 1024)} KB, every tab)${copied ? ' and copied to the clipboard' : ''}. Upload the file, or paste it, into Claude.`);
+  };
+
+  function headH() {
+    return `<div class="vs"><div><b>${esc(S.me.name)}</b><small>${gpTxt(S.me.gp)} GP</small></div><div class="v">vs</div><div><b>${esc(S.opp.name)}</b><small>${gpTxt(S.opp.gp)} GP${S.opp.guild ? ' · ' + esc(S.opp.guild) : ''}</small></div></div>
       <p class="sub">${S.oppHist.battles.length} battles from ${S.oppHist.rounds.length} of their ${S.oppHist.fmt} rounds (seasons ${(S.oppHist.seasons || []).join(', ') || '–'}), plus ${S.myBattles} of your own attacks, blended with swgoh.gg's GAC counters page. <a href="#" data-t="about">How it works</a></p>
       ${S.autoFmt ? `<p class="sub">Format: ${S.oppHist.fmt}, from their latest finished event. swgoh.gg only lists an event once it's over, so in the first week of a new season pick the format yourself at the top.</p>` : ''}
       ${S.note ? `<p class="warn">${S.note}</p>` : ''}${S.insWarn ? `<p class="warn">${S.insWarn}</p>` : ''}
@@ -1131,9 +1247,6 @@
         : `<details class="sub"><summary>Optional: add HotUtils' ${nice(leagueName())} defence meta (whole league, live datacrons only${S.INS ? '; shown beside Insight and used where Insight is thin' : ''})</summary>
         <p>1. <a class="lnk" href="${esc(huUrl())}" target="_blank" rel="noopener">Open HotUtils' ${nice(leagueName())} ${S.oppHist.fmt} defence data</a> (a page of raw text).<br>2. On that page press <b>Ctrl+A</b> then <b>Ctrl+C</b> (on a Mac, Cmd).<br>3. Paste it here: <input id="hupaste" placeholder="Paste here" autocomplete="off"></p>
         <p>It's remembered for 3 days, so you only do this once per event.</p></details>`}`;
-    const body = { plan: viewPlan, defs: viewDefs, atts: viewAtts, rounds: viewRounds, time: viewTime, roster: viewRoster, about: viewAbout }[tab]();
-    $('#out').innerHTML = head + body;
-    wire(tab);
   }
 
   function persistAndReplan(tab = 'plan') {
@@ -1187,6 +1300,12 @@
       const v = add.value.trim().toLowerCase();
       const u = Object.values(S.me.units).find(x => nm(x.id).toLowerCase() === v);
       if (!u) return;
+      if (S.locked.has(u.id) || S.fleet.has(u.id)) {
+        add.value = '';
+        const chipEl = out.querySelector(`[data-unlock="${CSS.escape(u.id)}"],[data-unfleet="${CSS.escape(u.id)}"]`);
+        if (chipEl) { chipEl.scrollIntoView({ block: 'center' }); chipEl.style.outline = '2px solid #ffd166'; setTimeout(() => (chipEl.style.outline = ''), 2500); }
+        return status(`${esc(nm(u.id))} is already on your defence. Tap ✕ on it to take it off.`);
+      }
       const ids = usualSquad(u.id);
       ids.forEach(id => (SHIP[id] ? S.fleet : S.locked).add(id));
       if (ids.some(id => SHIP[id])) fleetEdited();
@@ -1210,15 +1329,23 @@
 
   function viewMyDefence() {
     const isLead = u => !!(S.myDefByLead[u.id] || (CAP[u.id] && S.myFleetByCap[u.id]));
-    const mine = Object.values(S.me.units).filter(u => !S.locked.has(u.id) && !S.fleet.has(u.id)).sort((a, b) => isLead(b) - isLead(a) || b.power - a.power);
+    const placed = u => S.locked.has(u.id) || S.fleet.has(u.id);
+    const mine = Object.values(S.me.units).sort((a, b) => placed(a) - placed(b) || isLead(b) - isLead(a) || b.power - a.power);
     const saved = store.myDefence && store.myDefence.saved && S.locked.size ? ` Last changed ${esc(when(store.myDefence.saved))}.` : '';
     const chip = (id, attr) => `<button class="u lk" ${attr}="${esc(id)}" title="Remove">${IMG[id] ? `<img src="${esc(IMG[id])}" alt="">` : ''}<span>${esc(nm(id))}</span><i class="me">${lv(S.me.units[id])}</i> ✕</button>`;
     const any = S.locked.size || S.fleet.size;
+    const size = S.oppHist.fmt === '5v5' ? 5 : 3, maxSq = size === 5 ? 12 : 16;
+    const chars = [...S.locked].filter(id => S.me.units[id] && !S.me.units[id].ship).length;
+    const savedT = store.myDefence && store.myDefence.saved ? Date.parse(store.myDefence.saved) : 0;
+    const stale = [];
+    if (chars > maxSq * size) stale.push(`It has ${chars} characters, about ${Math.round(chars / size)} squads of ${size}: more than a GAC defence holds.`);
+    if (S.locked.size && EVSTART && savedT && savedT < EVSTART) stale.push(`It was last changed before this GAC event started.`);
+    const staleH = stale.length ? `<p class="warn">⚠ This list looks left over from an earlier event. ${stale.join(' ')} Everything on it is kept out of the attack plan and the suggested defence, so the plan will be wrong until it's fixed: press <b>Clear all</b>, then add this round's teams.</p>` : '';
     return `<h2>Your defence</h2><p class="sub">Pick a leader and the team you usually set with it is added. Tap ✕ on any unit to correct it, or add single units. The attack plan won't use them.</p>
       <p class="sub">Saved in this browser (one list, not per opponent), so it carries over to rounds 2 and 3. Use <b>Save to file</b> to move it to another device, and <b>Clear all</b> when a new GAC event starts.${saved}</p>
-      <div class="picker"><input id="addu" list="myunits" placeholder="Add a unit or ship…" autocomplete="off"><datalist id="myunits">${mine.map(u => `<option value="${esc(nm(u.id))}">${lv(u)}${u.ship ? (CAP[u.id] ? ' · adds your usual fleet' : ' · ship') : S.myDefByLead[u.id] ? ' · adds your usual team' : ''}</option>`).join('')}</datalist>
+      <div class="picker"><input id="addu" list="myunits" placeholder="Add a unit or ship…" autocomplete="off"><datalist id="myunits">${mine.map(u => `<option value="${esc(nm(u.id))}">${lv(u)}${placed(u) ? ' · already on your defence' : u.ship ? (CAP[u.id] ? ' · adds your usual fleet' : ' · ship') : S.myDefByLead[u.id] ? ' · adds your usual team' : ''}</option>`).join('')}</datalist>
       ${any ? '<button class="chip" data-act="export">Save to file</button>' : ''}<button class="chip" data-act="import">Load from file</button><input type="file" id="impfile" accept=".json,application/json" hidden>${S.locked.size || store.myFleet ? '<button class="chip" data-act="clear">Clear all</button>' : ''}</div>
-      <div class="sq locked">${[...S.locked].map(id => chip(id, 'data-unlock')).join('') || '<span class="sub">No squads added yet.</span>'}</div>
+      ${staleH}<div class="sq locked">${[...S.locked].map(id => chip(id, 'data-unlock')).join('') || '<span class="sub">No squads added yet.</span>'}</div>
       <details id="fleetbox" ${S.fleetOpen ? 'open' : ''}><summary><b>Fleet defence:</b> ${[...S.fleet].filter(id => CAP[id]).map(nm).map(esc).join(', ') || (S.fleet.size ? S.fleet.size + ' ships' : 'none')} <span class="sub">(${store.myFleet ? 'edited by you' : 'from your latest season'}; tap to change)</span></summary>
       <p class="sub">Tap ✕ to remove a ship, or add a capital ship in the box above to add its usual fleet. These ships are kept out of the attack plan.${store.myFleet ? ' <button class="chip" data-act="fleetreset">Reset from my history</button>' : ''}</p>
       <div class="sq locked">${[...S.fleet].map(id => chip(id, 'data-unfleet')).join('') || '<span class="sub">No ships.</span>'}</div></details>`;
@@ -1407,7 +1534,8 @@
       <li><b>Est. for you</b> starts from the swgoh.gg win rate (counted as up to 30 battles), adds the battles in your two histories on top, then nudges ±4% per relic level your counter is above or below their defence, capped at ±12%. With no swgoh.gg data it falls back to a 50/50 start worth two battles. Fleets get no relic adjustment.</li>
       <li><b>Data label</b> counts both sources: solid = 20+ battles, some = 6 to 19, thin = 5 or fewer.</li>
       <li><b>Battle plan</b> covers up to 18 of their defences (those set in at least 10% of the rounds in their two most recent seasons, or at all in the latest one). It tries every combination of your top 4 owned counters for the 9 most likely, then fills any gaps with the best counter whose units are all still free. It never reuses a unit, and leaves out everything in Your defence, fleets included. <b>Most banners</b> ranks by win chance × average banners per win.</li>
-      <li><b>Your defence</b> is one list saved in this browser. Your fleet defence starts as the fleets you set in your latest season; remove ships or add a capital ship if you've changed it.</li>
+      <li><b>Export report</b> (top bar) saves every tab as one text file (Markdown, with a machine-readable summary at the end) and copies it to the clipboard, ready to give to Claude or a guildmate. The latest report is also kept in this browser's storage for swgoh.gg.</li>
+      <li><b>Your defence</b> is one list saved in this browser. The unit box lists every unit you own; ones already on your defence are marked, and choosing one shows where it is. If the list has more teams than a GAC defence holds, or was last changed before the current event started, a warning says so: press Clear all and add this round's teams. Your fleet defence starts as the fleets you set in your latest season; remove ships or add a capital ship if you've changed it.</li>
       <li><b>Suggested defence</b> looks at every meta defence squad you own at R5+ (from swgoh.gg's squad meta page, or HotUtils once added), plus the squads in the two histories. Each is scored half on its meta hold %, and half on how it holds against the attack teams your opponent uses, weighted by how often they use them. Galactic Legends are left out unless you untick the switch.</li>
       <li><b>swgoh.gg GAC Insight</b> is used automatically if you're signed in to swgoh.gg: for each of their defences and your 24 best free defence options (not already on your defence, and not GL teams while they're kept for attack), it reads this season's battles against that exact squad in your league and division (or your whole league if your division has under 150). Those numbers replace the all-league counters pages and squad meta. Signed out, the tool uses those instead.</li>
       <li><b>HotUtils defence meta</b> (optional): HotUtils publishes defence hold % for each league, with expired datacrons left out. Their site doesn't let bookmarks or other websites read it, so you open their data page, copy it and paste it into the box under the summary. It's remembered for 3 days and covers your whole league, because HotUtils' division filter needs a login. With GAC Insight on, Insight's division hold % still drives the Suggested defence score and HotUtils' figure is shown beside it as a second opinion with a much bigger sample; where Insight has under 50 battles for a squad, HotUtils' figure is used instead and the line says so. Without Insight, HotUtils replaces swgoh.gg's all-league hold %. Counters never come from HotUtils.</li>
