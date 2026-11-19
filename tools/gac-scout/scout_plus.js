@@ -1456,7 +1456,7 @@
       S.defOpen = true;
       persistAndReplan(tab);
       const r = L.round;
-      status(`Loaded ${L.squads.length} squad${L.squads.length === 1 ? '' : 's'}${L.ships.length ? ` and ${L.ships.length} ships` : ''} from your defence in ${r.season ? `season ${r.season} round ${r.rn}` : 'your latest round'}${r.foe ? ` vs ${esc(r.foe)}` : ''}. swgoh.gg only records defences that were attacked: add any squad that's missing, and tap ✕ on anything you've changed since.`);
+      status(`Loaded ${L.squads.length} squad${L.squads.length === 1 ? '' : 's'}${L.ships.length ? ` and ${L.ships.length} ships` : ''} from your defence in ${r.season ? `season ${r.season} round ${r.rn}` : 'a recent round'}${r.foe ? ` vs ${esc(r.foe)}` : ''} (your most recent round on swgoh.gg where most of your defence was attacked). swgoh.gg only records defences that were attacked: add any squad that's missing, and tap ✕ on anything you've changed since.`);
     }));
     out.querySelectorAll('[data-act="clear"]').forEach(b => (b.onclick = () => { S.defSq = []; fleetReset(); persistAndReplan(tab); }));
     out.querySelectorAll('[data-zone]').forEach(sel => (sel.onchange = () => { const z = (store.defZones = store.defZones || {}); if (sel.value) z[sel.dataset.zone] = sel.value; else delete z[sel.dataset.zone]; save(); S.defOpen = true; try { packageSim(S); } catch (e) {} show(tab); }));
@@ -1531,13 +1531,19 @@
   }
 
   const ZONES3 = ['Front top', 'Front bottom', 'Back'];
-  // your defence in your latest round on swgoh.gg: squads (leader first), their zones, and your fleet. swgoh.gg lists a
-  // round once its event is over, and only records defences that were attacked, so a squad nobody attacked is missing.
+  // your defence from your recent rounds on swgoh.gg: squads (leader first), their zones, and your fleet. swgoh.gg lists a
+  // round once its event is over, and only records defences that were attacked (an opponent who barely attacked leaves
+  // almost nothing), so it takes the round from your last two events where the most of your defence was recorded.
   function lastRoundDefence() {
     const defB = S.myHist.battles.filter(b => b.side === 'DEF');
     if (!defB.length) return null;
-    const rk = r => { const m = String(r || '').match(/O(\d+)\/(\d)\//); return m ? +m[1] + +m[2] : 0; };
-    const last = defB.reduce((a, b) => (rk(b.r) > rk(a) ? b.r : a), defB[0].r);
+    const rp = r => { const m = String(r || '').match(/O(\d+)\/(\d)\//); return m ? [+m[1], +m[2]] : [0, 0]; };
+    const evs = [...new Set(defB.map(b => rp(b.r)[0]))].sort((a, b) => b - a).slice(0, 2);
+    const cnt = {};
+    defB.filter(b => evs.includes(rp(b.r)[0]) && !SHIP[b.def[0]]).forEach(b => (cnt[b.r] = cnt[b.r] || new Set()).add(b.def[0]));
+    const order = r => rp(r)[0] + rp(r)[1];
+    const last = Object.keys(cnt).sort((a, b) => cnt[b].size - cnt[a].size || order(b) - order(a))[0];
+    if (!last) return null;
     const byLead = {}, ships = new Set();
     defB.filter(b => b.r === last).forEach(b => {
       const L = b.def[0];
@@ -1580,10 +1586,10 @@
     const chunks = S.defSq || [];
     const nSq = myDefSquads().length;
     const open = S.defOpen ?? (!S.locked.size || stale.length > 0);
-    return `<h2>Your defence</h2>${staleH}${part.length ? `<p class="warn">⚠ ${part.map(q => esc(q.map(nm).join(' / '))).join('; ')}: not a full squad of ${size}, so not counted as a defence team (no datacron, not in the brief). Add a unit to it, or remove it.</p>` : ''}<details id="defbox"${open ? ' open' : ''}><summary><b>${S.locked.size ? `${nSq} squad${nSq === 1 ? '' : 's'} (${chars} characters)` : 'Nothing set yet'}</b> · fleet: ${[...S.fleet].filter(id => CAP[id]).map(nm).map(esc).join(', ') || 'none'} <span class="sub">(tap to ${open ? 'hide' : 'show and edit'})</span></summary><p class="sub"><b>Fill from my last round</b> loads the defence you set in your latest round on swgoh.gg (squads, zones and fleet); then tap ✕ on anything you've changed. Or pick a leader and the team you usually set with it is added. Tap ✕ on any unit to correct it, or add single units. The attack plan won't use them.</p>
+    return `<h2>Your defence</h2>${staleH}${part.length ? `<p class="warn">⚠ ${part.map(q => esc(q.map(nm).join(' / '))).join('; ')}: not a full squad of ${size}, so not counted as a defence team (no datacron, not in the brief). Add a unit to it, or remove it.</p>` : ''}<details id="defbox"${open ? ' open' : ''}><summary><b>${S.locked.size ? `${nSq} squad${nSq === 1 ? '' : 's'} (${chars} characters)` : 'Nothing set yet'}</b> · fleet: ${[...S.fleet].filter(id => CAP[id]).map(nm).map(esc).join(', ') || 'none'} <span class="sub">(tap to ${open ? 'hide' : 'show and edit'})</span></summary><p class="sub"><b>Fill from my last round</b> loads your defence from your most recent round on swgoh.gg where most of it was attacked (squads, zones and fleet); then tap ✕ on anything you've changed. Or pick a leader and the team you usually set with it is added. Tap ✕ on any unit to correct it, or add single units. The attack plan won't use them.</p>
       <p class="sub">Saved in this browser (one list, not per opponent), so it carries over to rounds 2 and 3. Use <b>Save to file</b> to move it to another device, and <b>Clear all</b> when a new GAC event starts.${saved}</p>
       <div class="picker"><input id="addu" list="myunits" placeholder="Add a unit or ship…" autocomplete="off"><datalist id="myunits">${mine.map(u => `<option value="${esc(nm(u.id))}">${lv(u)}${placed(u) ? ' · already on your defence' : u.ship ? (CAP[u.id] ? ' · adds your usual fleet' : ' · ship') : S.myDefByLead[u.id] ? ' · adds your usual team' : ''}</option>`).join('')}</datalist>
-      <button class="chip" data-act="filllast" title="Replace this list with the defence you set in your latest round on swgoh.gg">Fill from my last round</button>${any ? '<button class="chip" data-act="export">Save to file</button>' : ''}<button class="chip" data-act="import">Load from file</button><input type="file" id="impfile" accept=".json,application/json" hidden>${S.locked.size || store.myFleet ? '<button class="chip" data-act="clear">Clear all</button>' : ''}</div>
+      <button class="chip" data-act="filllast" title="Replace this list with your defence from your most recent round on swgoh.gg where most of it was recorded">Fill from my last round</button>${any ? '<button class="chip" data-act="export">Save to file</button>' : ''}<button class="chip" data-act="import">Load from file</button><input type="file" id="impfile" accept=".json,application/json" hidden>${S.locked.size || store.myFleet ? '<button class="chip" data-act="clear">Clear all</button>' : ''}</div>
       ${chunks.length ? `<p class="sub">Set each squad's zone so the Decision brief knows where it is (otherwise it guesses from the last round it was attacked).</p><div class="dgrid">${chunks.map(c => { const k = ldKey(c), z = (store.defZones || {})[k] || ''; return `<div class="dsq">${c.map(id => chip(id, 'data-unlock')).join('')}${c.length === size ? `<select data-zone="${esc(k)}"><option value="">Zone…</option>${ZONES3.map(x => `<option${x === z ? ' selected' : ''}>${x}</option>`).join('')}</select>` : ''}</div>`; }).join('')}</div>` : '<p class="sub">No squads added yet.</p>'}
       <details id="fleetbox" ${S.fleetOpen ? 'open' : ''}><summary><b>Fleet defence:</b> ${[...S.fleet].filter(id => CAP[id]).map(nm).map(esc).join(', ') || (S.fleet.size ? S.fleet.size + ' ships' : 'none')} <span class="sub">(${store.myFleet ? 'edited by you' : 'from your latest season'}; tap to change)</span></summary>
       <p class="sub">Tap ✕ to remove a ship, or add a capital ship in the box above to add its usual fleet. These ships are kept out of the attack plan.${store.myFleet ? ' <button class="chip" data-act="fleetreset">Reset from my history</button>' : ''}</p>
@@ -1816,16 +1822,17 @@
     if (!R.mine.length) return `<p class="sub">No defence saved yet. Press <b>Fill from my last round</b> under Your defence (Battle plan tab) to get a keep/remove review.</p>` + attackShortH();
     const decM = c => (!c.onDef && c.dc && c.useDc !== true && c.no ? c.no.meta : c.meta);
     const srcName = m => (m.src === 'ins' ? insLabel(m.scope) : m.src === 'hu' ? 'HotUtils' : 'swgoh.gg');
+    // the three hold % side by side (swgoh.gg's all-league page usually sits a few points lower than your league, so
+    // only a 10-point gap between Insight and HotUtils, the two league-level sources, is flagged)
     const agree = c => {
-      const l = metaList(c).map(m => m.h);
-      if (l.length < 2) return '<span class="sub">one source</span>';
-      const lo = Math.min(...l), hi = Math.max(...l);
-      return hi - lo < 0.05 ? '<span class="me">✓ agree</span>' : `<span class="warn">⚠ differ ${pct(lo)}–${pct(hi)}</span>`;
+      const i = insEff(c), hu = c.hu, f = m => (m ? pct(m.h) : '–');
+      const gap = i && hu && Math.abs(i.h - hu.h) >= 0.1;
+      return `${f(i)} · ${f(hu)} · ${f(c.sg)}${gap ? ' <span class="warn">⚠ league sources differ</span>' : ''}`;
     };
     const zoneOf = c => { const e = zs['@' + ldKey(c.squad)] || zs[c.squad[0]]; return e ? esc(e.zone) + (e.saved ? '' : ' <small>(guess)</small>') : '–'; };
     const dcOf = c => (c.onDef ? (c.dc ? dcNo(c.dc.dc) : '–') : c.useDc && c.dc ? dcNo(c.dc.dc) : '–');
     const line = (c, v, cls, zFrom = c) => { const m = decM(c); return `<tr><td><b class="${cls}">${v}</b></td><td>${squadH(c.squad, 'me')}</td><td>${zoneOf(zFrom)}</td><td>${dcOf(c)}</td><td>${m ? `${pct(m.h)} <small>${esc(srcName(m))}, ${kNum(m.n)} battles</small>${m.n < 20 ? ' <span class="warn">⚠ thin</span>' : ''}` : '–'}</td><td>${agree(c)}</td></tr>`; };
-    let h = `<table class="stack"><tr><th></th><th>Squad</th><th>Zone</th><th>Datacron</th><th>Hold %</th><th>3 sources</th></tr>
+    let h = `<table class="stack"><tr><th></th><th>Squad</th><th>Zone</th><th>Datacron</th><th>Deciding hold %</th><th>${S.INS ? esc(insLabel('div')).replace('swgoh.gg ', '') : 'Insight'} · HotUtils · all leagues</th></tr>
       ${R.mine.map(c => (R.outSet.has(c) ? line(c, 'REMOVE', 'warn') : line(c, 'KEEP', 'me'))).join('')}${R.swaps.map(x => line(x.in, 'ADD', 'me', x.out)).join('')}</table>`;
     h += R.swaps.length ? R.swaps.map(x => `<p>Swap <b>${esc(x.out.squad.map(nm).join(' / '))}</b> for <b>${esc(x.in.squad.map(nm).join(' / '))}</b>.</p>`).join('') : '<p><b class="me">No swaps.</b></p>';
     const P = S.pkg;

@@ -112,15 +112,18 @@ test('ticking their actual defence makes the attack plan use exactly those teams
   assert.deepStrictEqual(plain(S.plan.map(p => p.d.lead)), ['A1', 'B1']);
 });
 
-test('fill from my last round takes the latest round only, leader first, with zones and fleet', () => {
+test('fill from my last round takes the recent round with the most of your defence recorded, leader first, with zones and fleet', () => {
   const T = load();
   const ids = ['P1', 'P2', 'P3', 'Q1', 'Q2', 'Q3', 'R1', 'R2', 'R3'];
   const S = mkS(T, { mine: [...ids.map(id => unit(id)), unit('CAPSHIP', { ship: true }), unit('SHIPB', { ship: true })] });
   T.SHIP.CAPSHIP = 1; T.SHIP.SHIPB = 1; T.CAP.CAPSHIP = 1;
   const b = (r, def, zone) => ({ side: 'DEF', r, def, zone, zn: 4, att: ['X'], win: true });
-  const old = '/p/1/gac-history/O1000/3/', last = '/p/1/gac-history/O2000/1/';
-  S.myHist.battles = [b(old, ['R1', 'R2', 'R3'], 0), b(last, ['P1', 'P2', 'P3'], 0), b(last, ['Q1', 'Q2', 'Q3'], 3), b(last, ['Q1', 'Q2', 'Q3'], 3), b(last, ['CAPSHIP', 'SHIPB'], 2)];
-  S.myHist.rounds = [{ h: last, season: 85, rn: 1, foe: 'Someone' }];
+  // three events: the oldest has the fullest round, but only the last two events count
+  const oldest = '/p/1/gac-history/O500/1/', old = '/p/1/gac-history/O1000/3/', r2 = '/p/1/gac-history/O2000/2/', r3 = '/p/1/gac-history/O2000/3/';
+  S.myHist.battles = [b(oldest, ['R1', 'R2', 'R3'], 0), b(oldest, ['P1', 'P2', 'P3'], 0), b(oldest, ['Q1', 'Q2', 'Q3'], 0), b(old, ['R1', 'R2', 'R3'], 0),
+    b(r2, ['P1', 'P2', 'P3'], 0), b(r2, ['Q1', 'Q2', 'Q3'], 3), b(r2, ['Q1', 'Q2', 'Q3'], 3), b(r2, ['CAPSHIP', 'SHIPB'], 2),
+    b(r3, ['R1', 'R2', 'R3'], 1)]; // their last opponent barely attacked
+  S.myHist.rounds = [{ h: r2, season: 85, rn: 2, foe: 'Someone' }];
   const L = T.lastRoundDefence();
   assert.deepStrictEqual(plain(L.squads), [['P1', 'P2', 'P3'], ['Q1', 'Q2', 'Q3']]);
   assert.strictEqual(L.zones[T.ldKey(['P1', 'P2', 'P3'])], 'Front top');
@@ -167,7 +170,7 @@ test('decision brief: short view, no expiry column, warnings only in the export'
   T.setExporting(false);
   T.store.briefShort = true;
   const short = T.viewBrief();
-  assert.ok(short.includes('3 sources') && short.includes('KEEP'), 'short view has one line per squad');
+  assert.ok(short.includes('HotUtils · all leagues') && short.includes('KEEP'), 'short view has one line per squad');
   assert.ok(!short.includes('Defence as a package'));
 });
 
