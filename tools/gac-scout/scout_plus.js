@@ -1302,7 +1302,7 @@
       `- "${sgLabel()}" = the swgoh.gg squads page (https://swgoh.gg/gac/squads/?sort=percent), all leagues, this season.`,
       '- "in these histories" = battles from the two players\' own GAC histories; "you N/M" = ' + me + '\'s own record.',
       '- "held X%" / "Holds" = how often a defence held (attacker did not win). "Est. win for you" / "Est. for you" = estimated chance that ' + me + '\'s counter wins. "solid / some / thin data" = 20+ / 6-19 / 5 or fewer battles.', '',
-      'Start with the "Decision brief" tab: it lists how many defence slots each zone has, a keep/remove/add review of the current defence on all three sources, the final line-up, where each datacron goes, a short attack plan and the known gaps. Use the other tabs to check or explain it.', '',
+      'Start with the "Decision brief" tab: it has a keep/remove/add review of the current defence on all three sources, the final line-up, where each datacron goes, a short attack plan and the known gaps. Use the other tabs to check or explain it.', '',
       'Rules to follow:',
       '1. Defence: recommend teams by hold % on ALL THREE sources above, for the exact squad in the exact lead order (leader listed first). The same units under a different leader hold differently; a ⚠ line says when another order holds better.',
       '2. Then check the opponent: the "Their attacks" tab shows the attack teams ' + opp + ' uses and what they beat or lost to. Prefer defences their main attackers struggle against.',
@@ -1311,8 +1311,8 @@
       '5. Flag any number based on fewer than about 20 battles. "95% range A–B%" covers sample size only (Wilson interval), not differences in meta, rosters or mods.',
       '6. Counters: use only the counters listed for each defence. Do not invent counters or work out kill/target orders from unit abilities; say if there is no data.',
       `7. "Your defence" is what ${me} has already set${S.locked.size ? '' : ' (empty: nothing set yet)'}. Units on it are kept out of the attack plan and the suggested defence.`, '',
-      '8. Give exactly as many defence squads and fleets as the brief\'s slot table says, and keep each squad in the zone the brief\'s line-up gives (zones marked "from history" are a guess: tell the player to check them). Datacrons are numbered #N so same-named copies can be told apart.',
-      '9. For every defence you recommend, show how it does against the opponent\'s main attackers (brief, section 2), and use "Defence as a package" (2b) to check the whole set, not just each squad.',
+      '8. Give the same number of defence squads and fleets per zone as the brief\'s line-up, and keep each squad in the zone it gives (zones marked "from history" are a guess: tell the player to check them). Datacrons are numbered #N so same-named copies can be told apart.',
+      '9. For every defence you recommend, show how it does against the opponent\'s main attackers (brief, section 1), and use "Defence as a package" (section 2) to check the whole set, not just each squad.',
       ...(compact ? ['10. This short version leaves out: the "How it works" and "When they attack" tabs, counters past the top 4 per defence, spare datacrons and the full list of owned squads. Say so if a question needs them.'] : []), '',
       'Good questions to answer: "Which defence teams should I set, and in what lead order?", "Is any of my current defence weak against this opponent, and what should replace it?", "For each of their likely defences, what should I attack with?"', ''].join('\n');
   }
@@ -1585,7 +1585,7 @@
     const ev = r => !r.att ? '<div class="sub">squad\'s overall estimate</div>' : r.n + r.gN ? `<div class="sub">from ${[r.n ? `${r.n} battle${r.n === 1 ? '' : 's'} here` : '', r.gN ? `${kNum(r.gN)} league battles` : ''].filter(Boolean).join(' + ')}${r.n + r.gN < 20 ? ' <span class="warn">⚠ thin</span>' : ''}</div>` : '<div class="sub warn">no battles between these teams: estimated from the meta</div>';
     const tbl = x => `<table class="stack"><tr><th>Your squad</th><th>Likely attacked by</th><th>Holds</th></tr>${x.rows.map(r => `<tr><td>${squadH(r.c.squad, 'me')}</td><td>${r.att ? squadH(r.att.squad, 'opp') : '<span class="sub">other teams</span>'}</td><td>${r.hold < 0.01 ? 'under 1%' : pct(r.hold)}${r.hold < 0.15 ? ' <span class="warn">weak spot</span>' : ''}${ev(r)}</td></tr>`).join('')}</table>`;
     const worse = P.rec && P.rec.exp < P.cur.exp - 0.05, gain = P.rec ? P.rec.exp - P.cur.exp : 0;
-    return `<h3>2b. Defence as a package</h3><p class="sub">${esc(S.opp.name)}'s ${P.atts.length} known attack teams (leaving out units they need for their usual defence), each sent at the squad of yours it does best against. One attack per squad; second attempts and teams they haven't shown aren't modelled.</p>
+    return `<h3>2. Defence as a package</h3><p class="sub">${esc(S.opp.name)}'s ${P.atts.length} known attack teams (leaving out units they need for their usual defence), each sent at the squad of yours it does best against. One attack per squad; second attempts and teams they haven't shown aren't modelled.</p>
       <p>Expected holds: <b>${P.cur.exp.toFixed(1)}</b> with your current defence${P.rec ? `, <b>${P.rec.exp.toFixed(1)}</b> with the swaps above` : ''} (out of ${P.cur.rows.length}). ${P.cur.base ? `<small>${P.cur.base.toFixed(1)} of that is squads none of their known attack teams reach, at their overall meta hold %.</small>` : ''}</p>
       ${worse ? '<p class="warn">The swaps look worse once their attackers are matched up: consider keeping your current defence.</p>' : P.rec && gain < 0.5 ? `<p class="sub"><b>Small gain</b> (+${gain.toFixed(1)} expected holds, under the 0.5 this tool treats as meaningful), so keeping your current defence is just as reasonable.</p>` : ''}
       ${tbl(P.rec && !worse ? P.rec : P.cur)}`;
@@ -1594,12 +1594,7 @@
     const me = S.me.name, opp = S.opp.name, sl = slotCounts(), zs = myZones(), R = S.review || defReview();
     const top2 = S.atts.filter(a => !SHIP[a.lead]).slice(0, 2), zOrder = ['Front top', 'Front bottom', 'Back', 'Fleet'];
     const zSort = (a, b) => (zOrder.indexOf(a) + 1 || 9) - (zOrder.indexOf(b) + 1 || 9);
-    const nSq = Object.entries(sl.zones).filter(([z]) => z !== 'Fleet').reduce((a, [, n]) => a + n, 0), nFl = sl.zones.Fleet || 0;
     let h = `<h2>Decision brief</h2><p class="sub">Everything needed for the defence decision on one page. The other tabs have the detail.</p>`;
-    // 1. slots
-    h += `<h3>1. Defence slots</h3>${Object.keys(sl.zones).length ? `<table class="stack"><tr><th>Zone</th><th>Squads</th></tr>${Object.entries(sl.zones).sort((a, b) => zSort(a[0], b[0])).map(([z, n]) => `<tr><td>${esc(z)}</td><td>at least ${n}</td></tr>`).join('')}<tr><td><b>Total</b></td><td><b>at least ${nSq} squads + ${nFl} fleet${nFl === 1 ? '' : 's'}</b></td></tr></table>
-      <p class="sub">The most different defences seen in each zone in one round this season, from both players' histories (${sl.rounds} rounds). Defences that were never attacked aren't recorded, so the real count can be higher: check the game.</p>
-      ${myDefSquads().length && nSq && myDefSquads().length !== nSq ? `<p class="warn">Your saved defence has ${myDefSquads().length} squads; the histories show at least ${nSq} slots.</p>` : ''}` : '<p class="sub">No zone data in the histories.</p>'}`;
     // 2. review
     const oppCheck = c => top2.map(a => {
       const v = effVs(c).find(x => x.lead === a.lead);
@@ -1609,7 +1604,7 @@
     }).join('');
     const dcNote = c => (c.onDef ? (c.dc ? `<div class="sub">suggested: your ${dcNo(c.dc.dc)} ${dcTxt(c.dc, '')}</div>` : '<div class="sub">no datacron</div>') : c.useDc && c.dc ? `<div class="sub">put your ${dcNo(c.dc.dc)} ${dcTxt(c.dc, '')} on it</div>` : c.dc ? '<div class="sub">rated without a datacron (yours is used elsewhere)</div>' : '<div class="sub">no datacron</div>');
     const row = (c, verdict, cls) => `<tr><td><b class="${cls}">${verdict}</b></td><td>${squadH(c.squad, 'me')}${dcNote(c)}${verdict === 'ADD' && c.hasGL ? '<div class="sub warn">puts a Galactic Legend on defence</div>' : ''}</td><td>${bar(effS(c))}</td><td>${srcF(c.sg)}</td><td>${srcF(c.hu)}</td><td>${srcF(insEff(c))}</td><td>${oppCheck(c) || '–'}</td></tr>`;
-    h += `<h3>2. Your defence: keep, remove, add</h3>`;
+    h += `<h3>1. Your defence: keep, remove, add</h3>`;
     if (!R.mine.length) h += `<p class="sub">No defence saved yet. Add your placed defence at the top of the Battle plan tab to get a keep/remove review. Best squads to set are under Suggested defence.</p>`;
     else {
       h += `<p class="sub">Score = a ranking guide, roughly an estimated hold against ${esc(opp)}: half the meta hold % (${S.INS ? insLabel('div') : S.HU ? 'HotUtils' : 'swgoh.gg'}), half how it does against the attack teams ${esc(opp)} uses. A squad is only swapped when the replacement scores at least 3 points higher, holds at least as well on the meta sources, and the hold % driving its score has 20+ battles. Keep Galactic Legends for attack: <b>${S.keepGL ? 'on' : 'off'}</b>.</p>
@@ -1896,7 +1891,7 @@
       <li><b>Battles</b>: both players' GAC histories on swgoh.gg (up to 8 seasons, same format), plus swgoh.gg's counters page for each defence. Exact-squad data is used where it has 20+ battles, otherwise any team with that leader. Format: Auto uses their latest finished event; early in a season, pick it yourself.</li>
       <li><b>Est. for you</b>: swgoh.gg win rate (worth up to 30 battles) plus your two histories, ±4% per relic level vs their team (max ±12%). Data labels: solid 20+, some 6–19, thin 5 or fewer battles.</li>
       <li><b>Battle plan</b>: up to 18 of their likely defences; every combination of your top 4 counters for the 9 most likely, then the best free counter for the rest. No unit reused; nothing on Your defence used. Most banners = win chance × banners per win.</li>
-      <li><b>Decision brief</b>: slots per zone (a minimum: only attacked defences are recorded), keep/remove/add (a swap needs +3 points, an equal or better meta hold % and 20+ battles behind its score), line-up by zone (set zones under Your defence), datacrons (#N), short attack plan, gaps. <b>Defence as a package</b> sends each of their attack teams at the squad it beats most easily (Hungarian method, one attack per squad).</li>
+      <li><b>Decision brief</b>: keep/remove/add (a swap needs +3 points, an equal or better meta hold % and 20+ battles behind its score), line-up by zone (set zones under Your defence), datacrons (#N), short attack plan, gaps. <b>Defence as a package</b> sends each of their attack teams at the squad it beats most easily (Hungarian method, one attack per squad).</li>
       <li><b>Suggested defence</b>: meta squads you own at R5+ plus squads from the histories, scored half on meta hold %, half against the attack teams they use. A ranking guide, not a calibrated chance. GLs left out while the switch is on.</li>
       <li><b>Three hold-% sources</b>, always exact squad, leader first: swgoh.gg GAC Insight (your league and division, whole league if under 150 battles; needs a swgoh.gg login), HotUtils (pasted, whole league, live datacrons; kept 3 days) and the swgoh.gg squads page (all leagues). ⚠ marks a better lead order. Counters never come from HotUtils.</li>
       <li><b>Datacrons</b> (with Insight): a datacron counts for a squad by alignment (tier 3), faction (6) or a named character (9). Each of your defence squads gets one (character matches first), never shared and kept out of attacks; the rest go to attacks, then the suggested defence. Theirs go to their likely defences, then attack teams. Thin splits fall back to all datacrons and say so.</li>
