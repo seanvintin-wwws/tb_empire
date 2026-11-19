@@ -41,7 +41,7 @@
 		<img class="mission"
 		v-for="mission in missions" 
 		v-bind:key="mission.name" 
-		v-bind:class="mission.name"
+		v-bind:class="[mission.name, rcClass(mission)]"
 		v-bind:src="'../media/mission_' +  mission.type + '.png'"
         @click="selectedMission = mission; seen = true"
 		>
@@ -52,6 +52,7 @@
             <h3><i class="fa fa-window-close fa-fw topcorner" @click="hide"></i></h3>
             </div>
             
+            <div class="mb-3 rc-note" v-if="rcNote(selectedMission)" v-html="rcNote(selectedMission)"></div>
             <div class="mb-3" v-if="selectedMission.reqs">
 				<p class="h4">Requirements</p>
 					<div v-for="item in selectedMission.reqs">
@@ -160,6 +161,7 @@
 <div class="planet-title"><div class="pt-name">Coruscant</div><div class="pt-sub">Phase 1 · Light Side</div></div>
 <div class="top-left"><a href="main.html" style="color:#FFFFFF;"> <i class="fa fa-home fa-fw"></i>Full Map </a><br>
 <script src="../js/vue.min.js"></script>
+<script src="../js/roster-check.js"></script>
 <script>window.GUIDE_PLANET = "coruscant";</script>
 <script src="../js/guide_data.js"></script>
 <script src="../js/coruscant.js"></script>
