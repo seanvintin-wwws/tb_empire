@@ -162,11 +162,17 @@ test('decision brief: short view, no expiry column, warnings only in the export'
   S.me.dcs = [{ id: 'd1', s: 1, lv: 3, f: false, ab: [] }];
   S.defCands = T.defenceCandidates(S);
   T.plan(S);
+  assert.ok(T.viewBrief().includes('HotUtils · all leagues'), 'the short view is the default');
+  T.store.briefShort = false;
   const full = T.viewBrief();
   assert.ok(!/expires/i.test(full), 'no datacron expiry warnings');
   assert.ok(!full.includes('Warnings and gaps'), 'warnings are kept off the screen');
+  assert.match(full, /<details class="fold" data-fold="lineup">/, 'line-up starts folded');
+  assert.match(full, /<details class="fold" data-fold="dcs">/, 'datacrons start folded');
   T.setExporting(true);
-  assert.ok(T.viewBrief().includes('Warnings and gaps'), 'but kept in the export');
+  const exp = T.viewBrief();
+  assert.ok(exp.includes('Warnings and gaps'), 'but kept in the export');
+  assert.ok(exp.includes('<h3>3. Final line-up</h3>') && exp.includes('<h3>4. Datacrons</h3>') && !exp.includes('data-fold'), 'export shows folded sections as plain headings');
   T.setExporting(false);
   T.store.briefShort = true;
   const short = T.viewBrief();
@@ -206,4 +212,49 @@ test('zones are North / South / Trap, and old saved zone names are renamed', () 
     localStorage: { getItem: k => (ls.has(k) ? ls.get(k) : null), setItem: (k, v) => ls.set(k, String(v)), removeItem: k => ls.delete(k) } });
   assert.deepStrictEqual(plain(T.store.defZones), { 'A>B,C': 'North', 'D>E,F': 'South', 'G>H,I': 'Trap' });
   assert.ok(!/Front top|Front bottom/.test(SRC.replace(/\/\/.*$/gm, '').replace(/'Front top': 'North', 'Front bottom': 'South'/, '')), 'no old zone names left in the tool');
+});
+
+test('decision brief: placed squads in North, South, Trap order, then a divider before suggested additions', () => {
+  const T = load();
+  const ids = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3', 'D1', 'D2', 'D3'];
+  const S = mkS(T, { mine: ids.map(id => unit(id)) });
+  setDefence(S, [['A1', 'A2', 'A3'], ['B1', 'B2', 'B3'], ['C1', 'C2', 'C3']]);
+  T.store.defZones = { [T.ldKey(['A1', 'A2', 'A3'])]: 'Trap', [T.ldKey(['B1', 'B2', 'B3'])]: 'North', [T.ldKey(['C1', 'C2', 'C3'])]: 'South' };
+  S.metaSG = T.metaMap([[5000, 0.10, 55, ['A1', 'A2', 'A3']], [5000, 0.30, 55, ['B1', 'B2', 'B3']], [5000, 0.30, 55, ['C1', 'C2', 'C3']], [5000, 0.40, 55, ['D1', 'D2', 'D3']]]);
+  S.defCands = T.defenceCandidates(S);
+  T.plan(S);
+  for (const short of [true, false]) {
+    T.store.briefShort = short;
+    const h = T.viewBrief();
+    const at = id => h.indexOf('>' + id + '<');
+    assert.ok(at('B1') < at('C1') && at('C1') < at('A1'), `North, South, Trap order (${short ? 'short' : 'full'})`);
+    assert.ok(at('A1') < h.indexOf('Suggested addition') && h.indexOf('Suggested addition') < at('D1'), `divider before the added squad (${short ? 'short' : 'full'})`);
+  }
+});
+
+test('swap buttons: Done puts the new squad on your defence in the same zone; Not doing hides that suggestion', () => {
+  const T = load();
+  const ids = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'D1', 'D2', 'D3', 'E1', 'E2', 'E3'];
+  const S = mkS(T, { mine: ids.map(id => unit(id)) });
+  setDefence(S, [['A1', 'A2', 'A3'], ['B1', 'B2', 'B3']]);
+  const kA = T.ldKey(['A1', 'A2', 'A3']), kD = T.ldKey(['D1', 'D2', 'D3']);
+  T.store.defZones = { [kA]: 'Trap', [T.ldKey(['B1', 'B2', 'B3'])]: 'North' };
+  S.metaSG = T.metaMap([[5000, 0.10, 55, ['A1', 'A2', 'A3']], [5000, 0.30, 55, ['B1', 'B2', 'B3']], [5000, 0.40, 55, ['D1', 'D2', 'D3']], [5000, 0.35, 55, ['E1', 'E2', 'E3']]]);
+  S.defCands = T.defenceCandidates(S);
+  T.plan(S);
+  assert.strictEqual(T.ldKey(S.review.swaps[0].in.squad), kD, 'first suggestion: D for A');
+  assert.ok(T.viewBrief().includes('data-do="yes"'), 'the ✓ / ✕ buttons are on the swap line');
+  // Not doing: the next best (E) is offered instead
+  T.store.swapNo = { t: Date.now(), ev: 0, pairs: [kA + '|' + kD] };
+  S.defCands = T.defenceCandidates(S); T.plan(S);
+  assert.strictEqual(T.ldKey(S.review.swaps[0].in.squad), T.ldKey(['E1', 'E2', 'E3']), 'after ✕, the next option');
+  delete T.store.swapNo;
+  S.defCands = T.defenceCandidates(S); T.plan(S);
+  // Done: D replaces A in the same place and zone
+  const e = T.applySwap(S.review.swaps[0]);
+  assert.strictEqual(e.zone, 'Trap');
+  assert.deepStrictEqual(plain(S.defSq), [['D1', 'D2', 'D3'], ['B1', 'B2', 'B3']]);
+  assert.strictEqual(T.store.defZones[kD], 'Trap');
+  assert.ok(!(kA in T.store.defZones));
+  assert.ok(S.locked.has('D1') && !S.locked.has('A1'));
 });

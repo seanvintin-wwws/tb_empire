@@ -9,10 +9,10 @@
    - Suggested defence uses swgoh.gg hold data too, and stops tiny samples outranking solid ones.
    - "Keep GLs for attack" switch for the suggested defence (on by default).
    - Zones named (North, South, Trap, Fleet) instead of swgoh.gg's numbers.
-   - Round by round tab (from Arrikhan): result, score, first attack time and delay, their holds and their drops.
+   - Round by round report (from Arrikhan): result, score, first attack time and delay, their holds and their drops (export only since v3.7.2).
 */
 (async () => {
-  const VERSION = '3.7.1';
+  const VERSION = '3.7.5';
   // tests (tools/gac-scout/test) load this file in Node with globalThis.__gacScoutTest set: no overlay, internals exposed
   const TEST = typeof globalThis.__gacScoutTest === 'object' && globalThis.__gacScoutTest ? globalThis.__gacScoutTest : null;
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
@@ -152,6 +152,12 @@
   .hrs span{display:block;width:100%;background:#1f6feb;border-radius:3px 3px 0 0;min-height:1px}.hrs small{color:#8f9ab5;font-size:10px}
   details.units>summary{font-size:14px;margin:8px 0}
   details{margin:6px 0}summary{cursor:pointer;font-size:13px}
+  button.sw{border-radius:14px;padding:3px 12px;margin-left:6px;font-weight:700;border:1px solid}button.sw.ok{background:#123d1f;color:#7ee787;border-color:#238636}button.sw.no{background:#3a1416;color:#ff9e9e;border-color:#b62324}button.sw:hover{filter:brightness(1.3)}
+  tr.divider td{border-top:3px solid #1f6feb;border-bottom:0;padding:10px 8px 4px;color:#8cc8ff;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  details.fold>summary{list-style:none}details.fold>summary::-webkit-details-marker{display:none}
+  details.fold>summary>h2,details.fold>summary>h3{display:inline-flex;align-items:center;gap:10px;margin:14px 0 6px;padding:6px 14px 6px 8px;background:#141b2e;border:1px solid #33406a;border-radius:10px}
+  details.fold>summary:hover>*{border-color:#1f6feb}details.fold>summary small{color:#8f9ab5;font-weight:400;font-size:12px}
+  .arr{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#1f6feb;color:#fff;font-size:11px;transition:transform .15s}details.fold[open]>summary .arr{transform:rotate(90deg)}
   label.seen{cursor:pointer;align-items:center}label.seen input{width:auto;margin:0 4px 0 2px;accent-color:#ff7b72}label.seen small{color:#8f9ab5;margin-left:auto}
   .dchint{border-bottom:1px dotted #5d6a88;cursor:help}
   .picker{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}#addu{width:260px;margin:0}
@@ -1197,7 +1203,7 @@
   }
 
   // ---------- rendering ----------
-  const TABS = [['brief', 'Decision brief'], ['plan', 'Battle plan'], ['defs', 'Their defences & counters'], ['atts', 'Their attacks'], ['rounds', 'Round by round'], ['time', 'When they attack'], ['roster', 'Roster compare']];
+  const TABS = [['brief', 'Decision brief'], ['plan', 'Battle plan'], ['defs', 'Their defences & counters'], ['atts', 'Their attacks'], ['time', 'When they attack'], ['roster', 'Roster compare']];
   const gpTxt = n => (n >= 1e6 ? (n / 1e6).toFixed(2) + 'M' : n.toLocaleString());
   const chipU = (id, who) => {
     const u = (who === 'me' ? S.me : S.opp).units[id];
@@ -1373,7 +1379,7 @@
       `Counters shown: teams you own. Attack plan ranked by: ${S.rank === 'banners' ? 'most banners' : 'best win %'}. Keep GLs for attack: ${S.keepGL ? 'yes' : 'no'}.`, '',
       '## Summary', '', mdOf(headH())];
     try {
-      TABS.filter(([k]) => !(compact && k === 'time')).forEach(([k, l]) => { let b; try { b = mdOf(VIEWS[k]()); } catch (e) { b = `(this tab could not be exported: ${e.message})`; } parts.push('', `# Tab: ${l}`, '', b); });
+      [...TABS, ['rounds', 'Round by round']].filter(([k]) => !(compact && k === 'time')).forEach(([k, l]) => { let b; try { b = mdOf(VIEWS[k]()); } catch (e) { b = `(this tab could not be exported: ${e.message})`; } parts.push('', `# Tab: ${l}`, '', b); });
     } finally { S.filter = keep.filter; store.showShips = keep.ships; COMPACT = keep.c; EXPORTING = false; store.briefShort = keep.short; }
     COMPACT = compact; const data = reportData(); COMPACT = keep.c; if (compact) delete data.ownedSquadHolds;
     parts.push('', '# Data (machine-readable)', '', '```json', JSON.stringify(data, null, compact ? 0 : 1), '```', '');
@@ -1429,12 +1435,31 @@
     const out = $('#out');
     out.querySelectorAll('[data-t]').forEach(a => (a.onclick = e => { e.preventDefault(); show(a.dataset.t); }));
     out.querySelectorAll('[data-filter]').forEach(b => (b.onclick = () => { S.filter = b.dataset.filter; show(tab); }));
+    out.querySelectorAll('details.fold').forEach(d => (d.ontoggle = () => { (S.folds = S.folds || {})[d.dataset.fold] = d.open; const sm = d.querySelector('summary small'); if (sm) sm.textContent = d.open ? 'tap to hide' : 'tap to show'; }));
     const sb = $('#seenbox'); if (sb) sb.ontoggle = () => { S.seenOpen = sb.open; };
     out.querySelectorAll('[data-seen]').forEach(cb => (cb.onchange = () => {
       const leads = [...out.querySelectorAll('[data-seen]')].filter(x => x.checked).map(x => x.dataset.seen);
       setSeen([...new Set(leads)]); S.seenOpen = true; plan(S); show(tab);
     }));
     out.querySelectorAll('[data-act="seenclear"]').forEach(b => (b.onclick = () => { setSeen([]); plan(S); show(tab); }));
+    out.querySelectorAll('[data-swap]').forEach(b => (b.onclick = () => {
+      const R = S.review || defReview(), x = R.swaps[+b.dataset.swap];
+      if (!x) return;
+      const kOut = ldKey(x.out.squad), kIn = ldKey(x.in.squad);
+      if (b.dataset.do === 'no') {
+        const e = swapNoEntry() || { pairs: [] };
+        store.swapNo = { t: Date.now(), ev: EVSTART || 0, pairs: [...new Set([...e.pairs, kOut + '|' + kIn])] };
+        save(); plan(S); show(tab);
+        return status(`OK, not swapping ${esc(x.out.squad.map(nm).join(' / '))}. ${S.review && S.review.swaps.length ? 'The brief now shows the next best option if there is one.' : ''}`);
+      }
+      const prev = { defSq: S.defSq.map(q => [...q]), zones: { ...(store.defZones || {}) } };
+      const e = applySwap(x);
+      if (e === false) return;
+      persistAndReplan(tab);
+      status(`Saved: ${esc(x.in.squad.map(nm).join(' / '))} is on your defence${e ? ' in ' + esc(e.zone) : ''} instead of ${esc(x.out.squad.map(nm).join(' / '))}. Everything has been updated. <a href="#" id="undoswap">Undo</a>`);
+      const u = $('#undoswap'); if (u) u.onclick = ev => { ev.preventDefault(); S.defSq = prev.defSq; store.defZones = prev.zones; persistAndReplan(tab); status('Swap undone.'); };
+    }));
+    out.querySelectorAll('[data-act="swapreset"]').forEach(a => (a.onclick = ev => { ev.preventDefault(); delete store.swapNo; save(); plan(S); show(tab); }));
     out.querySelectorAll('[data-brief]').forEach(b => (b.onclick = () => { store.briefShort = b.dataset.brief === 'short'; save(); show(tab); }));
     out.querySelectorAll('[data-rank]').forEach(b => (b.onclick = () => { S.rank = b.dataset.rank; persistAndReplan(tab); }));
     out.querySelectorAll('[data-unlock]').forEach(b => (b.onclick = () => { S.defSq = S.defSq.map(q => q.filter(u => u !== b.dataset.unlock)); persistAndReplan(tab); }));
@@ -1643,13 +1668,33 @@
     return z;
   }
   // keep / remove / add: a placed squad is swapped only for a clearly better suggestion with enough data
+  // swaps the player said they're not doing, kept for the current event: "<out squad key>|<in squad key>"
+  const swapNoEntry = () => { const e = store.swapNo; return e && Date.now() - e.t < 7 * DAY && (!EVSTART || !e.ev || e.ev === EVSTART) ? e : null; };
+  const swapNo = () => new Set((swapNoEntry() || {}).pairs || []);
+  // the swap sentence, with a ✓ (I made it) and ✕ (not doing it) on screen
+  const swapLine = (x, i, withPct) => `<p class="swapline">Swap <b>${esc(x.out.squad.map(nm).join(' / '))}</b> for <b>${esc(x.in.squad.map(nm).join(' / '))}</b>${withPct ? ` (${pct(effS(x.out))} → ${pct(effS(x.in))})` : ''}.${EXPORTING ? '' : ` <button class="sw ok" data-swap="${i}" data-do="yes" title="I made this swap: update my saved defence">✓ Done</button><button class="sw no" data-swap="${i}" data-do="no" title="I'm not doing this swap: stop suggesting it this event">✕ Not doing</button>`}</p>`;
+  const swapNoNote = () => { const n = swapNo().size; return n && !EXPORTING ? `<p class="sub">${n} suggested swap${n === 1 ? '' : 's'} hidden because you said you're not doing ${n === 1 ? 'it' : 'them'}. <a href="#" data-act="swapreset">Show again</a></p>` : ''; };
+  // ✓ Done: the squad coming in takes the place (and zone) of the one going out on your saved defence
+  function applySwap(x) {
+    const kOut = ldKey(x.out.squad), kIn = ldKey(x.in.squad);
+    const zs = myZones(), e = zs['@' + kOut] || zs[x.out.squad[0]];
+    const at = S.defSq.findIndex(q => ldKey(q) === kOut);
+    if (at < 0) return false;
+    S.defSq[at] = [...x.in.squad];
+    store.defZones = store.defZones || {};
+    if (e && ZONES3.includes(e.zone)) store.defZones[kIn] = e.zone;
+    delete store.defZones[kOut];
+    syncLocked();
+    return e || null;
+  }
   function defReview() {
     const mine = myDefSquads().map(sq => (S.defCands || []).find(c => c.onDef && ldKey(c.squad) === ldKey(sq))).filter(Boolean);
     const asc = [...mine].sort((a, b) => effS(a) - effS(b));
     const pool = (S.defPlan || []).filter(enough).sort((a, b) => effS(b) - effS(a)), used = new Set(), swaps = [];
     for (const weak of asc) {
       const mw = metaMean(weak);
-      const c = pool.find(x => !used.has(x) && effS(x) >= effS(weak) + 0.03 && (mw == null || (metaMean(x) || 0) >= mw));
+      const no = swapNo();
+      const c = pool.find(x => !used.has(x) && !no.has(ldKey(weak.squad) + '|' + ldKey(x.squad)) && effS(x) >= effS(weak) + 0.03 && (mw == null || (metaMean(x) || 0) >= mw));
       if (!c) continue;
       used.add(c); swaps.push({ out: weak, in: c });
     }
@@ -1710,8 +1755,9 @@
     let h = `<h2>Decision brief</h2>`;
     const st = staleDefence();
     if (st.length) h += `<p class="warn">⚠ Your saved defence looks out of date. ${st.join(' ')} Everything below depends on it. <button class="chip" data-act="filllast">Fill from my last round</button> then check it on the Battle plan tab.</p>`;
-    if (!EXPORTING) h += `<div class="filters">View: <button class="chip ${store.briefShort ? '' : 'on'}" data-brief="full">Full</button><button class="chip ${store.briefShort ? 'on' : ''}" data-brief="short">Short</button></div>`;
-    if (store.briefShort && !EXPORTING) return h + briefShort(R, top2, zs);
+    const short = store.briefShort !== false; // Short is the default; Full once chosen (exports always use Full)
+    if (!EXPORTING) h += `<div class="filters">View: <button class="chip ${short ? 'on' : ''}" data-brief="short">Short</button><button class="chip ${short ? '' : 'on'}" data-brief="full">Full</button></div>`;
+    if (short && !EXPORTING) return h + briefShort(R, top2, zs);
     h += `<p class="sub">Everything needed for the defence decision on one page. The other tabs have the detail.</p>`;
     // 2. review
     const oppCheck = c => top2.map(a => {
@@ -1727,8 +1773,8 @@
     else {
       h += `<p class="sub">Score = a ranking guide, roughly an estimated hold against ${esc(opp)}: half the meta hold % (${S.INS ? insLabel('div') : S.HU ? 'HotUtils' : 'swgoh.gg'}), half how it does against the attack teams ${esc(opp)} uses. A squad is only swapped when the replacement scores at least 3 points higher, holds at least as well on the meta sources, and the hold % driving its score has 20+ battles. Keep Galactic Legends for attack: <b>${S.keepGL ? 'on' : 'off'}</b>.</p>
       <table class="stack"><tr><th></th><th>Squad</th><th>Score</th><th>${sgLabel()}</th><th>HotUtils</th><th>${S.INS ? insLabel('div') : 'Insight'}</th><th>Their main attackers${top2.length ? ` (${top2.map(a => esc(nm(a.lead))).join(', ')})` : ''}</th></tr>
-      ${R.mine.map(c => (R.outSet.has(c) ? row(c, 'REMOVE', 'warn') : row(c, 'KEEP', 'me'))).join('')}${R.swaps.map(x => row(x.in, 'ADD', 'me')).join('')}</table>
-      ${R.swaps.length ? R.swaps.map(x => `<p>Swap <b>${esc(x.out.squad.map(nm).join(' / '))}</b> for <b>${esc(x.in.squad.map(nm).join(' / '))}</b> (${pct(effS(x.out))} → ${pct(effS(x.in))}).</p>`).join('') : '<p><b class="me">No swaps: nothing free scores clearly better than what you have set.</b></p>'}`;
+      ${byZoneOrder(R.mine, zs).map(c => (R.outSet.has(c) ? row(c, 'REMOVE', 'warn') : row(c, 'KEEP', 'me'))).join('')}${addDivider(R.swaps.length, 7)}${R.swaps.map(x => row(x.in, 'ADD', 'me')).join('')}</table>
+      ${swapNoNote()}${R.swaps.length ? R.swaps.map((x, i) => swapLine(x, i, true)).join('') : '<p><b class="me">No swaps: nothing free scores clearly better than what you have set.</b></p>'}`;
     }
     h += pkgH();
     // 3. lineup
@@ -1743,11 +1789,11 @@
       caps.forEach((cp, i) => [...S.fleet].filter(u => !inF.has(u) && !CAP[u] && S.fleetSeen && S.fleetSeen[cp] && S.fleetSeen[cp].has(u)).forEach(u => { inF.add(u); fleets[i].push(u); }));
       const rest = [...S.fleet].filter(u => !inF.has(u));
       const unset = R.mine.filter(c => !zs['@' + ldKey(c.squad)]).length;
-      h += `<h3>3. Final line-up</h3><p class="sub">Zones are the ones you set under Your defence; where none is set, the zone it was in the last time it was attacked. An added squad takes the zone of the one it replaces.</p>
+      h += foldH('lineup', '3. Final line-up', `<p class="sub">Zones are the ones you set under Your defence; where none is set, the zone it was in the last time it was attacked. An added squad takes the zone of the one it replaces.</p>
         ${unset ? `<p class="warn">${unset} squad${unset === 1 ? "'s" : "s'"} zone${unset === 1 ? ' is' : 's are'} guessed from history or unknown. Set the zone under Your defence (Battle plan tab) so this is exact.</p>` : ''}
         <table class="stack"><tr><th>Zone</th><th>Squads</th></tr>${Object.entries(by).sort((a, b) => zSort(a[0], b[0])).map(([z, l]) => `<tr><td>${esc(z)}${sl.zones[z] ? ` <small>(${l.length} of at least ${sl.zones[z]})</small>` : ''}</td><td>${l.map(x => squadH(x.c.squad, 'me') + (x.src || x.sw ? `<div class="sub">${[x.sw ? 'added, takes the replaced squad\'s zone' : '', x.src].filter(Boolean).join(' · ')}</div>` : '')).join('')}</td></tr>`).join('')}
         ${fleets.map((f, i) => `<tr><td>Fleet ${i + 1}</td><td>${squadH(f, 'me')}<div class="sub">${esc(nm(f[0]))} with every saved ship that has flown with it on your defence. Which are starters and which are reinforcements isn't recorded: check in game.</div></td></tr>`).join('') || '<tr><td>Fleet</td><td><span class="sub">No fleet saved.</span></td></tr>'}
-        ${rest.length ? `<tr><td>Fleet ?</td><td>${squadH(rest, 'me')}<div class="sub warn">Never seen with any of your capital ships on defence: place these yourself.</div></td></tr>` : ''}</table>`;
+        ${rest.length ? `<tr><td>Fleet ?</td><td>${squadH(rest, 'me')}<div class="sub warn">Never seen with any of your capital ships on defence: place these yourself.</div></td></tr>` : ''}</table>`);
     }
     // 4. datacrons
     const live = (S.me.dcs || []).filter(dcLive), checks = [];
@@ -1777,7 +1823,7 @@
         return { used: where !== 'Spare', lv: dc.lv, h: `<tr><td>${dcNo(dc)} Lvl ${dc.lv} ${esc(setName(dc.s))}${dc.f ? ' (focused)' : ''}${chars.length ? `<div class="sub">${esc(chars.join(', '))}</div>` : ''}</td><td>${where}</td></tr>` };
       }).sort((a, b) => b.used - a.used || b.lv - a.lv);
       const show_ = COMPACT ? rows.filter(r => r.used) : rows;
-      h += `<h3>4. Datacrons</h3><p class="sub">#N is a number for each of your datacrons in this report, so two with the same name can be told apart. Swgoh.gg doesn't show which datacron is on which defence team, so these are suggestions: one per team, character matches first, recalculated from your saved defence each time. If the game differs, go by the game.</p><table class="stack"><tr><th>Datacron</th><th>Used on</th></tr>${show_.map(r => r.h).join('')}</table>${COMPACT && rows.length > show_.length ? `<p class="sub">${rows.length - show_.length} more live datacrons are spare.</p>` : ''}`;
+      h += foldH('dcs', '4. Datacrons', `<p class="sub">#N is a number for each of your datacrons in this report, so two with the same name can be told apart. Swgoh.gg doesn't show which datacron is on which defence team, so these are suggestions: one per team, character matches first, recalculated from your saved defence each time. If the game differs, go by the game.</p><table class="stack"><tr><th>Datacron</th><th>Used on</th></tr>${show_.map(r => r.h).join('')}</table>${COMPACT && rows.length > show_.length ? `<p class="sub">${rows.length - show_.length} more live datacrons are spare.</p>` : ''}`);
     }
     h += `<p>${checks.join('<br>')}</p>`;
     // 5. attack plan
@@ -1814,6 +1860,19 @@
     const th = fast(d.squad, S.opp), mi = fast(c.squad, S.me);
     return th && mi && th - mi >= 30 ? `<div class="sub warn">⚡ Their team is faster: fastest ${th} speed vs your ${mi} (+${th - mi}). Speed isn't in the win %.</div>` : '';
   }
+  // your placed squads in zone order (North, South, Trap, zone unknown last), keeping your order within a zone
+  const ZORDER = ['North', 'South', 'Trap'];
+  const byZoneOrder = (list, zs) => {
+    const zr = c => { const e = zs['@' + ldKey(c.squad)] || zs[c.squad[0]]; const i = e ? ZORDER.indexOf(e.zone) : -1; return i < 0 ? 9 : i; };
+    return list.map((c, i) => [c, i]).sort((a, b) => zr(a[0]) - zr(b[0]) || a[1] - b[1]).map(x => x[0]);
+  };
+  const addDivider = (n, cols) => (n ? `<tr class="divider"><td colspan="${cols}">▼ Suggested addition${n === 1 ? '' : 's'}: not on your defence yet</td></tr>` : '');
+  // a section that starts folded; on screen only (exports show it open as a normal heading). Open/closed is remembered.
+  function foldH(id, title, body, tag = 'h3') {
+    if (EXPORTING) return `<${tag}>${esc(title)}</${tag}>${body}`;
+    const open = S.folds && S.folds[id];
+    return `<details class="fold" data-fold="${id}"${open ? ' open' : ''}><summary><${tag}><span class="arr">▶</span>${esc(title)} <small>${open ? 'tap to hide' : 'tap to show'}</small></${tag}></summary>${body}</details>`;
+  }
   // the short attack plan (brief section 5, and the short brief)
   function attackShortH(no = '') {
     if (!(S.plan || []).length) return theirDefBox();
@@ -1835,8 +1894,8 @@
     const dcOf = c => (c.onDef ? (c.dc ? dcNo(c.dc.dc) : '–') : c.useDc && c.dc ? dcNo(c.dc.dc) : '–');
     const line = (c, v, cls, zFrom = c) => { const m = decM(c); return `<tr><td><b class="${cls}">${v}</b></td><td>${squadH(c.squad, 'me')}</td><td>${zoneOf(zFrom)}</td><td>${dcOf(c)}</td><td>${m ? `${pct(m.h)} <small>${esc(srcName(m))}, ${kNum(m.n)} battles</small>${m.n < 20 ? ' <span class="warn">⚠ thin</span>' : ''}` : '–'}</td><td>${agree(c)}</td></tr>`; };
     let h = `<table class="stack"><tr><th></th><th>Squad</th><th>Zone</th><th>Datacron</th><th>Deciding hold %</th><th>${S.INS ? esc(insLabel('div')).replace('swgoh.gg ', '') : 'Insight'} · HotUtils · all leagues</th></tr>
-      ${R.mine.map(c => (R.outSet.has(c) ? line(c, 'REMOVE', 'warn') : line(c, 'KEEP', 'me'))).join('')}${R.swaps.map(x => line(x.in, 'ADD', 'me', x.out)).join('')}</table>`;
-    h += R.swaps.length ? R.swaps.map(x => `<p>Swap <b>${esc(x.out.squad.map(nm).join(' / '))}</b> for <b>${esc(x.in.squad.map(nm).join(' / '))}</b>.</p>`).join('') : '<p><b class="me">No swaps.</b></p>';
+      ${byZoneOrder(R.mine, zs).map(c => (R.outSet.has(c) ? line(c, 'REMOVE', 'warn') : line(c, 'KEEP', 'me'))).join('')}${addDivider(R.swaps.length, 6)}${R.swaps.map(x => line(x.in, 'ADD', 'me', x.out)).join('')}</table>`;
+    h += (R.swaps.length ? R.swaps.map((x, i) => swapLine(x, i, false)).join('') : '<p><b class="me">No swaps.</b></p>') + swapNoNote();
     const P = S.pkg;
     if (P && P.cur) h += `<p class="sub">Expected holds against ${esc(S.opp.name)}'s attack teams: <b>${P.cur.exp.toFixed(1)}</b> now${P.rec ? `, <b>${P.rec.exp.toFixed(1)}</b> with the swaps` : ''} (out of ${P.cur.rows.length}).</p>`;
     return h + attackShortH();
@@ -1859,11 +1918,11 @@
       <td>${pick ? bar(est) + confH(pick) + (pick.delta ? `<div class="sub">${pick.delta > 0 ? '+' : ''}${pick.delta.toFixed(1)} relic vs their team</div>` : '') : ''}</td>
       <td>${pick ? `<b class="ban">${banTxt(pick)}</b>${pick.avgBan ? '<div class="sub">banners per win</div>' : ''}` : ''}</td></tr>`).join('')}</table>`;
     const seenNow = seenSet();
-    if (S.unseen.some(d => !seenNow.has(d.lead))) h += `<h2>Other teams they could set</h2><p class="sub">Strong teams in their roster that haven't shown up on their defence (swgoh.gg only records defences that got attacked). Your best free counter, not counted in the plan above.</p>
+    if (S.unseen.some(d => !seenNow.has(d.lead))) h += foldH('unseen', 'Other teams they could set', `<p class="sub">Strong teams in their roster that haven't shown up on their defence (swgoh.gg only records defences that got attacked). Your best free counter, not counted in the plan above.</p>
       <table class="stack"><tr><th>Their team</th><th>Your best counter</th><th>Est. win</th></tr>${S.unseen.filter(d => !seenNow.has(d.lead)).map(d => {
         const c = d.counters.find(c => c.own && !c.squad.some(u => S.locked.has(u) || S.fleet.has(u)));
         return `<tr><td>${squadH(d.squad, 'opp')}</td><td>${c ? squadH(c.squad, 'me') + `<div class="sub">${recTxt(c)}</div>` : '<span class="sub">No recorded counter you own</span>'}</td><td>${c ? bar(c.est) + confH(c) : ''}</td></tr>`;
-      }).join('')}</table>`;
+      }).join('')}</table>`, 'h2');
     const byZone = {};
     S.plan.forEach(p => (byZone[zoneTxt(p.d)] = byZone[zoneTxt(p.d)] || []).push(p.d));
     const order = ['North', 'South', 'Trap', 'Fleet'];
@@ -2062,7 +2121,7 @@
       VERSION, store, gstore, SHIP, CAP, ALIGN, CATS, OMI, IMG,
       setS: x => (S = x), getS: () => S, setNames: x => (NAME = x), setSets: x => (S0_sets = x), setEvStart: x => (EVSTART = x),
       ldKey, sqKey, metaMap, dcFit, bestDc, assignDcs, defenceCandidates, plan, defReview, packageSim, lastRoundDefence, staleDefence,
-      speedH, seenSet, setSeen, effS, insEff, viewBrief, viewRoster, viewPlan, setExporting: v => (EXPORTING = v),
+      speedH, seenSet, setSeen, applySwap, effS, insEff, viewBrief, viewRoster, viewPlan, setExporting: v => (EXPORTING = v),
     });
     return;
   }

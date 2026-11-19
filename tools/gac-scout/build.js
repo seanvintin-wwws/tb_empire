@@ -51,7 +51,7 @@ details{margin-top:14px}summary{cursor:pointer;color:#8cc8ff}
 <div class="grid">
 <div class="f"><b>Counter odds</b><p>Your two GAC histories blended with swgoh.gg's counters page, matched to their exact defence squad when there's enough data, and adjusted for your relic levels.</p></div>
 <div class="f"><b>Battle plan</b><p>The best combination of your counters against the defences they usually set, never reusing a unit or anything on your defence.</p></div>
-<div class="f"><b>Decision brief</b><p>Keep, remove or add for each of your defence squads, on all three hold-% sources, then the line-up, datacrons and a short attack plan. Switch to the short view for one line per squad.</p></div>
+<div class="f"><b>Decision brief</b><p>Keep, remove or add for each of your defence squads, on all three hold-% sources, then the line-up, datacrons and a short attack plan. The short view (the default) gives one line per squad; switch to Full for everything.</p></div>
 <div class="f"><b>Your defence</b><p>One click fills it from the defence you set in your last round; tap ✕ on anything you've changed. The plan stops using those units. Saved for rounds 2 and 3.</p></div>
 <div class="f"><b>Their actual defence</b><p>Once their defence is up, tick the teams you can see in game and the attack plan uses exactly those instead of guessing from their history.</p></div>
 <div class="f"><b>Defence planner</b><p>Squads you own that hold best against the attack teams your opponent uses. Keeps GLs for attack unless you say otherwise.</p></div>
@@ -59,7 +59,7 @@ details{margin-top:14px}summary{cursor:pointer;color:#8cc8ff}
 <div class="f"><b>HotUtils meta</b><p>HotUtils' defence hold % for your own league (live datacrons only) loads automatically from a daily copy. It sits beside swgoh.gg Insight's division figure, and fills in where Insight is thin.</p></div>
 <div class="f"><b>Speed check</b><p>A ⚡ warning when the team you're attacking is clearly faster than your counter (30+ speed on the fastest unit).</p></div>
 <div class="f"><b>Datacrons</b><p>Your datacrons and theirs are in the odds: each counter and defence is rated from battles with the datacron strength each side can actually bring, and the plan never uses one datacron twice.</p></div>
-<div class="f"><b>Round by round</b><p>Each of their rounds: score, first attack time and delay, what held on their defence and what they dropped.</p></div>
+<div class="f"><b>Export for AI</b><p>Every tab in one file, plus their round-by-round history (scores, first attack times, what held and what they dropped), ready to upload to an AI assistant.</p></div>
 <div class="f"><b>Their attacks</b><p>What they win with and which defences stopped them.</p></div>
 <div class="f"><b>When they attack</b><p>Their usual attack hours in your time zone, and average delay.</p></div>
 <div class="f"><b>Roster compare</b><p>GP, GLs, relic counts, zetas, omicrons, ships, and every unit side by side, A to Z, characters and ships separately.</p></div>
