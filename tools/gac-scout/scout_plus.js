@@ -12,7 +12,7 @@
    - Round by round report (from Arrikhan): result, score, first attack time and delay, their holds and their drops (export only since v3.7.2).
 */
 (async () => {
-  const VERSION = '3.7.2';
+  const VERSION = '3.7.3';
   // tests (tools/gac-scout/test) load this file in Node with globalThis.__gacScoutTest set: no overlay, internals exposed
   const TEST = typeof globalThis.__gacScoutTest === 'object' && globalThis.__gacScoutTest ? globalThis.__gacScoutTest : null;
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
@@ -1715,8 +1715,9 @@
     let h = `<h2>Decision brief</h2>`;
     const st = staleDefence();
     if (st.length) h += `<p class="warn">⚠ Your saved defence looks out of date. ${st.join(' ')} Everything below depends on it. <button class="chip" data-act="filllast">Fill from my last round</button> then check it on the Battle plan tab.</p>`;
-    if (!EXPORTING) h += `<div class="filters">View: <button class="chip ${store.briefShort ? '' : 'on'}" data-brief="full">Full</button><button class="chip ${store.briefShort ? 'on' : ''}" data-brief="short">Short</button></div>`;
-    if (store.briefShort && !EXPORTING) return h + briefShort(R, top2, zs);
+    const short = store.briefShort !== false; // Short is the default; Full once chosen (exports always use Full)
+    if (!EXPORTING) h += `<div class="filters">View: <button class="chip ${short ? 'on' : ''}" data-brief="short">Short</button><button class="chip ${short ? '' : 'on'}" data-brief="full">Full</button></div>`;
+    if (short && !EXPORTING) return h + briefShort(R, top2, zs);
     h += `<p class="sub">Everything needed for the defence decision on one page. The other tabs have the detail.</p>`;
     // 2. review
     const oppCheck = c => top2.map(a => {

@@ -162,6 +162,8 @@ test('decision brief: short view, no expiry column, warnings only in the export'
   S.me.dcs = [{ id: 'd1', s: 1, lv: 3, f: false, ab: [] }];
   S.defCands = T.defenceCandidates(S);
   T.plan(S);
+  assert.ok(T.viewBrief().includes('HotUtils · all leagues'), 'the short view is the default');
+  T.store.briefShort = false;
   const full = T.viewBrief();
   assert.ok(!/expires/i.test(full), 'no datacron expiry warnings');
   assert.ok(!full.includes('Warnings and gaps'), 'warnings are kept off the screen');
