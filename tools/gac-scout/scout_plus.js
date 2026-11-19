@@ -12,7 +12,7 @@
    - Round by round report (from Arrikhan): result, score, first attack time and delay, their holds and their drops (export only since v3.7.2).
 */
 (async () => {
-  const VERSION = '3.7.4';
+  const VERSION = '3.7.5';
   // tests (tools/gac-scout/test) load this file in Node with globalThis.__gacScoutTest set: no overlay, internals exposed
   const TEST = typeof globalThis.__gacScoutTest === 'object' && globalThis.__gacScoutTest ? globalThis.__gacScoutTest : null;
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
@@ -152,6 +152,7 @@
   .hrs span{display:block;width:100%;background:#1f6feb;border-radius:3px 3px 0 0;min-height:1px}.hrs small{color:#8f9ab5;font-size:10px}
   details.units>summary{font-size:14px;margin:8px 0}
   details{margin:6px 0}summary{cursor:pointer;font-size:13px}
+  .swapline{display:flex;flex-wrap:wrap;align-items:center;gap:6px}button.sw{border-radius:14px;padding:3px 12px;font-weight:700;border:1px solid}button.sw.ok{background:#123d1f;color:#7ee787;border-color:#238636}button.sw.no{background:#3a1416;color:#ff9e9e;border-color:#b62324}button.sw:hover{filter:brightness(1.3)}
   tr.divider td{border-top:3px solid #1f6feb;border-bottom:0;padding:10px 8px 4px;color:#8cc8ff;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
   details.fold>summary{list-style:none}details.fold>summary::-webkit-details-marker{display:none}
   details.fold>summary>h2,details.fold>summary>h3{display:inline-flex;align-items:center;gap:10px;margin:14px 0 6px;padding:6px 14px 6px 8px;background:#141b2e;border:1px solid #33406a;border-radius:10px}
@@ -1441,6 +1442,24 @@
       setSeen([...new Set(leads)]); S.seenOpen = true; plan(S); show(tab);
     }));
     out.querySelectorAll('[data-act="seenclear"]').forEach(b => (b.onclick = () => { setSeen([]); plan(S); show(tab); }));
+    out.querySelectorAll('[data-swap]').forEach(b => (b.onclick = () => {
+      const R = S.review || defReview(), x = R.swaps[+b.dataset.swap];
+      if (!x) return;
+      const kOut = ldKey(x.out.squad), kIn = ldKey(x.in.squad);
+      if (b.dataset.do === 'no') {
+        const e = swapNoEntry() || { pairs: [] };
+        store.swapNo = { t: Date.now(), ev: EVSTART || 0, pairs: [...new Set([...e.pairs, kOut + '|' + kIn])] };
+        save(); plan(S); show(tab);
+        return status(`OK, not swapping ${esc(x.out.squad.map(nm).join(' / '))}. ${S.review && S.review.swaps.length ? 'The brief now shows the next best option if there is one.' : ''}`);
+      }
+      const prev = { defSq: S.defSq.map(q => [...q]), zones: { ...(store.defZones || {}) } };
+      const e = applySwap(x);
+      if (e === false) return;
+      persistAndReplan(tab);
+      status(`Saved: ${esc(x.in.squad.map(nm).join(' / '))} is on your defence${e ? ' in ' + esc(e.zone) : ''} instead of ${esc(x.out.squad.map(nm).join(' / '))}. Everything has been updated. <a href="#" id="undoswap">Undo</a>`);
+      const u = $('#undoswap'); if (u) u.onclick = ev => { ev.preventDefault(); S.defSq = prev.defSq; store.defZones = prev.zones; persistAndReplan(tab); status('Swap undone.'); };
+    }));
+    out.querySelectorAll('[data-act="swapreset"]').forEach(a => (a.onclick = ev => { ev.preventDefault(); delete store.swapNo; save(); plan(S); show(tab); }));
     out.querySelectorAll('[data-brief]').forEach(b => (b.onclick = () => { store.briefShort = b.dataset.brief === 'short'; save(); show(tab); }));
     out.querySelectorAll('[data-rank]').forEach(b => (b.onclick = () => { S.rank = b.dataset.rank; persistAndReplan(tab); }));
     out.querySelectorAll('[data-unlock]').forEach(b => (b.onclick = () => { S.defSq = S.defSq.map(q => q.filter(u => u !== b.dataset.unlock)); persistAndReplan(tab); }));
@@ -1649,13 +1668,33 @@
     return z;
   }
   // keep / remove / add: a placed squad is swapped only for a clearly better suggestion with enough data
+  // swaps the player said they're not doing, kept for the current event: "<out squad key>|<in squad key>"
+  const swapNoEntry = () => { const e = store.swapNo; return e && Date.now() - e.t < 7 * DAY && (!EVSTART || !e.ev || e.ev === EVSTART) ? e : null; };
+  const swapNo = () => new Set((swapNoEntry() || {}).pairs || []);
+  // the swap sentence, with a ✓ (I made it) and ✕ (not doing it) on screen
+  const swapLine = (x, i, withPct) => `<p class="swapline">Swap <b>${esc(x.out.squad.map(nm).join(' / '))}</b> for <b>${esc(x.in.squad.map(nm).join(' / '))}</b>${withPct ? ` (${pct(effS(x.out))} → ${pct(effS(x.in))})` : ''}.${EXPORTING ? '' : ` <button class="sw ok" data-swap="${i}" data-do="yes" title="I made this swap: update my saved defence">✓ Done</button><button class="sw no" data-swap="${i}" data-do="no" title="I'm not doing this swap: stop suggesting it this event">✕ Not doing</button>`}</p>`;
+  const swapNoNote = () => { const n = swapNo().size; return n && !EXPORTING ? `<p class="sub">${n} suggested swap${n === 1 ? '' : 's'} hidden because you said you're not doing ${n === 1 ? 'it' : 'them'}. <a href="#" data-act="swapreset">Show again</a></p>` : ''; };
+  // ✓ Done: the squad coming in takes the place (and zone) of the one going out on your saved defence
+  function applySwap(x) {
+    const kOut = ldKey(x.out.squad), kIn = ldKey(x.in.squad);
+    const zs = myZones(), e = zs['@' + kOut] || zs[x.out.squad[0]];
+    const at = S.defSq.findIndex(q => ldKey(q) === kOut);
+    if (at < 0) return false;
+    S.defSq[at] = [...x.in.squad];
+    store.defZones = store.defZones || {};
+    if (e && ZONES3.includes(e.zone)) store.defZones[kIn] = e.zone;
+    delete store.defZones[kOut];
+    syncLocked();
+    return e || null;
+  }
   function defReview() {
     const mine = myDefSquads().map(sq => (S.defCands || []).find(c => c.onDef && ldKey(c.squad) === ldKey(sq))).filter(Boolean);
     const asc = [...mine].sort((a, b) => effS(a) - effS(b));
     const pool = (S.defPlan || []).filter(enough).sort((a, b) => effS(b) - effS(a)), used = new Set(), swaps = [];
     for (const weak of asc) {
       const mw = metaMean(weak);
-      const c = pool.find(x => !used.has(x) && effS(x) >= effS(weak) + 0.03 && (mw == null || (metaMean(x) || 0) >= mw));
+      const no = swapNo();
+      const c = pool.find(x => !used.has(x) && !no.has(ldKey(weak.squad) + '|' + ldKey(x.squad)) && effS(x) >= effS(weak) + 0.03 && (mw == null || (metaMean(x) || 0) >= mw));
       if (!c) continue;
       used.add(c); swaps.push({ out: weak, in: c });
     }
@@ -1735,7 +1774,7 @@
       h += `<p class="sub">Score = a ranking guide, roughly an estimated hold against ${esc(opp)}: half the meta hold % (${S.INS ? insLabel('div') : S.HU ? 'HotUtils' : 'swgoh.gg'}), half how it does against the attack teams ${esc(opp)} uses. A squad is only swapped when the replacement scores at least 3 points higher, holds at least as well on the meta sources, and the hold % driving its score has 20+ battles. Keep Galactic Legends for attack: <b>${S.keepGL ? 'on' : 'off'}</b>.</p>
       <table class="stack"><tr><th></th><th>Squad</th><th>Score</th><th>${sgLabel()}</th><th>HotUtils</th><th>${S.INS ? insLabel('div') : 'Insight'}</th><th>Their main attackers${top2.length ? ` (${top2.map(a => esc(nm(a.lead))).join(', ')})` : ''}</th></tr>
       ${byZoneOrder(R.mine, zs).map(c => (R.outSet.has(c) ? row(c, 'REMOVE', 'warn') : row(c, 'KEEP', 'me'))).join('')}${addDivider(R.swaps.length, 7)}${R.swaps.map(x => row(x.in, 'ADD', 'me')).join('')}</table>
-      ${R.swaps.length ? R.swaps.map(x => `<p>Swap <b>${esc(x.out.squad.map(nm).join(' / '))}</b> for <b>${esc(x.in.squad.map(nm).join(' / '))}</b> (${pct(effS(x.out))} → ${pct(effS(x.in))}).</p>`).join('') : '<p><b class="me">No swaps: nothing free scores clearly better than what you have set.</b></p>'}`;
+      ${swapNoNote()}${R.swaps.length ? R.swaps.map((x, i) => swapLine(x, i, true)).join('') : '<p><b class="me">No swaps: nothing free scores clearly better than what you have set.</b></p>'}`;
     }
     h += pkgH();
     // 3. lineup
@@ -1856,7 +1895,7 @@
     const line = (c, v, cls, zFrom = c) => { const m = decM(c); return `<tr><td><b class="${cls}">${v}</b></td><td>${squadH(c.squad, 'me')}</td><td>${zoneOf(zFrom)}</td><td>${dcOf(c)}</td><td>${m ? `${pct(m.h)} <small>${esc(srcName(m))}, ${kNum(m.n)} battles</small>${m.n < 20 ? ' <span class="warn">⚠ thin</span>' : ''}` : '–'}</td><td>${agree(c)}</td></tr>`; };
     let h = `<table class="stack"><tr><th></th><th>Squad</th><th>Zone</th><th>Datacron</th><th>Deciding hold %</th><th>${S.INS ? esc(insLabel('div')).replace('swgoh.gg ', '') : 'Insight'} · HotUtils · all leagues</th></tr>
       ${byZoneOrder(R.mine, zs).map(c => (R.outSet.has(c) ? line(c, 'REMOVE', 'warn') : line(c, 'KEEP', 'me'))).join('')}${addDivider(R.swaps.length, 6)}${R.swaps.map(x => line(x.in, 'ADD', 'me', x.out)).join('')}</table>`;
-    h += R.swaps.length ? R.swaps.map(x => `<p>Swap <b>${esc(x.out.squad.map(nm).join(' / '))}</b> for <b>${esc(x.in.squad.map(nm).join(' / '))}</b>.</p>`).join('') : '<p><b class="me">No swaps.</b></p>';
+    h += (R.swaps.length ? R.swaps.map((x, i) => swapLine(x, i, false)).join('') : '<p><b class="me">No swaps.</b></p>') + swapNoNote();
     const P = S.pkg;
     if (P && P.cur) h += `<p class="sub">Expected holds against ${esc(S.opp.name)}'s attack teams: <b>${P.cur.exp.toFixed(1)}</b> now${P.rec ? `, <b>${P.rec.exp.toFixed(1)}</b> with the swaps` : ''} (out of ${P.cur.rows.length}).</p>`;
     return h + attackShortH();
@@ -2082,7 +2121,7 @@
       VERSION, store, gstore, SHIP, CAP, ALIGN, CATS, OMI, IMG,
       setS: x => (S = x), getS: () => S, setNames: x => (NAME = x), setSets: x => (S0_sets = x), setEvStart: x => (EVSTART = x),
       ldKey, sqKey, metaMap, dcFit, bestDc, assignDcs, defenceCandidates, plan, defReview, packageSim, lastRoundDefence, staleDefence,
-      speedH, seenSet, setSeen, effS, insEff, viewBrief, viewRoster, viewPlan, setExporting: v => (EXPORTING = v),
+      speedH, seenSet, setSeen, applySwap, effS, insEff, viewBrief, viewRoster, viewPlan, setExporting: v => (EXPORTING = v),
     });
     return;
   }

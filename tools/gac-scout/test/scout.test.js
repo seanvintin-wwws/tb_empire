@@ -231,3 +231,30 @@ test('decision brief: placed squads in North, South, Trap order, then a divider 
     assert.ok(at('A1') < h.indexOf('Suggested addition') && h.indexOf('Suggested addition') < at('D1'), `divider before the added squad (${short ? 'short' : 'full'})`);
   }
 });
+
+test('swap buttons: Done puts the new squad on your defence in the same zone; Not doing hides that suggestion', () => {
+  const T = load();
+  const ids = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'D1', 'D2', 'D3', 'E1', 'E2', 'E3'];
+  const S = mkS(T, { mine: ids.map(id => unit(id)) });
+  setDefence(S, [['A1', 'A2', 'A3'], ['B1', 'B2', 'B3']]);
+  const kA = T.ldKey(['A1', 'A2', 'A3']), kD = T.ldKey(['D1', 'D2', 'D3']);
+  T.store.defZones = { [kA]: 'Trap', [T.ldKey(['B1', 'B2', 'B3'])]: 'North' };
+  S.metaSG = T.metaMap([[5000, 0.10, 55, ['A1', 'A2', 'A3']], [5000, 0.30, 55, ['B1', 'B2', 'B3']], [5000, 0.40, 55, ['D1', 'D2', 'D3']], [5000, 0.35, 55, ['E1', 'E2', 'E3']]]);
+  S.defCands = T.defenceCandidates(S);
+  T.plan(S);
+  assert.strictEqual(T.ldKey(S.review.swaps[0].in.squad), kD, 'first suggestion: D for A');
+  assert.ok(T.viewBrief().includes('data-do="yes"'), 'the ✓ / ✕ buttons are on the swap line');
+  // Not doing: the next best (E) is offered instead
+  T.store.swapNo = { t: Date.now(), ev: 0, pairs: [kA + '|' + kD] };
+  S.defCands = T.defenceCandidates(S); T.plan(S);
+  assert.strictEqual(T.ldKey(S.review.swaps[0].in.squad), T.ldKey(['E1', 'E2', 'E3']), 'after ✕, the next option');
+  delete T.store.swapNo;
+  S.defCands = T.defenceCandidates(S); T.plan(S);
+  // Done: D replaces A in the same place and zone
+  const e = T.applySwap(S.review.swaps[0]);
+  assert.strictEqual(e.zone, 'Trap');
+  assert.deepStrictEqual(plain(S.defSq), [['D1', 'D2', 'D3'], ['B1', 'B2', 'B3']]);
+  assert.strictEqual(T.store.defZones[kD], 'Trap');
+  assert.ok(!(kA in T.store.defZones));
+  assert.ok(S.locked.has('D1') && !S.locked.has('A1'));
+});
