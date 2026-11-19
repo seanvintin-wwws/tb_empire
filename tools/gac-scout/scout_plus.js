@@ -12,7 +12,7 @@
    - Round by round tab (from Arrikhan): result, score, first attack time and delay, their holds and their drops.
 */
 (async () => {
-  const VERSION = '3.3';
+  const VERSION = '3.4';
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
     alert('GAC Scout+ runs on swgoh.gg. Open https://swgoh.gg in this tab, then click the bookmark again.');
     return;
@@ -367,7 +367,7 @@
   // ---------- swgoh.gg squad meta page (defence hold %, all leagues) ----------
   async function loadMetaSG(fmt) {
     const ck = 'meta2|' + fmt, c = gstore.leads[ck];
-    if (c && Date.now() - c.t < DAY) { SG.season = c.season || null; return c.rows; }
+    if (c && Date.now() - c.t < DAY && c.t > EVSTART) { SG.season = c.season || null; return c.rows; }
     const rows = [], seenKeys = new Set();
     let sp = seasonParam[fmt] || '';
     for (let page = 1; page <= 6; page++) {
@@ -554,7 +554,7 @@
   }
   async function globalFor(lead, fmt) {
     const ck = lead + '|' + fmt, c = gstore.leads[ck];
-    if (c && Date.now() - c.t < G_TTL) return c.rows;
+    if (c && Date.now() - c.t < G_TTL && c.t > EVSTART) return c.rows;
     const base = `/gac/counters/${lead}/?sort=seen`;
     let doc;
     if (seasonParam[fmt] == null) {
@@ -867,8 +867,7 @@
   // which datacrons are where: yours on your defence, and the best fit for each of their teams
   function assignDcs(S) {
     const { me, opp } = S;
-    // a datacron of yours whose character tier names a unit on your defence is taken to be on that team
-    S.myDcRes = new Set((me.dcs || []).filter(dc => dcLive(dc) && dc.ab.some(t => t.type === 4 && S.locked && S.locked.has(t.id))).map(dc => dc.id));
+    S.myDcRes = new Set();
     // each squad on your defence gets one datacron, never shared: first those whose character tier names one of its
     // units, then the best of what's left. All of them are kept out of the attack plan.
     S.myDefDc = {};
@@ -886,16 +885,15 @@
     // theirs: the best fit for each of their likely defences in turn, then their attack teams from what's left
     const used = new Set();
     S.oppDcDef = {}; S.oppDcAtt = {};
-    [...(S.defs || []), ...(S.unseen || [])].forEach(d => {
-      if (d.ships) return;
-      const x = bestDc(opp.dcs, d.squad, used);
-      if (x) { used.add(x.dc.id); S.oppDcDef[d.lead] = x; }
-    });
+    const defDc = d => { if (d.ships || S.oppDcDef[d.lead]) return; const x = bestDc(opp.dcs, d.squad, used); if (x) { used.add(x.dc.id); S.oppDcDef[d.lead] = x; } };
+    const likely = (S.defs || []).filter(d => d.likely >= 0.1 || d.recent);
+    likely.forEach(defDc);
     (S.atts || []).forEach(a => {
       const sq = top(a.squads, 1)[0][0].split(',');
       const x = bestDc(opp.dcs, sq, used);
       if (x) { used.add(x.dc.id); S.oppDcAtt[a.lead] = x; }
     });
+    [...(S.defs || []), ...(S.unseen || [])].forEach(defDc);
   }
 
   function plan(S) {
@@ -1006,6 +1004,9 @@
       S.metaSG = metaMap(await loadMetaSG(oppHist.fmt));
       const hu = gstore.hu;
       if (hu && hu.fmt === oppHist.fmt && String(me.league || '').toUpperCase() === hu.league && Date.now() - hu.t < 3 * DAY) { S.HU = hu.data; S.HU.meta = rekey(S.HU.meta); }
+      // squads first found on the meta pages need their counters pages too
+      const extra = [...new Set(defenceCandidates(S).slice(0, 24).map(c => c.lead))].filter(L => !(L in S.G));
+      if (extra.length) { n = 0; const g2 = await pool(extra, 3, async L => { const r = await globalFor(L, oppHist.fmt); status(`Reading swgoh.gg counters for meta squads: ${++n}/${extra.length}…`); return r; }); extra.forEach((L, i) => (S.G[L] = g2[i] || [])); }
       gsave();
       analyse(S);
       // swgoh.gg GAC Insight for your league and division, if your swgoh.gg login allows it
@@ -1054,9 +1055,10 @@
           // a defence missing an omicron: its battles minus the ones where the defender had the omicron you lack
           Object.values(S.INS.cand).forEach(c => {
             ['dc', 'no'].forEach(w => {
-              if (!c[w] || !c[w + 'Lack'] || c.lackDone) return;
+              const ld = (c.lackDone = typeof c.lackDone === 'object' && c.lackDone ? c.lackDone : {});
+              if (!c[w] || !c[w + 'Lack'] || ld[w]) return;
               const m = minusV(c[w], c[w + 'Lack']);
-              if (m.minus && m.n >= 20) { c[w] = m; c.lackDone = true; }
+              if (m.minus && m.n >= 20) { c[w] = m; ld[w] = true; }
             });
           });
         };
@@ -1282,7 +1284,7 @@
       '2. Then check the opponent: the "Their attacks" tab shows the attack teams ' + opp + ' uses and what they beat or lost to. Prefer defences their main attackers struggle against.',
       '3. Datacrons: a hold % can depend on a datacron. Only count it if the report says the player has a fitting one ("Put your ... datacron on it"); "rated without it" means the number assumes no datacron. Expired datacron sets are already excluded.',
       '4. Do not put on defence a team the attack plan needs, and never reuse a unit.',
-      '5. Flag any number based on fewer than about 20 battles. "likely A–B%" is the range the real figure most likely falls in (95%).',
+      '5. Flag any number based on fewer than about 20 battles. "95% range A–B%" covers sample size only (Wilson interval), not differences in meta, rosters or mods.',
       '6. Counters: use only the counters listed for each defence. Do not invent counters or work out kill/target orders from unit abilities; say if there is no data.',
       `7. "Your defence" is what ${me} has already set${S.locked.size ? '' : ' (empty: nothing set yet)'}. Units on it are kept out of the attack plan and the suggested defence.`, '',
       '8. Give exactly as many defence squads and fleets as the brief\'s slot table says, and keep each squad in the zone the brief\'s line-up gives (zones marked "from history" are a guess: tell the player to check them). Datacrons are numbered #N so same-named copies can be told apart.',
@@ -1335,7 +1337,7 @@
       ${S.autoFmt ? `<p class="sub">Format: ${S.oppHist.fmt}, from their latest finished event. swgoh.gg only lists an event once it's over, so in the first week of a new season pick the format yourself at the top.</p>` : ''}
       ${S.note ? `<p class="warn">${S.note}</p>` : ''}${S.insWarn ? `<p class="warn">${S.insWarn}</p>` : ''}
       ${S.INS ? `<p class="sub"><b class="me">Using swgoh.gg GAC Insight for ${nice(S.INS.league)}${S.INS.dn ? ' Division ' + S.INS.dn : ''}</b> (this season, exact squads) for counters and defence holds. Squads with too few battles in your division use your whole league.</p>
-        <p class="sub"><b class="me">Datacrons counted:</b> ${(S.me.dcs || []).filter(dcLive).length} of yours and ${(S.opp.dcs || []).filter(dcLive).length} of ${esc(S.opp.name)}'s (live sets). Every number is from battles where each side had a datacron of the same strength as the one you or they can actually put on that team.${S.myDcRes && S.myDcRes.size ? ` ${S.myDcRes.size} of yours are taken as already on your defence.` : ''}</p>` : S.insNote ? `<p class="sub">${S.insNote}</p>` : ''}
+        <p class="sub"><b class="me">Datacrons counted:</b> ${(S.me.dcs || []).filter(dcLive).length} of yours and ${(S.opp.dcs || []).filter(dcLive).length} of ${esc(S.opp.name)}'s (live sets). Where there are enough battles, numbers come from battles where each side had a datacron of the strength you or they can put on that team; thin samples use all datacron strengths, and the line says so.${S.myDcRes && S.myDcRes.size ? ` ${S.myDcRes.size} of yours are on your defence.` : ''}</p>` : S.insNote ? `<p class="sub">${S.insNote}</p>` : ''}
       ${S.HU ? `<p class="sub"><b class="me">${S.INS ? `HotUtils ${nice(S.HU.league)} hold % shown beside Insight's in Suggested defence` : `Suggested defence uses HotUtils ${nice(S.HU.league)} hold %`}</b> (season ${S.HU.season}, whole league, live datacrons only)${S.INS ? ', and used for squads where Insight has under 50 battles' : ''}. <a href="#" data-act="hureset">Drop it</a></p>`
         : `<details class="sub"><summary>Optional: add HotUtils' ${nice(leagueName())} defence meta (whole league, live datacrons only${S.INS ? '; shown beside Insight and used where Insight is thin' : ''})</summary>
         <p>1. <a class="lnk" href="${esc(huUrl())}" target="_blank" rel="noopener">Open HotUtils' ${nice(leagueName())} ${S.oppHist.fmt} defence data</a> (a page of raw text).<br>2. On that page press <b>Ctrl+A</b> then <b>Ctrl+C</b> (on a Mac, Cmd).<br>3. Paste it here: <input id="hupaste" placeholder="Paste here" autocomplete="off"></p>
@@ -1462,14 +1464,14 @@
     const z = 1.96, d = 1 + z * z / n, c = (h + z * z / (2 * n)) / d, w = (z * Math.sqrt(h * (1 - h) / n + z * z / (4 * n * n))) / d;
     return [Math.max(0, c - w), Math.min(1, c + w)];
   };
-  const rng = m => { const w = m && wilson(m.h, m.n); return w ? ` <small>(likely ${Math.round(100 * w[0])}–${Math.round(100 * w[1])}%)</small>` : ''; };
+  const rng = m => { const w = m && wilson(m.h, m.n); return w ? ` <small>(95% range ${Math.round(100 * w[0])}–${Math.round(100 * w[1])}%)</small>` : ''; };
   const srcF = m => (m ? `${pct(m.h)} <small>of ${kNum(m.n)}</small>${m.src === 'ins' && m.scope && m.scope !== 'div' ? ' <small>(whole league: too few in your division)</small>' : ''}${rng(m)}${m.n < 20 ? ' <span class="warn">⚠ under 20 battles</span>' : ''}` : '–');
   // a squad's score, meta figures and per-attacker odds as it would really be set (with or without its datacron)
   const effS = c => (c.eff != null ? c.eff : !c.onDef && c.dc && c.useDc !== true && c.no ? c.no.score : c.score);
   const effVs = c => (!c.onDef && c.dc && c.useDc !== true && c.no ? c.no.vsAll : c.vsAll) || [];
   const metaList = c => [c.sg, c.hu, insEff(c)].filter(Boolean);
   const metaMean = c => { const l = metaList(c); return l.length ? mean(l.map(m => m.h)) : null; };
-  const enough = c => metaList(c).some(m => m.n >= 20) && c.conf !== 'low';
+  const enough = c => { const m = !c.onDef && c.dc && c.useDc !== true && c.no ? c.no.meta : c.meta; return !!m && m.n >= 20 && c.conf !== 'low'; };
   const dcNo = dc => '#' + ((S.me.dcs || []).indexOf(dc) + 1);
   const epOfR = r => +((r || '').match(/O(\d+)\//) || [0, 0])[1];
   // how many defence squads (and fleets) each zone takes: the most distinct defences seen in a zone in one round this
@@ -1506,7 +1508,7 @@
     for (const weak of asc) {
       const mw = metaMean(weak);
       const c = pool.find(x => !used.has(x) && effS(x) >= effS(weak) + 0.03 && (mw == null || (metaMean(x) || 0) >= mw));
-      if (!c) break;
+      if (!c) continue;
       used.add(c); swaps.push({ out: weak, in: c });
     }
     return { mine, swaps, outSet: new Set(swaps.map(x => x.out)) };
@@ -1580,7 +1582,7 @@
     h += `<h3>2. Your defence: keep, remove, add</h3>`;
     if (!R.mine.length) h += `<p class="sub">No defence saved yet. Add your placed defence at the top of the Battle plan tab to get a keep/remove review. Best squads to set are under Suggested defence.</p>`;
     else {
-      h += `<p class="sub">Score = estimated hold against ${esc(opp)}: half the meta hold % (${S.INS ? insLabel('div') : S.HU ? 'HotUtils' : 'swgoh.gg'}), half how it does against the attack teams ${esc(opp)} uses. A squad is only swapped when the replacement scores at least 3 points higher, holds at least as well on the meta sources, and has 20+ battles behind it. Keep Galactic Legends for attack: <b>${S.keepGL ? 'on' : 'off'}</b>.</p>
+      h += `<p class="sub">Score = a ranking guide, roughly an estimated hold against ${esc(opp)}: half the meta hold % (${S.INS ? insLabel('div') : S.HU ? 'HotUtils' : 'swgoh.gg'}), half how it does against the attack teams ${esc(opp)} uses. A squad is only swapped when the replacement scores at least 3 points higher, holds at least as well on the meta sources, and the hold % driving its score has 20+ battles. Keep Galactic Legends for attack: <b>${S.keepGL ? 'on' : 'off'}</b>.</p>
       <table class="stack"><tr><th></th><th>Squad</th><th>Score</th><th>${sgLabel()}</th><th>HotUtils</th><th>${S.INS ? insLabel('div') : 'Insight'}</th><th>Their main attackers${top2.length ? ` (${top2.map(a => esc(nm(a.lead))).join(', ')})` : ''}</th></tr>
       ${R.mine.map(c => (R.outSet.has(c) ? row(c, 'REMOVE', 'warn') : row(c, 'KEEP', 'me'))).join('')}${R.swaps.map(x => row(x.in, 'ADD', 'me')).join('')}</table>
       ${R.swaps.length ? R.swaps.map(x => `<p>Swap <b>${esc(x.out.squad.map(nm).join(' / '))}</b> for <b>${esc(x.in.squad.map(nm).join(' / '))}</b> (${pct(effS(x.out))} → ${pct(effS(x.in))}).</p>`).join('') : '<p><b class="me">No swaps: nothing free scores clearly better than what you have set.</b></p>'}`;
@@ -1612,7 +1614,7 @@
       S.fleet.forEach(u => add(u, 'fleet'));
       (S.plan || []).forEach(p => p.pick && p.pick.squad.forEach(u => add(u, 'attack')));
       const dup = Object.keys(seen).filter(u => seen[u].length > 1);
-      checks.push(dup.length ? `<span class="warn">Units used twice: ${dup.map(u => `${esc(nm(u))} (${seen[u].join(', ')})`).join('; ')}.</span>` : `Unit check: no unit or ship is used twice across the line-up, fleets and attack plan (${Object.keys(seen).length} units).`);
+      checks.push(dup.length ? `<span class="warn">Units used twice: ${dup.map(u => `${esc(nm(u))} (${seen[u].join(', ')})`).join('; ')}.</span>` : `Final line-up check: no unit or ship is used twice across the line-up, fleets and attack plan (${Object.keys(seen).length} units).`);
     }
     if (live.length) {
       const defOf = id => Object.values(S.myDefDc || {}).find(x => x.dc.id === id);
@@ -1622,7 +1624,7 @@
       (S.plan || []).forEach(p => { if (p.dcOn && p.pick && p.pick.myDc) dcUse[p.pick.myDc.dc.id] = (dcUse[p.pick.myDc.dc.id] || 0) + 1; });
       R.swaps.forEach(x => { if (x.in.useDc && x.in.dc) dcUse[x.in.dc.dc.id] = (dcUse[x.in.dc.dc.id] || 0) + 1; });
       const twice = live.filter(dc => dcUse[dc.id] > 1);
-      checks.push(twice.length ? `<span class="warn">Datacron used twice: ${twice.map(dcNo).join(', ')}.</span>` : `Datacron check: each of the ${Object.keys(dcUse).length} datacrons in use is on one team only.`);
+      checks.push(twice.length ? `<span class="warn">Datacron used twice: ${twice.map(dcNo).join(', ')}.</span>` : `Datacron check: no datacron is on more than one team (${Object.keys(dcUse).length} in use).`);
       const rows = live.map(dc => {
         const si = S0_sets[dc.s], days = si && si.exp ? Math.max(0, Math.round((si.exp - Date.now()) / DAY)) : null;
         const ds = defSq(dc.id), p = (S.plan || []).find(p => p.dcOn && p.pick && p.pick.myDc && p.pick.myDc.dc.id === dc.id);
@@ -1725,11 +1727,11 @@
       if (!cd || !cd.have) return '';
       const v = cd.dc || cd.no;
       return (cd.have.length ? `Your GAC omicrons counted: ${omiNames(cd.have)}${v && !v.oq ? ' <span class="warn">(too few battles with them, so not filtered)</span>' : ''}.<br>` : '')
-        + (cd.lack.length ? `<span class="warn">You don't have ${omiNames(cd.lack)}${cd.lackDone ? ', so battles where the defender had it are left out' : ', and there were too few battles to leave those out, so this may be optimistic'}.</span><br>` : '');
+        + (cd.lack.length ? `<span class="warn">You don't have ${omiNames(cd.lack)}${(cd.lackDone || {})[!c.onDef && c.dc && !c.useDc && cd.no ? 'no' : cd.dc ? 'dc' : 'no'] ? ', so battles where the defender had it are left out' : ', and there were too few battles to leave those out, so this may be optimistic'}.</span><br>` : '');
     };
     return `<h2>Suggested defence</h2><p class="sub">Squads you own, ranked half on how often they hold in the current meta (${srcTxt}) and half on how they do against the attack teams ${esc(S.opp.name)} uses${users ? ` (mostly ${users})` : ''}${S.INS ? ', each with the datacron you can actually put on it and the datacron they would bring' : ''}. Kept clear of your attack plan and each other. Tap "I've set this" once it's placed.</p>
       <div class="filters"><label class="tog"><input type="checkbox" id="keepgl" ${S.keepGL ? 'checked' : ''}> Keep Galactic Legends for attack: <b>${S.keepGL ? 'on' : 'off'}</b>${S.keepGL ? '' : ' (GL teams can be suggested for defence)'}</label></div>
-      ${S.defPlan.length ? `<table class="stack"><tr><th>Your defence</th><th>Score <small>(est. hold vs this opponent)</small></th><th>Evidence</th><th></th></tr>${S.defPlan.map(c => { const m = !c.useDc && c.dc && c.no ? c.no.meta : c.meta, vs = !c.useDc && c.dc && c.no ? c.no.vs : c.vs; return `<tr>
+      ${S.defPlan.length ? `<table class="stack"><tr><th>Your defence</th><th>Score <small>(ranking, ~hold vs this opponent)</small></th><th>Evidence</th><th></th></tr>${S.defPlan.map(c => { const m = !c.useDc && c.dc && c.no ? c.no.meta : c.meta, vs = !c.useDc && c.dc && c.no ? c.no.vs : c.vs; return `<tr>
       <td>${squadH(c.squad, 'me')}</td><td>${bar(c.eff ?? c.score)}${confH({ conf: c.conf, total: c.n + c.gN + (m ? m.n : 0) })}</td>
       <td class="sub">${dcAdvice(c)}${omiAdvice(c)}${metaH(c)}${sgH(c)}${c.n ? `Held ${c.held}/${c.n} in these histories` : 'Not in these histories'}${c.myN ? ` · on your defence ${c.myHeld}/${c.myN}` : ''}${vs.slice(0, 3).map(v => `<br>vs ${esc(nm(v.lead))}${S.INS && c.dBand !== undefined ? (v.theirDc ? ' (with their datacron)' : ' (no datacron of theirs fits)') : ''}: ${v.n ? `held ${v.held}/${v.n}` : ''}${v.n && v.gN ? ' · ' : ''}${v.gN ? `${c.exactVs ? src : 'swgoh.gg, any ' + esc(nm(c.lead)) + ' team,'} ${pct(v.gHold)} of ${kNum(v.gN)}` : ''}`).join('')}</td>
       <td><button class="chip" data-lock="${esc(c.squad.join(','))}">I've set this</button></td></tr>`; }).join('')}</table>`
@@ -1861,27 +1863,16 @@
 
   function viewAbout() {
     return `<h2>How it works</h2><ul class="about">
-      <li><b>Two sources of battles.</b> (1) Every battle in your GAC history and your opponent's on swgoh.gg (up to 8 seasons in the same format). (2) swgoh.gg's GAC counters page for each of their defences (the page swgoh.gg shows by default, or the latest season in the right format), which covers thousands of battles. Where swgoh.gg has 20 or more battles against their exact defence squad, only those are used; otherwise every team with the same leader. The same rule applies to your attacking squad, and the line under each counter says which you're looking at.</li>
-      <li><b>Format</b> is 3v3 or 5v5. Auto uses their latest finished event. swgoh.gg only lists an event after it ends, so in the first week of a new season choose the format yourself at the top.</li>
-      <li><b>Est. for you</b> starts from the swgoh.gg win rate (counted as up to 30 battles), adds the battles in your two histories on top, then nudges ±4% per relic level your counter is above or below their defence, capped at ±12%. With no swgoh.gg data it falls back to a 50/50 start worth two battles. Fleets get no relic adjustment.</li>
-      <li><b>Data label</b> counts both sources: solid = 20+ battles, some = 6 to 19, thin = 5 or fewer.</li>
-      <li><b>Battle plan</b> covers up to 18 of their defences (those set in at least 10% of the rounds in their two most recent seasons, or at all in the latest one). It tries every combination of your top 4 owned counters for the 9 most likely, then fills any gaps with the best counter whose units are all still free. It never reuses a unit, and leaves out everything in Your defence, fleets included. <b>Most banners</b> ranks by win chance × average banners per win.</li>
-      <li><b>Export report</b> (top bar) saves every tab as one text file (Markdown, with a machine-readable summary at the end) and copies it to the clipboard. It starts with instructions for an AI assistant (what each source means, and to pick defences on all three hold-% sources in exact lead order, check datacrons and flag thin data), so a guildmate can upload it to Claude, ChatGPT or Gemini and ask "Which defence should I set?". <b>Export for AI (short)</b> is about a third of the size (4 counters per defence, no full unit list or timing tab) for free AI tiers. Uploading the file works better than pasting. The latest full report is also kept in this browser's storage for swgoh.gg.</li>
-      <li><b>Decision brief</b> (first tab): slots per zone (the most defences seen in a zone in one round this season, so a minimum), a keep/remove/add review of your defence (a swap needs +3 points of score, an equal or better meta hold % and 20+ battles), the final line-up, where each datacron goes, a short attack plan and known gaps. "Likely A–B%" is the 95% range for a hold %. <b>Defence as a package</b> sends each of their attack teams at the squad of yours it does best against (Hungarian method, one attack per squad) and adds up the expected holds.</li>
-      <li><b>Your defence</b> is one list saved in this browser. The unit box lists every unit you own; ones already on your defence are marked, and choosing one shows where it is. If the list has more teams than a GAC defence holds, or was last changed before the current event started, a warning says so: press Clear all and add this round's teams. Your fleet defence starts as the fleets you set in your latest season; remove ships or add a capital ship if you've changed it.</li>
-      <li><b>Suggested defence</b> looks at every meta defence squad you own at R5+ (from swgoh.gg's squad meta page, or HotUtils once added), plus the squads in the two histories. Each is scored half on its meta hold %, and half on how it holds against the attack teams your opponent uses, weighted by how often they use them. Galactic Legends are left out unless you untick the switch.</li>
-      <li><b>swgoh.gg GAC Insight</b> is used automatically if you're signed in to swgoh.gg: for each of their defences and your 24 best free defence options (not already on your defence, and not GL teams while they're kept for attack), it reads this season's battles against that exact squad in your league and division (or your whole league if your division has under 150). Those numbers replace the all-league counters pages and squad meta. Signed out, the tool uses those instead.</li>
-      <li><b>Your defence on all three sources</b>: the squads on Your defence (taken in the order you added them, leader first) are checked in GAC Insight too, with the best datacron of yours that fits each, and listed first in "Hold % for squads you own".</li>
-      <li><b>swgoh.gg squads page</b> (https://swgoh.gg/gac/squads/?sort=percent, the current season in this format, all leagues) is read on every scout and shown on its own line under each Suggested defence, beside Insight and HotUtils. Squads are matched leader first, because the same units under a different leader hold differently; a ⚠ line says when another lead order of the same units holds 2+ points better. "Hold % for squads you own" under Suggested defence lists every squad you own on all three sources, and the export includes it.</li>
-      <li><b>HotUtils defence meta</b> (optional): HotUtils publishes defence hold % for each league, with expired datacrons left out. Their site doesn't let bookmarks or other websites read it, so you open their data page, copy it and paste it into the box under the summary. It's remembered for 3 days and covers your whole league, because HotUtils' division filter needs a login. With GAC Insight on, Insight's division hold % still drives the Suggested defence score and HotUtils' figure is shown beside it as a second opinion with a much bigger sample; where Insight has under 50 battles for a squad, HotUtils' figure is used instead and the line says so. Without Insight, HotUtils replaces swgoh.gg's all-league hold %. Counters never come from HotUtils.</li>
-      <li><b>Their usual squad</b> for each leader is the line-up they set most, with the latest season counted 4 times and the one before twice, so a team they changed recently shows the new version.</li>
-      <li><b>Zones</b> (Front top, Front bottom, Back, Fleet) are where each of their defences was placed most often, counted once per round.</li>
-      <li><b>Round by round</b> lists each of their rounds: result and score, first attack time, delay from attacks opening, the attacks their defence held against, and their own failed attacks.</li>
-      <li><b>Datacrons</b> (needs GAC Insight). Both players' datacrons are read from swgoh.gg (live sets only). For each team, the tool works out how much of a datacron actually works on it: the alignment tier (3) and faction tier (6) work if any unit in the squad matches, the character tier (9, and every third tier on a focused datacron) only if that character is in the squad. That gives a strength: none, level 1-5, or level 6+. Each counter's win % then comes only from Insight battles where the attacker had a datacron of the strength you can bring to that squad, against a defender with a datacron of the strength they can put on that team. Each suggested defence is rated the same way, against their attack teams with or without the datacron they'd bring. If a split leaves too few battles (under 20 for a counter, under 50 for a defence), it falls back to all datacrons and says so.</li>
-      <li><b>Who gets which datacron:</b> a datacron of yours whose character tier names a unit on Your defence is taken to be on that team. The rest go to the attack plan, one battle each (a datacron used in one attack isn't counted again in another; that battle is rated without it), then to the suggested defence. For your opponent, their best-fitting datacron goes to each of their defences in order of how often they set it, then to their attack teams. The line "Datacron: Lvl 6 …" under their defences is what they actually ran last time, from their battle history.</li>
-      <li><b>Omicrons</b> (needs GAC Insight). Only GAC omicrons count: those swgoh.gg marks for all GAC, plus the 3v3-only or 5v5-only ones for the format being scouted. <b>Their defences</b> are assumed to have every GAC omicron their units can take (the worst case for you), so each counter's win % comes only from battles against defences that had all of them. <b>Your suggested defences</b> use the GAC omicrons you actually have; if you're missing one, battles where the defender had it are taken out. If a filter leaves too few battles, the datacron filter is dropped first and then the omicron filter, and the line says so. Omicrons on the attacking side aren't split yet.</li>
-      <li><b>What it can't see:</b> mods and turn-meter luck. A defence nobody attacked never appears in swgoh.gg's history, and the event being played right now isn't listed until it ends.</li>
-      <li>Everything is read from public swgoh.gg pages in your own browser. Nothing is sent anywhere else. Finished rounds are cached in this browser, and swgoh.gg counters pages for 3 days, so later scouts are much faster.</li>
+      <li><b>Battles</b>: both players' GAC histories on swgoh.gg (up to 8 seasons, same format), plus swgoh.gg's counters page for each defence. Exact-squad data is used where it has 20+ battles, otherwise any team with that leader. Format: Auto uses their latest finished event; early in a season, pick it yourself.</li>
+      <li><b>Est. for you</b>: swgoh.gg win rate (worth up to 30 battles) plus your two histories, ±4% per relic level vs their team (max ±12%). Data labels: solid 20+, some 6–19, thin 5 or fewer battles.</li>
+      <li><b>Battle plan</b>: up to 18 of their likely defences; every combination of your top 4 counters for the 9 most likely, then the best free counter for the rest. No unit reused; nothing on Your defence used. Most banners = win chance × banners per win.</li>
+      <li><b>Decision brief</b>: slots per zone (a minimum: only attacked defences are recorded), keep/remove/add (a swap needs +3 points, an equal or better meta hold % and 20+ battles behind its score), line-up by zone (set zones under Your defence), datacrons (#N), short attack plan, gaps. <b>Defence as a package</b> sends each of their attack teams at the squad it beats most easily (Hungarian method, one attack per squad).</li>
+      <li><b>Suggested defence</b>: meta squads you own at R5+ plus squads from the histories, scored half on meta hold %, half against the attack teams they use. A ranking guide, not a calibrated chance. GLs left out while the switch is on.</li>
+      <li><b>Three hold-% sources</b>, always exact squad, leader first: swgoh.gg GAC Insight (your league and division, whole league if under 150 battles; needs a swgoh.gg login), HotUtils (pasted, whole league, live datacrons; kept 3 days) and the swgoh.gg squads page (all leagues). ⚠ marks a better lead order. Counters never come from HotUtils.</li>
+      <li><b>Datacrons</b> (with Insight): a datacron counts for a squad by alignment (tier 3), faction (6) or a named character (9). Each of your defence squads gets one (character matches first), never shared and kept out of attacks; the rest go to attacks, then the suggested defence. Theirs go to their likely defences, then attack teams. Thin splits fall back to all datacrons and say so.</li>
+      <li><b>Omicrons</b>: GAC ones only. Their defences are assumed to have all they can take; yours use only the ones you have, and battles with ones you lack are removed where there are enough.</li>
+      <li><b>Export</b> saves every tab plus JSON, with instructions for an AI; the short version suits free tiers. Upload the file rather than pasting.</li>
+      <li><b>Can't see</b>: mods, speed, turn meter luck, defences nobody attacked, and the event in progress. Everything runs in your browser; nothing is sent anywhere else.</li>
       <li>Credits: original GAC Scout by FireFight; GAC Scout+ (battle plan, defence planner, zones, banners) by samobudo; round-by-round report by Arrikhan (PHX).</li></ul>`;
   }
 
