@@ -165,8 +165,12 @@ test('decision brief: short view, no expiry column, warnings only in the export'
   const full = T.viewBrief();
   assert.ok(!/expires/i.test(full), 'no datacron expiry warnings');
   assert.ok(!full.includes('Warnings and gaps'), 'warnings are kept off the screen');
+  assert.match(full, /<details class="fold" data-fold="lineup">/, 'line-up starts folded');
+  assert.match(full, /<details class="fold" data-fold="dcs">/, 'datacrons start folded');
   T.setExporting(true);
-  assert.ok(T.viewBrief().includes('Warnings and gaps'), 'but kept in the export');
+  const exp = T.viewBrief();
+  assert.ok(exp.includes('Warnings and gaps'), 'but kept in the export');
+  assert.ok(exp.includes('<h3>3. Final line-up</h3>') && exp.includes('<h3>4. Datacrons</h3>') && !exp.includes('data-fold'), 'export shows folded sections as plain headings');
   T.setExporting(false);
   T.store.briefShort = true;
   const short = T.viewBrief();
