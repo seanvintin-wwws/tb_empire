@@ -1,0 +1,426 @@
+{
+"mode": "3v3",
+"season": 85,
+"instanceIds": [
+"3v3:CHAMPIONSHIPS_GRAND_ARENA_GA2_EVENT_SEASON_85:O1794434400000",
+"3v3:CHAMPIONSHIPS_GRAND_ARENA_GA2_EVENT_SEASON_85:O1793829600000"
+],
+"pending": true,
+"pendingInstanceId": "3v3:CHAMPIONSHIPS_GRAND_ARENA_GA2_EVENT_SEASON_85:O1795039200000",
+"side": "defense",
+"battleType": "character",
+"grain": "squad",
+"hideExpired": true,
+"league": "KYBER",
+"division": "ALL",
+"asOf": "2026-11-19T03:42:19.149Z",
+"floor": 1000,
+"denominators": {
+"winPct": "Wins/Battles \u2014 the ATTACKER\u2019s win, on either side",
+"holdPct": "100 \u2212 Win % \u2014 for side=defense this is the defense holding",
+"bannerEfficiency": "sum(FawBanners)/sum(FawMax)",
+"banners": "first-attempt character WINS only; always the ATTACKER\u2019s banners, on either side"
+},
+"rows": [
+{
+"leader": "JABBATHEHUTT",
+"battles": 120759,
+"wins": 86118,
+"winPct": 71.31,
+"holdPct": 28.69,
+"bannerSample": 86118,
+"avgBanners": 55.99,
+"bannerEfficiencyPct": 97.9,
+"squadKey": "JABBATHEHUTT|BOUSHH,KRRSANTAN",
+"units": [
+"JABBATHEHUTT",
+"BOUSHH",
+"KRRSANTAN"
+]
+},
+{
+"leader": "LORDVADER",
+"battles": 90087,
+"wins": 59067,
+"winPct": 65.57,
+"holdPct": 34.43,
+"bannerSample": 59067,
+"avgBanners": 55.22,
+"bannerEfficiencyPct": 96.15,
+"squadKey": "LORDVADER|APPO,OPERATIVE",
+"units": [
+"LORDVADER",
+"APPO",
+"OPERATIVE"
+]
+},
+{
+"leader": "GRANDMOFFTARKIN",
+"battles": 82097,
+"wins": 75490,
+"winPct": 91.95,
+"holdPct": 8.05,
+"bannerSample": 75490,
+"avgBanners": 55.97,
+"bannerEfficiencyPct": 97.77,
+"squadKey": "GRANDMOFFTARKIN|DISGUISEDCLONETROOPER,SCORCH",
+"units": [
+"GRANDMOFFTARKIN",
+"DISGUISEDCLONETROOPER",
+"SCORCH"
+]
+},
+{
+"leader": "BAYLANSKOLL",
+"battles": 81673,
+"wins": 60410,
+"winPct": 73.97,
+"holdPct": 26.03,
+"bannerSample": 60410,
+"avgBanners": 56.13,
+"bannerEfficiencyPct": 98.35,
+"squadKey": "BAYLANSKOLL|MARROK,SHINHATI",
+"units": [
+"BAYLANSKOLL",
+"MARROK",
+"SHINHATI"
+]
+},
+{
+"leader": "GLREY",
+"battles": 73184,
+"wins": 57613,
+"winPct": 78.72,
+"holdPct": 21.28,
+"bannerSample": 57613,
+"avgBanners": 55.28,
+"bannerEfficiencyPct": 96.98,
+"squadKey": "GLREY|BENSOLO,CALKESTIS",
+"units": [
+"GLREY",
+"BENSOLO",
+"CALKESTIS"
+]
+},
+{
+"leader": "QUEENAMIDALA",
+"battles": 70356,
+"wins": 59687,
+"winPct": 84.84,
+"holdPct": 15.16,
+"bannerSample": 59687,
+"avgBanners": 55.83,
+"bannerEfficiencyPct": 96.8,
+"squadKey": "QUEENAMIDALA|MASTERQUIGON,PADAWANOBIWAN",
+"units": [
+"QUEENAMIDALA",
+"MASTERQUIGON",
+"PADAWANOBIWAN"
+]
+},
+{
+"leader": "EMPERORPALPATINE",
+"battles": 55019,
+"wins": 45854,
+"winPct": 83.34,
+"holdPct": 16.66,
+"bannerSample": 45854,
+"avgBanners": 56.38,
+"bannerEfficiencyPct": 98.46,
+"squadKey": "EMPERORPALPATINE|MARAJADE,VADERDUELSEND",
+"units": [
+"EMPERORPALPATINE",
+"MARAJADE",
+"VADERDUELSEND"
+]
+},
+{
+"leader": "STRANGER",
+"battles": 54846,
+"wins": 33151,
+"winPct": 60.44,
+"holdPct": 39.56,
+"bannerSample": 33151,
+"avgBanners": 56.14,
+"bannerEfficiencyPct": 98.44,
+"squadKey": "STRANGER|MAULHATEFUELED,STARKILLER",
+"units": [
+"STRANGER",
+"MAULHATEFUELED",
+"STARKILLER"
+]
+},
+{
+"leader": "GLAHSOKATANO",
+"battles": 48935,
+"wins": 36489,
+"winPct": 74.57,
+"holdPct": 25.43,
+"bannerSample": 36489,
+"avgBanners": 55.68,
+"bannerEfficiencyPct": 97.47,
+"squadKey": "GLAHSOKATANO|EZRAEXILE,HUYANG",
+"units": [
+"GLAHSOKATANO",
+"EZRAEXILE",
+"HUYANG"
+]
+},
+{
+"leader": "THIRDSISTER",
+"battles": 41330,
+"wins": 35612,
+"winPct": 86.17,
+"holdPct": 13.83,
+"bannerSample": 35612,
+"avgBanners": 55.27,
+"bannerEfficiencyPct": 96.29,
+"squadKey": "THIRDSISTER|GRANDINQUISITOR,SEVENTHSISTER",
+"units": [
+"THIRDSISTER",
+"GRANDINQUISITOR",
+"SEVENTHSISTER"
+]
+},
+{
+"leader": "GLHONDO",
+"battles": 38700,
+"wins": 35718,
+"winPct": 92.29,
+"holdPct": 7.71,
+"bannerSample": 35718,
+"avgBanners": 56.08,
+"bannerEfficiencyPct": 98.3,
+"squadKey": "GLHONDO|CAPTAINSILVO,VANE",
+"units": [
+"GLHONDO",
+"CAPTAINSILVO",
+"VANE"
+]
+},
+{
+"leader": "BOSSNASS",
+"battles": 37592,
+"wins": 35893,
+"winPct": 95.48,
+"holdPct": 4.52,
+"bannerSample": 35893,
+"avgBanners": 56.39,
+"bannerEfficiencyPct": 98.86,
+"squadKey": "BOSSNASS|GUNGANPHALANX,JARJARBINKS",
+"units": [
+"BOSSNASS",
+"GUNGANPHALANX",
+"JARJARBINKS"
+]
+},
+{
+"leader": "DARTHJARJAR",
+"battles": 35571,
+"wins": 28592,
+"winPct": 80.38,
+"holdPct": 19.62,
+"bannerSample": 28592,
+"avgBanners": 55.7,
+"bannerEfficiencyPct": 97.39,
+"squadKey": "DARTHJARJAR|THERONIN,YODADSV",
+"units": [
+"DARTHJARJAR",
+"THERONIN",
+"YODADSV"
+]
+},
+{
+"leader": "MAJORPARTAGAZ",
+"battles": 34245,
+"wins": 31222,
+"winPct": 91.17,
+"holdPct": 8.83,
+"bannerSample": 31222,
+"avgBanners": 56.06,
+"bannerEfficiencyPct": 98.02,
+"squadKey": "MAJORPARTAGAZ|DEDRAMEERO,KXSECURITYDROID",
+"units": [
+"MAJORPARTAGAZ",
+"DEDRAMEERO",
+"KXSECURITYDROID"
+]
+},
+{
+"leader": "CAPTAINENOCH",
+"battles": 34123,
+"wins": 31244,
+"winPct": 91.56,
+"holdPct": 8.44,
+"bannerSample": 31244,
+"avgBanners": 56.03,
+"bannerEfficiencyPct": 98.12,
+"squadKey": "CAPTAINENOCH|DEATHTROOPERPERIDEA,NIGHTTROOPER",
+"units": [
+"CAPTAINENOCH",
+"DEATHTROOPERPERIDEA",
+"NIGHTTROOPER"
+]
+},
+{
+"leader": "CASSIANUNDERCOVER",
+"battles": 32795,
+"wins": 26538,
+"winPct": 80.92,
+"holdPct": 19.08,
+"bannerSample": 26538,
+"avgBanners": 56.27,
+"bannerEfficiencyPct": 98.46,
+"squadKey": "CASSIANUNDERCOVER|KLEYA,LUTHENRAEL",
+"units": [
+"CASSIANUNDERCOVER",
+"KLEYA",
+"LUTHENRAEL"
+]
+},
+{
+"leader": "JEDIKNIGHTLUKE",
+"battles": 30218,
+"wins": 25315,
+"winPct": 83.77,
+"holdPct": 16.23,
+"bannerSample": 25315,
+"avgBanners": 55.74,
+"bannerEfficiencyPct": 97.53,
+"squadKey": "JEDIKNIGHTLUKE|MACEWINDU,MARAJADESKYWALKER",
+"units": [
+"JEDIKNIGHTLUKE",
+"MACEWINDU",
+"MARAJADESKYWALKER"
+]
+},
+{
+"leader": "GREATMOTHERS",
+"battles": 29581,
+"wins": 20388,
+"winPct": 68.92,
+"holdPct": 31.08,
+"bannerSample": 20388,
+"avgBanners": 55.09,
+"bannerEfficiencyPct": 96.57,
+"squadKey": "GREATMOTHERS|MORGANELSBETH,NIGHTSISTERSPIRIT",
+"units": [
+"GREATMOTHERS",
+"MORGANELSBETH",
+"NIGHTSISTERSPIRIT"
+]
+},
+{
+"leader": "GLREY",
+"battles": 29498,
+"wins": 25436,
+"winPct": 86.23,
+"holdPct": 13.77,
+"bannerSample": 25436,
+"avgBanners": 54.65,
+"bannerEfficiencyPct": 95.85,
+"squadKey": "GLREY|BENSOLO,REYJEDITRAINING",
+"units": [
+"GLREY",
+"BENSOLO",
+"REYJEDITRAINING"
+]
+},
+{
+"leader": "GLAHSOKATANO",
+"battles": 29306,
+"wins": 23368,
+"winPct": 79.74,
+"holdPct": 20.26,
+"bannerSample": 23368,
+"avgBanners": 55.83,
+"bannerEfficiencyPct": 97.74,
+"squadKey": "GLAHSOKATANO|EZRAEXILE,PADAWANSABINE",
+"units": [
+"GLAHSOKATANO",
+"EZRAEXILE",
+"PADAWANSABINE"
+]
+},
+{
+"leader": "JEDIMASTERMACEWINDU",
+"battles": 27677,
+"wins": 22833,
+"winPct": 82.5,
+"holdPct": 17.5,
+"bannerSample": 22833,
+"avgBanners": 55.25,
+"bannerEfficiencyPct": 96.47,
+"squadKey": "JEDIMASTERMACEWINDU|JOCASTANU,VANGUARDTEMPLEGUARD",
+"units": [
+"JEDIMASTERMACEWINDU",
+"JOCASTANU",
+"VANGUARDTEMPLEGUARD"
+]
+},
+{
+"leader": "KELLERANBEQ",
+"battles": 26333,
+"wins": 19766,
+"winPct": 75.06,
+"holdPct": 24.94,
+"bannerSample": 19766,
+"avgBanners": 55.22,
+"bannerEfficiencyPct": 96.55,
+"squadKey": "KELLERANBEQ|JOCASTANU,VANGUARDTEMPLEGUARD",
+"units": [
+"KELLERANBEQ",
+"JOCASTANU",
+"VANGUARDTEMPLEGUARD"
+]
+},
+{
+"leader": "JEDIMASTERMACEWINDU",
+"battles": 26263,
+"wins": 22451,
+"winPct": 85.49,
+"holdPct": 14.51,
+"bannerSample": 22451,
+"avgBanners": 55.59,
+"bannerEfficiencyPct": 97.27,
+"squadKey": "JEDIMASTERMACEWINDU|DEPABILLABA,VANGUARDTEMPLEGUARD",
+"units": [
+"JEDIMASTERMACEWINDU",
+"DEPABILLABA",
+"VANGUARDTEMPLEGUARD"
+]
+},
+{
+"leader": "CT7567",
+"battles": 23624,
+"wins": 20805,
+"winPct": 88.07,
+"holdPct": 11.93,
+"bannerSample": 20805,
+"avgBanners": 55.93,
+"bannerEfficiencyPct": 97.79,
+"squadKey": "CT7567|CAPTAINREX,CT5555",
+"units": [
+"CT7567",
+"CAPTAINREX",
+"CT5555"
+]
+},
+{
+"leader": "QUIGONJINN",
+"battles": 23309,
+"wins": 20255,
+"winPct": 86.9,
+"holdPct": 13.1,
+"bannerSample": 20255,
+"avgBanners": 55.56,
+"bannerEfficiencyPct": 97.02,
+"squadKey": "QUIGONJINN|ANAKINKNIGHT,KIADIMUNDI",
+"units": [
+"QUIGONJINN",
+"ANAKINKNIGHT",
+"KIADIMUNDI"
+]
+}
+]
+}

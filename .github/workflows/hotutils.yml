@@ -1,0 +1,33 @@
+# Daily copy of HotUtils' GAC defence meta for GAC Scout+ (see tools/gac-scout/hotutils-fetch.js).
+name: HotUtils meta for GAC Scout+
+on:
+  schedule:
+    - cron: '23 19 * * *' # 19:23 UTC = early morning in Australia
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+concurrency: hotutils
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node tools/gac-scout/hotutils-fetch.js
+      - name: Commit if changed
+        id: commit
+        run: |
+          git add data/hotutils
+          if git diff --cached --quiet; then echo "no changes"; echo "changed=0" >> "$GITHUB_OUTPUT"; exit 0; fi
+          git -c user.name="GAC Scout+ bot" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "HotUtils meta for GAC Scout+ ($(date -u +%F))"
+          git push
+          echo "changed=1" >> "$GITHUB_OUTPUT"
+      # a push made by this workflow doesn't start the Pages build by itself, so ask for one
+      - name: Rebuild GitHub Pages
+        if: steps.commit.outputs.changed == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" || echo "Pages build request failed; the next push will publish it"
