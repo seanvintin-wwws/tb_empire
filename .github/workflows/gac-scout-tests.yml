@@ -1,0 +1,23 @@
+# GAC Scout+ checks on every pull request: the regression tests, and that the build still works.
+name: GAC Scout+ tests
+on:
+  pull_request:
+    paths: ['tools/gac-scout/**', '.github/workflows/gac-scout-tests.yml']
+  push:
+    branches: [main]
+    paths: ['tools/gac-scout/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Regression tests
+        run: node --test tools/gac-scout/test/scout.test.js
+      - name: Build
+        run: node tools/gac-scout/build.js

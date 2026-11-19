@@ -1,6 +1,6 @@
 // Builds GAC Scout+ for the site:
 //   js/gac-scout-plus.js  minified script that the loader bookmark pulls in (always the latest version)
-//   gac-scout.html        install page with the loader bookmark and a full-code fallback bookmark
+//   gac-scout.html        install page with the loader bookmark and the How it works notes (linked from the tool)
 // Usage: node tools/gac-scout/build.js   (needs terser: npx terser is used)
 const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
 const root = path.join(__dirname, '..', '..');
@@ -12,18 +12,12 @@ const version = (fs.readFileSync(src, 'utf8').match(/const VERSION = '([^']+)'/)
 fs.writeFileSync(path.join(root, 'js', 'gac-scout-plus.js'), min + '\n');
 
 const URL_ = 'https://seanvintin-wwws.github.io/tb_empire/js/gac-scout-plus.js';
-const loaderSrc = `(()=>{if(!/(^|\\.)swgoh\\.gg$/.test(location.hostname)){alert('GAC Scout+ runs on swgoh.gg. Open swgoh.gg in this tab, then click the bookmark again.');return}var s=document.createElement('script');s.src='${URL_}?v='+Date.now();s.onerror=function(){alert('GAC Scout+ could not load from ${URL_.split('/')[2]}. Check your connection or ad blocker, or use the full-code bookmark from the install page.')};document.body.appendChild(s)})()`;
-// Both bookmarks are fully percent-encoded, so no browser has anything left to rewrite when it saves them.
-// The full version carries the whole tool gzipped and base64-encoded (about 25,000 characters, well under
-// Firefox's 65,536-character bookmark limit) and unpacks it with the browser's built-in DecompressionStream.
-// `void` stops the bookmark returning a value, which would otherwise replace the page.
+const loaderSrc = `(()=>{if(!/(^|\\.)swgoh\\.gg$/.test(location.hostname)){alert('GAC Scout+ runs on swgoh.gg. Open swgoh.gg in this tab, then click the bookmark again.');return}var s=document.createElement('script');s.src='${URL_}?v='+Date.now();s.onerror=function(){alert('GAC Scout+ could not load from ${URL_.split('/')[2]}. Check your connection or ad blocker, then click the bookmark again.')};document.body.appendChild(s)})()`;
+// The bookmark is fully percent-encoded, so no browser has anything left to rewrite when it saves it.
+// (There used to be a second, full-code bookmark as a fallback. It never updated itself and hit Firefox's bookmark
+// size limit, so it was dropped in v3.7: the loader above is the only bookmark.)
 const loader = 'javascript:' + encodeURIComponent(loaderSrc);
-const b64 = require('zlib').gzipSync(Buffer.from(min, 'utf8'), { level: 9 }).toString('base64');
-const fullSrc = `void(async()=>{try{if(!/(^|\\.)swgoh\\.gg$/.test(location.hostname)){alert("GAC Scout+ runs on swgoh.gg. Open swgoh.gg in this tab, then click the bookmark again.");return}var b=Uint8Array.from(atob("${b64}"),function(c){return c.charCodeAt(0)}),t=await new Response(new Blob([b]).stream().pipeThrough(new DecompressionStream("gzip"))).text();(0,eval)(t)}catch(e){alert("GAC Scout+ could not start ("+e.message+"). Update your browser, or use the main GAC Scout+ bookmark.")}})()`;
-const full = 'javascript:' + encodeURIComponent(fullSrc);
-if (full.length > 60000) throw new Error('full bookmark is ' + full.length + ' characters: too long for Firefox');
-if (require('zlib').gunzipSync(Buffer.from(b64, 'base64')).toString('utf8') !== min) throw new Error('packed script does not unpack to the original');
-for (const [name, url, want] of [['loader', loader, loaderSrc], ['full', full, fullSrc]]) {
+for (const [name, url, want] of [['loader', loader, loaderSrc]]) {
   if (decodeURIComponent(url.slice('javascript:'.length)) !== want) throw new Error(name + ' bookmark does not decode back to its source');
   new Function(want); // must parse
 }
@@ -57,15 +51,18 @@ details{margin-top:14px}summary{cursor:pointer;color:#8cc8ff}
 <div class="grid">
 <div class="f"><b>Counter odds</b><p>Your two GAC histories blended with swgoh.gg's counters page, matched to their exact defence squad when there's enough data, and adjusted for your relic levels.</p></div>
 <div class="f"><b>Battle plan</b><p>The best combination of your counters against the defences they usually set, never reusing a unit or anything on your defence.</p></div>
-<div class="f"><b>Your defence</b><p>Add what you've placed and the plan stops using it. Picking a leader adds your usual team. Saved for rounds 2 and 3.</p></div>
+<div class="f"><b>Decision brief</b><p>Keep, remove or add for each of your defence squads, on all three hold-% sources, then the line-up, datacrons and a short attack plan. Switch to the short view for one line per squad.</p></div>
+<div class="f"><b>Your defence</b><p>One click fills it from the defence you set in your last round; tap ✕ on anything you've changed. The plan stops using those units. Saved for rounds 2 and 3.</p></div>
+<div class="f"><b>Their actual defence</b><p>Once their defence is up, tick the teams you can see in game and the attack plan uses exactly those instead of guessing from their history.</p></div>
 <div class="f"><b>Defence planner</b><p>Squads you own that hold best against the attack teams your opponent uses. Keeps GLs for attack unless you say otherwise.</p></div>
 <div class="f"><b>Zones and banners</b><p>Where they usually put each team (Front top, Front bottom, Back, Fleet), and counters ranked by expected banners.</p></div>
-<div class="f"><b>HotUtils meta</b><p>Optional: paste HotUtils' defence hold % for your own league (live datacrons only). It sits beside swgoh.gg Insight's division figure in the defence planner, and fills in where Insight is thin.</p></div>
+<div class="f"><b>HotUtils meta</b><p>HotUtils' defence hold % for your own league (live datacrons only) loads automatically from a daily copy. It sits beside swgoh.gg Insight's division figure, and fills in where Insight is thin.</p></div>
+<div class="f"><b>Speed check</b><p>A ⚡ warning when the team you're attacking is clearly faster than your counter (30+ speed on the fastest unit).</p></div>
 <div class="f"><b>Datacrons</b><p>Your datacrons and theirs are in the odds: each counter and defence is rated from battles with the datacron strength each side can actually bring, and the plan never uses one datacron twice.</p></div>
 <div class="f"><b>Round by round</b><p>Each of their rounds: score, first attack time and delay, what held on their defence and what they dropped.</p></div>
 <div class="f"><b>Their attacks</b><p>What they win with and which defences stopped them.</p></div>
 <div class="f"><b>When they attack</b><p>Their usual attack hours in your time zone, and average delay.</p></div>
-<div class="f"><b>Roster compare</b><p>GP, GLs, relic counts, zetas, omicrons, ships, and every unit side by side.</p></div>
+<div class="f"><b>Roster compare</b><p>GP, GLs, relic counts, zetas, omicrons, ships, and every unit side by side, A to Z, characters and ships separately.</p></div>
 </div>
 
 <h2>1. Install (once)</h2>
@@ -75,12 +72,6 @@ details{margin-top:14px}summary{cursor:pointer;color:#8cc8ff}
 <p class="note">Can't drag it, or on a phone? Copy the code below, bookmark any page, then edit that bookmark: name it <b>GAC Scout+</b> and replace its URL with the code. If you opened this page from Discord on a phone, open it in Chrome or Safari first (Discord's built-in browser can't save bookmarks).</p>
 <textarea id="code" readonly>${txt(loader)}</textarea>
 <button class="copy" data-for="code">Copy code</button>
-<details><summary>Full-code version (only if the bookmark above won't load)</summary>
-<p class="note">This contains the whole tool (packed), so it works even if this site can't be reached, but it won't update itself. Reinstall it from here to get new versions.</p>
-<p><a class="btn btn2" href="${attr(full)}" onclick="alert('Drag this button to your bookmarks bar instead of clicking it.');return false;">GAC Scout+ (full)</a></p>
-<textarea id="full" readonly>${txt(full)}</textarea>
-<button class="copy" data-for="full">Copy full code</button>
-</details>
 
 <h2>2. Use it</h2>
 <ol>
@@ -88,9 +79,10 @@ details{margin-top:14px}summary{cursor:pointer;color:#8cc8ff}
 <li>Click the <b>GAC Scout+</b> bookmark. On Android Chrome, type <code>GAC Scout+</code> in the address bar and tap the bookmark.</li>
 <li>The first time, enter <b>your own</b> ally code too. It's remembered in your browser, and you can change it in the header.</li>
 <li>Press <b>Scout</b>. The first run takes about 30 to 60 seconds. Later runs are much faster because finished rounds and swgoh.gg counters pages are cached.</li>
-<li><b>Optional:</b> under the summary, open the HotUtils link, copy that page (Ctrl+A, Ctrl+C) and paste it into the box. The suggested defence then shows your league's hold rates beside swgoh.gg's, and uses them where swgoh.gg has too few battles. It's remembered for 3 days.</li>
+<li>HotUtils' hold rates for your league load by themselves. Only if the summary says they couldn't be loaded: open the HotUtils link there, copy that page (Ctrl+A, Ctrl+C) and paste it into the box.</li>
 <li><b>Format</b> is Auto (their latest finished event). In the first week of a new season, set it to 3v3 or 5v5 yourself, because swgoh.gg only lists an event once it's over.</li>
-<li>Add the units you've put on defence under <b>Your defence</b> so the battle plan doesn't use them. Your fleet defence is filled in from your latest season; fix it there if you've changed it. Press <b>Clear all</b> when a new GAC event starts.</li>
+<li>Under <b>Your defence</b> (Battle plan tab), press <b>Fill from my last round</b>, then tap ✕ on anything you've changed. The battle plan won't use those units. Do this when a new GAC event starts; the list carries over to rounds 2 and 3.</li>
+<li>Once your opponent's defence is up, open <b>Their actual defence</b> above the attack plan and tick the teams you can see in game.</li>
 </ol>
 
 <h2>If it doesn't work</h2>
@@ -102,13 +94,29 @@ details{margin-top:14px}summary{cursor:pointer;color:#8cc8ff}
 <li><b>No history for a new opponent:</b> swgoh.gg may not have their GAC rounds, or they haven't played this format recently. Try the other format.</li>
 </ul>
 
+<h2 id="how">How it works</h2>
+<ul class="note">
+<li><b>Battles</b>: both players' GAC histories on swgoh.gg (up to 8 seasons, same format), plus swgoh.gg's counters page for each defence. Exact-squad data is used where it has 20+ battles, otherwise any team with that leader. Format: Auto uses their latest finished event; early in a season, pick it yourself.</li>
+<li><b>Est. for you</b>: swgoh.gg win rate (worth up to 30 battles) plus your two histories, ±4% per relic level vs their team (max ±12%). Data labels: solid 20+, some 6–19, thin 5 or fewer battles.</li>
+<li><b>Battle plan</b>: up to 18 of their likely defences (or exactly the ones you ticked under Their actual defence); every combination of your top 4 counters for the 9 most likely, then the best free counter for the rest. No unit reused; nothing on Your defence used. Most banners = win chance × banners per win.</li>
+<li><b>Decision brief</b>: keep/remove/add (a swap needs +3 points, an equal or better meta hold % and 20+ battles behind its score), line-up by zone, datacrons (#N) and a short attack plan. <b>Defence as a package</b> sends each of their attack teams at the squad it beats most easily (Hungarian method, one attack per squad). The short view gives one line per squad: the hold % that decides it and whether the three sources agree (within 5 points). Known gaps are worked out too, but only kept in the export.</li>
+<li><b>Fill from my last round</b>: the squads, zones and fleet from your latest round on swgoh.gg. swgoh.gg lists a round once its event is over and only records defences that were attacked, so add anything missing.</li>
+<li><b>Suggested defence</b>: meta squads you own at R5+ plus squads from the histories, scored half on meta hold %, half against the attack teams they use. A ranking guide, not a calibrated chance. GLs left out while the switch is on.</li>
+<li><b>Three hold-% sources</b>, always exact squad, leader first: swgoh.gg GAC Insight (your league and division, whole league if under 150 battles; needs a swgoh.gg login), HotUtils (whole league, live datacrons; a daily copy kept on this site, or pasted) and the swgoh.gg squads page (all leagues). ⚠ marks a better lead order. Counters never come from HotUtils.</li>
+<li><b>Datacrons</b> (with Insight): a datacron counts for a squad by alignment (tier 3), faction (6) or a named character (9). Each of your defence squads gets one (character matches first), never shared and kept out of attacks; the rest go to attacks, then the suggested defence. Theirs go to their likely defences, then attack teams. Expired sets are left out. Thin splits fall back to all datacrons and say so.</li>
+<li><b>Omicrons</b>: GAC ones only. Their defences are assumed to have all they can take; yours use only the ones you have, and battles with ones you lack are removed where there are enough.</li>
+<li><b>Speed</b>: the fastest unit on each side, from swgoh.gg (mods included). Flagged at 30+ speed; it doesn't change the win %.</li>
+<li><b>Export</b> saves every tab plus JSON, with instructions for an AI; the short version suits free tiers. Upload the file rather than pasting.</li>
+<li><b>Can't see</b>: mods beyond speed, turn meter luck, defences nobody attacked, and the event in progress. Everything runs in your browser.</li>
+</ul>
+
 <h2>Where the numbers come from</h2>
 <ul class="note">
 <li>Battles from your GAC history and your opponent's (up to 8 seasons in the same format), plus swgoh.gg's GAC counters page for each of their defences.</li>
 <li><b>Est. for you</b> starts from the swgoh.gg win rate, adds the battles in your two histories, and is nudged up to ±12% for the relic gap between your counter and their defence. Each figure is labelled solid, some or thin data.</li>
-<li>It runs on swgoh.gg itself and reads the same public pages you can open, from your own browser. Nothing is sent anywhere else.</li>
+<li>It runs on swgoh.gg itself and reads the same public pages you can open, from your own browser. Nothing is sent anywhere else. HotUtils' public league meta is copied to this site once a day so the tool can read it.</li>
 <li>The bookmark loads the tool's code from this site (GitHub Pages) each time you click it. The source is in the <a href="https://github.com/seanvintin-wwws/tb_empire/tree/main/tools/gac-scout" style="color:#8cc8ff">tools/gac-scout</a> folder of the repository.</li>
-<li>With swgoh.gg GAC Insight (sign in to swgoh.gg), datacrons are in the win %: both players' datacrons are read, and each number comes from this season's battles where each side had a datacron of the strength they can actually bring to that team. GAC omicrons count too: your opponent's defences are assumed to have every GAC omicron (worst case), and your defences use the ones you have. Mods aren't visible, so treat the odds as a guide. For what to build on your own account, see <a href="https://ahnaldt101.com/swgoh/datacrons" style="color:#8cc8ff">AhnaldT101's datacron guide</a>.</li>
+<li>With swgoh.gg GAC Insight (sign in to swgoh.gg), datacrons are in the win %: both players' datacrons are read, and each number comes from this season's battles where each side had a datacron of the strength they can actually bring to that team. GAC omicrons count too: your opponent's defences are assumed to have every GAC omicron (worst case), and your defences use the ones you have. Mods aren't in the odds (only a speed warning), so treat them as a guide. For what to build on your own account, see <a href="https://ahnaldt101.com/swgoh/datacrons" style="color:#8cc8ff">AhnaldT101's datacron guide</a>.</li>
 <li>Made for ANZGC. Original GAC Scout by FireFight; GAC Scout+ battle plan, defence planner, zones and banners by samobudo; round-by-round report by Arrikhan (PHX).</li>
 </ul>
 <script>
@@ -117,4 +125,4 @@ document.querySelectorAll('.copy').forEach(function(b){b.onclick=function(){var 
 </body></html>
 `;
 fs.writeFileSync(path.join(root, 'gac-scout.html'), html);
-console.log('built', version, 'min', min.length, 'bytes; full bookmark', full.length, 'chars');
+console.log('built', version, 'min', min.length, 'bytes; loader bookmark', loader.length, 'chars');
