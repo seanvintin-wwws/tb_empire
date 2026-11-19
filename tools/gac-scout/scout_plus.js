@@ -12,7 +12,7 @@
    - Round by round tab (from Arrikhan): result, score, first attack time and delay, their holds and their drops.
 */
 (async () => {
-  const VERSION = '3.6';
+  const VERSION = '3.6.1';
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
     alert('GAC Scout+ runs on swgoh.gg. Open https://swgoh.gg in this tab, then click the bookmark again.');
     return;
@@ -976,7 +976,8 @@
         R.swaps.forEach(({ in: c }) => {
           if (!c.dc || c.useDc) return; // rated with a datacron only when Insight has battles at that strength
           const x = bestDc(S.me.dcs, c.squad, busy2);
-          if (x && x.band === c.dc.band) { c.dc = x; c.useDc = true; c.eff = c.score; busy2.add(x.dc.id); }
+          // only when the with-datacron rating is at least as good as the one the swap was decided on
+          if (x && x.band === c.dc.band && c.score >= (c.eff ?? 0)) { c.dc = x; c.useDc = true; c.eff = c.score; busy2.add(x.dc.id); }
         });
       }
     } catch (e) { console.warn('[GAC Scout+] freed datacrons', e); }
