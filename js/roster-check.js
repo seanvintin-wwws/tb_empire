@@ -131,7 +131,7 @@
           return r.ok ? '<li><span class="rc-yes">✓</span> ' + esc(r.name) + '</li>'
             : '<li><span class="rc-x">✕</span> ' + esc(r.name) + ': ' + r.short.slice(0, 3).map(function (x) { return esc(x.n || x.s.replace(/_/g, ' ')) + ' (' + esc(x.why) + ')'; }).join(', ') + (r.short.length > 3 ? ', +' + (r.short.length - 3) + ' more' : '') + '</li>';
         }).join('');
-        return '<p class="h4">Your roster</p><p>' + who + (c.ready ? ' <span class="rc-yes">has a suggested team ready</span>' : ' <span class="rc-x">isn\'t ready yet</span>') + (c.rel ? ' (Relic ' + c.rel + '+)' : '') + '</p><ul class="rc-list">' + lines + '</ul>';
+        return '<p class="h4">Your roster</p><p class="rc-sub">Checked against the map\'s built-in team list. The Recommended teams table below is community text and isn\'t checked.</p><p>' + who + (c.ready ? ' <span class="rc-yes">has a suggested team ready</span>' : ' <span class="rc-x">isn\'t ready yet</span>') + (c.rel ? ' (Relic ' + c.rel + '+)' : '') + '</p><ul class="rc-list">' + lines + '</ul>';
       }
     }
   });
@@ -140,9 +140,9 @@
   function ui() {
     var css = document.createElement('style');
     css.textContent = 'img.mission.rc-ready{filter:drop-shadow(0 0 7px #3fb950) drop-shadow(0 0 3px #3fb950)}img.mission.rc-some{filter:drop-shadow(0 0 7px #d29922) drop-shadow(0 0 3px #d29922)}img.mission.rc-no{filter:drop-shadow(0 0 6px #f85149) grayscale(.5)}'
-      + '#rc-box{position:fixed;top:8px;right:8px;z-index:50;background:rgba(10,14,24,.88);border:1px solid #33406a;border-radius:10px;padding:8px 10px;color:#dbe3f4;font:13px system-ui,sans-serif;text-align:left;max-width:300px}'
+      + '#rc-box{position:fixed;bottom:10px;right:10px;z-index:50;background:rgba(10,14,24,.88);border:1px solid #33406a;border-radius:10px;padding:8px 10px;color:#dbe3f4;font:13px system-ui,sans-serif;text-align:left;max-width:300px}'
       + '#rc-box input{width:110px;background:#0d1322;color:#fff;border:1px solid #33406a;border-radius:6px;padding:3px 6px}#rc-box button{margin-left:4px;border-radius:6px;border:1px solid #1f6feb;background:#1f6feb;color:#fff;padding:3px 8px}#rc-box button.rc-clear{background:transparent;color:#8f9ab5;border-color:#33406a}'
-      + '#rc-box .rc-msg{margin-top:5px;font-size:12px;color:#8f9ab5}.rc-yes{color:#3fb950;font-weight:700}.rc-x{color:#f85149;font-weight:700}.rc-list{text-align:left;padding-left:18px;margin:0}.rc-note p{margin:2px 0}';
+      + '#rc-box .rc-msg{margin-top:5px;font-size:12px;color:#8f9ab5}.rc-yes{color:#3fb950;font-weight:700}.rc-x{color:#f85149;font-weight:700}.rc-list{text-align:left;padding-left:18px;margin:0}.rc-note p{margin:2px 0}.rc-sub{font-size:11px;color:#8f9ab5}';
     document.head.appendChild(css);
     var box = document.createElement('div');
     box.id = 'rc-box';
