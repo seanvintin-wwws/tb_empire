@@ -12,7 +12,7 @@
    - Round by round tab (from Arrikhan): result, score, first attack time and delay, their holds and their drops.
 */
 (async () => {
-  const VERSION = '2.9.2';
+  const VERSION = '3.0';
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
     alert('GAC Scout+ runs on swgoh.gg. Open https://swgoh.gg in this tab, then click the bookmark again.');
     return;
