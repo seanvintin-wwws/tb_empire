@@ -8,11 +8,11 @@
      matched to their exact defence squad where swgoh.gg has enough battles for it.
    - Suggested defence uses swgoh.gg hold data too, and stops tiny samples outranking solid ones.
    - "Keep GLs for attack" switch for the suggested defence (on by default).
-   - Zones named (Front top, Front bottom, Back, Fleet) instead of swgoh.gg's numbers.
+   - Zones named (North, South, Trap, Fleet) instead of swgoh.gg's numbers.
    - Round by round tab (from Arrikhan): result, score, first attack time and delay, their holds and their drops.
 */
 (async () => {
-  const VERSION = '3.7';
+  const VERSION = '3.7.1';
   // tests (tools/gac-scout/test) load this file in Node with globalThis.__gacScoutTest set: no overlay, internals exposed
   const TEST = typeof globalThis.__gacScoutTest === 'object' && globalThis.__gacScoutTest ? globalThis.__gacScoutTest : null;
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
@@ -88,6 +88,8 @@
     }
     if (!store.myDefence) { const v1 = load('gacScoutPlus:v1'); if (v1.myDefence && Array.isArray(v1.myDefence.ids)) store.myDefence = v1.myDefence; }
   } catch (e) {}
+  // zones were called Front top / Front bottom / Back before v3.7.1: rename any saved ones
+  if (store.defZones) { const RN = { 'Front top': 'North', 'Front bottom': 'South', Back: 'Trap' }; Object.keys(store.defZones).forEach(k => { if (RN[store.defZones[k]]) store.defZones[k] = RN[store.defZones[k]]; }); }
   const save = () => {
     const put = () => localStorage.setItem(SKEY, JSON.stringify(store));
     try { put(); } catch (e) {
@@ -261,7 +263,7 @@
   const lv = u => (u ? (u.ship ? u.stars + '★' : u.relic != null ? 'R' + u.relic : u.stars < 7 ? u.stars + '★ G' + u.gear : 'G' + u.gear) : '—');
 
   // ---------- GAC history ----------
-  const ZONES4 = ['Front top', 'Front bottom', 'Fleet', 'Back'];
+  const ZONES4 = ['North', 'South', 'Fleet', 'Trap']; // swgoh.gg's zone 0 front top, 1 front bottom, 2 fleet, 3 back
   const zoneName = (z, n) => (n === 4 && ZONES4[z]) || 'Zone ' + z;
 
   async function parseRound(r, owner) {
@@ -1530,7 +1532,7 @@
     return s || [lead];
   }
 
-  const ZONES3 = ['Front top', 'Front bottom', 'Back'];
+  const ZONES3 = ['North', 'South', 'Trap'];
   // your defence from your recent rounds on swgoh.gg: squads (leader first), their zones, and your fleet. swgoh.gg lists a
   // round once its event is over, and only records defences that were attacked (an opponent who barely attacked leaves
   // almost nothing), so it takes the round from your last two events where the most of your defence was recorded.
@@ -1703,7 +1705,7 @@
   }
   function viewBrief() {
     const me = S.me.name, opp = S.opp.name, sl = slotCounts(), zs = myZones(), R = S.review || defReview();
-    const top2 = S.atts.filter(a => !SHIP[a.lead]).slice(0, 2), zOrder = ['Front top', 'Front bottom', 'Back', 'Fleet'];
+    const top2 = S.atts.filter(a => !SHIP[a.lead]).slice(0, 2), zOrder = ['North', 'South', 'Trap', 'Fleet'];
     const zSort = (a, b) => (zOrder.indexOf(a) + 1 || 9) - (zOrder.indexOf(b) + 1 || 9);
     let h = `<h2>Decision brief</h2>`;
     const st = staleDefence();
@@ -1864,7 +1866,7 @@
       }).join('')}</table>`;
     const byZone = {};
     S.plan.forEach(p => (byZone[zoneTxt(p.d)] = byZone[zoneTxt(p.d)] || []).push(p.d));
-    const order = ['Front top', 'Front bottom', 'Back', 'Fleet'];
+    const order = ['North', 'South', 'Trap', 'Fleet'];
     h += `<h2>Where they put their teams</h2><p class="sub">Most common zone for each of their defences, counted once per round.</p>
       <div class="zones">${Object.entries(byZone).sort((a, b) => (order.indexOf(a[0]) + 1 || 9) - (order.indexOf(b[0]) + 1 || 9)).map(([z, ds]) => `<div class="zone"><b>${esc(z)}</b>${ds.map(d => `<div>${esc(nm(d.lead))} <small>${d.zone ? pct(d.zone.share) : ''}</small></div>`).join('')}</div>`).join('')}</div>`;
     return h + viewDefPlan();

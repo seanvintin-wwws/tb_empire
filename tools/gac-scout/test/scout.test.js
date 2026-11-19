@@ -126,8 +126,8 @@ test('fill from my last round takes the recent round with the most of your defen
   S.myHist.rounds = [{ h: r2, season: 85, rn: 2, foe: 'Someone' }];
   const L = T.lastRoundDefence();
   assert.deepStrictEqual(plain(L.squads), [['P1', 'P2', 'P3'], ['Q1', 'Q2', 'Q3']]);
-  assert.strictEqual(L.zones[T.ldKey(['P1', 'P2', 'P3'])], 'Front top');
-  assert.strictEqual(L.zones[T.ldKey(['Q1', 'Q2', 'Q3'])], 'Back');
+  assert.strictEqual(L.zones[T.ldKey(['P1', 'P2', 'P3'])], 'North');
+  assert.strictEqual(L.zones[T.ldKey(['Q1', 'Q2', 'Q3'])], 'Trap');
   assert.deepStrictEqual(plain(L.ships).sort(), ['CAPSHIP', 'SHIPB']);
   assert.strictEqual(L.round.foe, 'Someone');
 });
@@ -198,4 +198,12 @@ test('HotUtils daily copy: feed rows are checked and trimmed', () => {
   const W = {};
   vm.runInNewContext(script(d), { window: W });
   assert.strictEqual(W.__gacScoutHU['3v3|KYBER'].rows.length, d.rows.length);
+});
+
+test('zones are North / South / Trap, and old saved zone names are renamed', () => {
+  const T = {}, ls = new Map([['gacScoutPlus:settings', JSON.stringify({ defZones: { 'A>B,C': 'Front top', 'D>E,F': 'Front bottom', 'G>H,I': 'Back' } })]]);
+  vm.runInNewContext(SRC, { __gacScoutTest: T, console, location: { hostname: 'swgoh.gg', pathname: '/' }, setTimeout, clearTimeout,
+    localStorage: { getItem: k => (ls.has(k) ? ls.get(k) : null), setItem: (k, v) => ls.set(k, String(v)), removeItem: k => ls.delete(k) } });
+  assert.deepStrictEqual(plain(T.store.defZones), { 'A>B,C': 'North', 'D>E,F': 'South', 'G>H,I': 'Trap' });
+  assert.ok(!/Front top|Front bottom/.test(SRC.replace(/\/\/.*$/gm, '').replace(/'Front top': 'North', 'Front bottom': 'South'/, '')), 'no old zone names left in the tool');
 });
