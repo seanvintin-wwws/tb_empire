@@ -12,7 +12,7 @@
    - Round by round tab (from Arrikhan): result, score, first attack time and delay, their holds and their drops.
 */
 (async () => {
-  const VERSION = '3.1';
+  const VERSION = '3.2';
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
     alert('GAC Scout+ runs on swgoh.gg. Open https://swgoh.gg in this tab, then click the bookmark again.');
     return;
@@ -959,6 +959,7 @@
       pick.c.useDc = !!pick.dcOk; pick.c.eff = pick.eff;
       S.defPlan.push(pick.c);
     }
+    try { packageSim(S); } catch (e) { S.pkg = null; console.warn('[GAC Scout+] package', e); }
   }
 
   // ---------- run ----------
@@ -1254,7 +1255,8 @@
         swgohggSquads: c.sg ? { hold: c.sg.h, battles: c.sg.n } : null, betterLeadOrder: (c.sgAlt || [])[0] && (!c.sg || c.sgAlt[0].h - c.sg.h >= 0.02) ? { squad: c.sgAlt[0].u, hold: c.sgAlt[0].h, battles: c.sgAlt[0].n } : null })),
       swgohggSquadsSeason: SG.season,
       decisionBrief: (() => { try { const sl = slotCounts(), R = defReview(); const sum = c => ({ squad: c.squad, score: +effS(c).toFixed(3), swgohggSquads: c.sg ? { hold: c.sg.h, battles: c.sg.n } : null, hotutils: c.hu ? { hold: c.hu.h, battles: c.hu.n } : null, insight: insEff(c) ? { hold: insEff(c).h, battles: insEff(c).n } : null });
-        return { slots: sl.zones, slotsAreMinimums: true, keep: R.mine.filter(c => !R.outSet.has(c)).map(sum), swaps: R.swaps.map(x => ({ remove: x.out.squad, add: sum(x.in) })) }; } catch (e) { return null; } })(),
+        const P = S.pkg, pk = x => x && { expectedHolds: +x.exp.toFixed(2), matchups: x.rows.map(r => ({ squad: r.c.squad, attackedBy: r.att ? r.att.squad : 'other teams', hold: +r.hold.toFixed(3) })) };
+        return { slots: sl.zones, slotsAreMinimums: true, package: P ? { current: pk(P.cur), withSwaps: pk(P.rec) } : null, keep: R.mine.filter(c => !R.outSet.has(c)).map(sum), swaps: R.swaps.map(x => ({ remove: x.out.squad, add: sum(x.in) })) }; } catch (e) { return null; } })(),
       myDefenceSquads: myDefSquads().map(sq => { const c = (S.defCands || []).find(x => ldKey(x.squad) === ldKey(sq)) || {}; return { squad: sq, datacron: c.dc ? T0(dcTxt(c.dc, '')) : null, insight: insWith(c) ? { hold: insWith(c).h, battles: insWith(c).n } : null, hotutils: c.hu ? { hold: c.hu.h, battles: c.hu.n } : null, swgohggSquads: c.sg ? { hold: c.sg.h, battles: c.sg.n } : null }; }),
       ownedSquadHolds: (S.defCands || []).filter(c => c.sg || c.hu || c.onDef).map(c => ({ squad: c.squad, onDefence: !!c.onDef, usesDefenceUnits: !!c.usesDef, swgohggSquads: c.sg ? { hold: c.sg.h, battles: c.sg.n } : null, hotutils: c.hu ? { hold: c.hu.h, battles: c.hu.n } : null,
         insightWithDatacron: c.dc && insWith(c) ? { hold: insWith(c).h, battles: insWith(c).n } : null, insightWithoutDatacron: c.dc ? (insWithout(c) ? { hold: insWithout(c).h, battles: insWithout(c).n } : null) : insWith(c) ? { hold: insWith(c).h, battles: insWith(c).n } : null })),
@@ -1281,7 +1283,7 @@
       '6. Counters: use only the counters listed for each defence. Do not invent counters or work out kill/target orders from unit abilities; say if there is no data.',
       `7. "Your defence" is what ${me} has already set${S.locked.size ? '' : ' (empty: nothing set yet)'}. Units on it are kept out of the attack plan and the suggested defence.`, '',
       '8. Give exactly as many defence squads and fleets as the brief\'s slot table says, and say which zone each goes in.',
-      '9. For every defence you recommend, show how it does against the opponent\'s main attackers (brief, section 2).',
+      '9. For every defence you recommend, show how it does against the opponent\'s main attackers (brief, section 2), and use "Defence as a package" (2b) to check the whole set, not just each squad.',
       ...(compact ? ['10. This short version leaves out: the "How it works" and "When they attack" tabs, counters past the top 4 per defence, spare datacrons and the full list of owned squads. Say so if a question needs them.'] : []), '',
       'Good questions to answer: "Which defence teams should I set, and in what lead order?", "Is any of my current defence weak against this opponent, and what should replace it?", "For each of their likely defences, what should I attack with?"', ''].join('\n');
   }
@@ -1501,6 +1503,52 @@
     }
     return { mine, swaps, outSet: new Set(swaps.map(x => x.out)) };
   }
+
+  // ---------- defence as a package ----------
+  // Their attack teams (not using units they need for their own usual defence, each unit once) are matched to your
+  // defence squads the way that wins them the most battles: an assignment problem, solved with the Hungarian method.
+  // Squads none of their known attackers reach are hit by "other teams" at the squad's meta hold %.
+  function hungarian(a) { // square cost matrix, minimised; returns the column for each row
+    const n = a.length, u = Array(n + 1).fill(0), v = Array(n + 1).fill(0), p = Array(n + 1).fill(0), way = Array(n + 1).fill(0);
+    for (let i = 1; i <= n; i++) {
+      p[0] = i; let j0 = 0; const minv = Array(n + 1).fill(Infinity), used = Array(n + 1).fill(false);
+      do {
+        used[j0] = true; const i0 = p[j0]; let d = Infinity, j1 = 0;
+        for (let j = 1; j <= n; j++) if (!used[j]) { const c = a[i0 - 1][j - 1] - u[i0] - v[j]; if (c < minv[j]) { minv[j] = c; way[j] = j0; } if (minv[j] < d) { d = minv[j]; j1 = j; } }
+        for (let j = 0; j <= n; j++) if (used[j]) { u[p[j]] += d; v[j] -= d; } else minv[j] -= d;
+        j0 = j1;
+      } while (p[j0] !== 0);
+      do { const j1 = way[j0]; p[j0] = p[j1]; j0 = j1; } while (j0);
+    }
+    const r = Array(n); for (let j = 1; j <= n; j++) if (p[j]) r[p[j] - 1] = j - 1; return r;
+  }
+  function packageSim(S) {
+    const keep = new Set((S.defs || []).filter(d => d.likely >= 0.5 && !d.ships).flatMap(d => d.squad)), usedU = new Set();
+    const atts = (S.atts || []).filter(a => !SHIP[a.lead]).map(a => ({ lead: a.lead, squad: top(a.squads, 1)[0][0].split(',') }))
+      .filter(a => !a.squad.some(u => keep.has(u) || usedU.has(u)) && (a.squad.forEach(u => usedU.add(u)), true)).slice(0, 12);
+    const holdP = (c, lead) => { const v = lead && effVs(c).find(x => x.lead === lead); return v ? v.p : c.prior; };
+    const run = list => {
+      if (!list.length) return null;
+      const n = Math.max(list.length, atts.length);
+      const cost = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (j >= list.length ? 0 : -(1 - holdP(list[j], i < atts.length ? atts[i].lead : null)))));
+      const asg = hungarian(cost), rows = list.map(c => ({ c, att: null }));
+      asg.forEach((j, i) => { if (j < list.length && i < atts.length) rows[j].att = atts[i]; });
+      rows.forEach(r => (r.hold = holdP(r.c, r.att && r.att.lead)));
+      return { exp: rows.reduce((a, r) => a + r.hold, 0), rows };
+    };
+    const R = defReview();
+    S.pkg = R.mine.length ? { atts, cur: run(R.mine), rec: R.swaps.length ? run(R.mine.map(c => (R.swaps.find(x => x.out === c) || { in: c }).in)) : null } : null;
+  }
+  function pkgH() {
+    const P = S.pkg;
+    if (!P || !P.cur) return '';
+    const tbl = x => `<table class="stack"><tr><th>Your squad</th><th>Likely attacked by</th><th>Holds</th></tr>${x.rows.map(r => `<tr><td>${squadH(r.c.squad, 'me')}</td><td>${r.att ? squadH(r.att.squad, 'opp') : '<span class="sub">other teams</span>'}</td><td>${pct(r.hold)}${r.hold < 0.15 ? ' <span class="warn">weak spot</span>' : ''}</td></tr>`).join('')}</table>`;
+    const worse = P.rec && P.rec.exp < P.cur.exp - 0.05;
+    return `<h3>2b. Defence as a package</h3><p class="sub">${esc(S.opp.name)}'s ${P.atts.length} known attack teams (leaving out units they need for their usual defence), each sent at the squad of yours it does best against. One attack per squad; second attempts and teams they haven't shown aren't modelled.</p>
+      <p>Expected holds: <b>${P.cur.exp.toFixed(1)}</b> with your current defence${P.rec ? `, <b>${P.rec.exp.toFixed(1)}</b> with the swaps above` : ''} (out of ${P.cur.rows.length}).</p>
+      ${worse ? '<p class="warn">The swaps look worse once their attackers are matched up: consider keeping your current defence.</p>' : ''}
+      ${tbl(P.rec && !worse ? P.rec : P.cur)}`;
+  }
   function viewBrief() {
     const me = S.me.name, opp = S.opp.name, sl = slotCounts(), zs = myZones(), R = defReview();
     const top2 = S.atts.slice(0, 2), zOrder = ['Front top', 'Front bottom', 'Back', 'Fleet'];
@@ -1528,6 +1576,7 @@
       ${R.mine.map(c => (R.outSet.has(c) ? row(c, 'REMOVE', 'warn') : row(c, 'KEEP', 'me'))).join('')}${R.swaps.map(x => row(x.in, 'ADD', 'me')).join('')}</table>
       ${R.swaps.length ? R.swaps.map(x => `<p>Swap <b>${esc(x.out.squad.map(nm).join(' / '))}</b> for <b>${esc(x.in.squad.map(nm).join(' / '))}</b> (${pct(effS(x.out))} → ${pct(effS(x.in))}).</p>`).join('') : '<p><b class="me">No swaps: nothing free scores clearly better than what you have set.</b></p>'}`;
     }
+    h += pkgH();
     // 3. lineup
     if (R.mine.length) {
       const by = {};
@@ -1791,6 +1840,7 @@
       <li><b>Data label</b> counts both sources: solid = 20+ battles, some = 6 to 19, thin = 5 or fewer.</li>
       <li><b>Battle plan</b> covers up to 18 of their defences (those set in at least 10% of the rounds in their two most recent seasons, or at all in the latest one). It tries every combination of your top 4 owned counters for the 9 most likely, then fills any gaps with the best counter whose units are all still free. It never reuses a unit, and leaves out everything in Your defence, fleets included. <b>Most banners</b> ranks by win chance × average banners per win.</li>
       <li><b>Export report</b> (top bar) saves every tab as one text file (Markdown, with a machine-readable summary at the end) and copies it to the clipboard. It starts with instructions for an AI assistant (what each source means, and to pick defences on all three hold-% sources in exact lead order, check datacrons and flag thin data), so a guildmate can upload it to Claude, ChatGPT or Gemini and ask "Which defence should I set?". <b>Export for AI (short)</b> is about a third of the size (4 counters per defence, no full unit list or timing tab) for free AI tiers. Uploading the file works better than pasting. The latest full report is also kept in this browser's storage for swgoh.gg.</li>
+      <li><b>Decision brief</b> (first tab): slots per zone (the most defences seen in a zone in one round this season, so a minimum), a keep/remove/add review of your defence (a swap needs +3 points of score, an equal or better meta hold % and 20+ battles), the final line-up, where each datacron goes, a short attack plan and known gaps. "Likely A–B%" is the 95% range for a hold %. <b>Defence as a package</b> sends each of their attack teams at the squad of yours it does best against (Hungarian method, one attack per squad) and adds up the expected holds.</li>
       <li><b>Your defence</b> is one list saved in this browser. The unit box lists every unit you own; ones already on your defence are marked, and choosing one shows where it is. If the list has more teams than a GAC defence holds, or was last changed before the current event started, a warning says so: press Clear all and add this round's teams. Your fleet defence starts as the fleets you set in your latest season; remove ships or add a capital ship if you've changed it.</li>
       <li><b>Suggested defence</b> looks at every meta defence squad you own at R5+ (from swgoh.gg's squad meta page, or HotUtils once added), plus the squads in the two histories. Each is scored half on its meta hold %, and half on how it holds against the attack teams your opponent uses, weighted by how often they use them. Galactic Legends are left out unless you untick the switch.</li>
       <li><b>swgoh.gg GAC Insight</b> is used automatically if you're signed in to swgoh.gg: for each of their defences and your 24 best free defence options (not already on your defence, and not GL teams while they're kept for attack), it reads this season's battles against that exact squad in your league and division (or your whole league if your division has under 150). Those numbers replace the all-league counters pages and squad meta. Signed out, the tool uses those instead.</li>
