@@ -17,7 +17,7 @@
 <div class="wrapper">
 	<div class="container-fluid ">
 		<div class="row justify-content-center h-100 text-center">
-			<div id="app" class="map">
+			<div id="app" class="map" v-cloak>
 				<svg viewBox="0 0 750 500">
                     <path  class="part" d="M 373 381 A 1 1 0 0 0 372 475 A 1 1 0 0 0 373 381 z"					></path>
                     <path  class="part" d="M 263 417 L 326 422 C 324 435 330 452 335 461 L 274 482 C 259 455 260 434 263 416 z"					></path>
@@ -186,7 +186,7 @@
 		<img class="mission"
 		v-for="mission in missions" 
 		v-bind:key="mission.name" 
-		v-bind:class="mission.name"
+		v-bind:class="[mission.name, rcClass(mission)]"
 		v-bind:src="'../media/planet_' +  mission.type + '.png'"
 		@mouseover="isMobile ? null : selectedMission = mission; seen = true" @mouseleave="seen = false"
         v-on:click="window.open(mission.planetlink,'_self')"
@@ -198,6 +198,7 @@
 				<p class="h4">Planet Info</p>
 				<span v-for="item in selectedMission.planet">&nbsp;&nbsp;{{item}}&nbsp;&nbsp;&nbsp;</span>
 			</div>
+            <div class="mb-3 rc-note" v-if="rcNote(selectedMission)" v-html="rcNote(selectedMission)"></div>
             <div class="rewards mb-3" v-if="selectedMission.notes">
 				<span v-for="item in selectedMission.notes">&nbsp;&nbsp;{{item}}&nbsp;&nbsp;&nbsp;</span>
 			</div>
@@ -214,6 +215,7 @@
 <div class="top-left"><a href="../index.html" style="color:#FFFFFF;"> <i class="fa fa-home fa-fw"></i>Home </a><br>
 <div class="top-left"><a href="../index.html" style="color:#FFFFFF;"> <i class="fa fa-home fa-fw"></i>Home </a><br>
 <script src="../js/vue.min.js"></script>
+<script src="../js/roster-check.js"></script>
 <script src="../js/main.js"></script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7G9QJXCBX4"></script>

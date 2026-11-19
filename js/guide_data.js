@@ -555,7 +555,7 @@ window.GUIDE = {
   },
   {
    "lead": "Emperor Palpatine",
-   "with": "Emperor Palpatine, Darth Vader Duel's End, Admiral Piett, Gar Saxon, Imperial Super Commando",
+   "with": "Darth Vader Duel's End, Admiral Piett, Gar Saxon, Imperial Super Commando",
    "how": "",
    "notes": "Easy fast auto"
   }
