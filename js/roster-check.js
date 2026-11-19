@@ -159,7 +159,7 @@
     var clash = p.rows.filter(function (x) { return x.ready && !x.team; });
     var mine = p.rows.filter(function (x) { return x.planet === link.replace(/\.html$/, ''); }).sort(function (a, b) { return a.mission < b.mission ? -1 : 1; });
     return '<p class="h4">Phase ' + (pi + 1) + ' plan</p><p>Without reusing a unit, you can fill <b>' + p.filled + ' of ' + p.total + '</b> combat missions across the phase'
-      + (clash.length ? ' (<span class="rc-some-t">' + clash.length + (clash.length === 1 ? ' more is' : ' more are') + ' ready on its own but needs units used elsewhere</span>: ' + clash.map(function (x) { return esc(pname(x.planet) + ' ' + x.mission); }).join(', ') + ')' : '') + '.</p>'
+      + (clash.length ? ' (<span class="rc-some-t">' + clash.length + ' more ready on their own, but their units are needed elsewhere</span>: ' + clash.map(function (x) { return esc(pname(x.planet) + ' ' + x.mission); }).join(', ') + ')' : '') + '.</p>'
       + '<ul class="rc-list">' + mine.map(function (x) { return '<li>' + esc(x.mission) + ': ' + (x.team ? '<span class="rc-yes">' + esc(x.team) + '</span>' : x.ready ? '<span class="rc-some-t">units needed elsewhere</span>' : '<span class="rc-x">no ready team</span>') + '</li>'; }).join('') + '</ul>'
       + '<p class="rc-sub">Uses only teams the map lists, fully owned at the relic asked. Platoon units aren\'t counted.</p>';
   }
