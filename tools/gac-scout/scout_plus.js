@@ -12,7 +12,7 @@
    - Round by round tab (from Arrikhan): result, score, first attack time and delay, their holds and their drops.
 */
 (async () => {
-  const VERSION = '3.5';
+  const VERSION = '3.6';
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
     alert('GAC Scout+ runs on swgoh.gg. Open https://swgoh.gg in this tab, then click the bookmark again.');
     return;
@@ -406,12 +406,11 @@
   const rekey = o => (o && Object.keys(o).length && !Object.keys(o).some(k => k.includes('>')) ? metaMap(Object.values(o).map(m => [m.n, m.h, m.b, m.u])) : o || {});
   const SG = { season: null };
   // your defence list split into squads in the order they were added (adding a leader adds its whole team, leader first)
-  const myDefSquads = () => {
-    if (!S || !S.locked) return [];
-    const size = S.oppHist && S.oppHist.fmt === '5v5' ? 5 : 3, ids = [...S.locked].filter(u => S.me.units[u] && !S.me.units[u].ship), out = [];
-    for (let i = 0; i + size <= ids.length; i += size) out.push(ids.slice(i, i + size));
-    return out;
-  };
+  // your defence is kept as squads (leader first), so editing one squad never shifts another
+  const sqSize = () => (S && S.oppHist && S.oppHist.fmt === '5v5' ? 5 : 3);
+  const chunk = ids => { const out = []; for (let i = 0; i < ids.length; i += sqSize()) out.push(ids.slice(i, i + sqSize())); return out; };
+  const syncLocked = () => { S.defSq = S.defSq.map(q => q.filter(u => S.me.units[u] && !S.me.units[u].ship)).filter(q => q.length); S.locked = new Set(S.defSq.flat()); };
+  const myDefSquads = () => (S && S.defSq ? S.defSq.filter(q => q.length === sqSize()) : []);
   const sgLabel = () => `swgoh.gg squads${SG.season ? ` (season ${SG.season}, all leagues)` : ''}`; // swgoh.gg squads page (https://swgoh.gg/gac/squads/?sort=percent): season it was read for
   // the Insight figure that matches how the squad would really be set: with its datacron, or without when that datacron is
   // used elsewhere. null when Insight didn't rate it.
@@ -468,8 +467,8 @@
     if (!a || !b || a.scope !== b.scope || a.dBand !== b.dBand) return a;
     const out = { ...a, b: {}, minus: true };
     Object.keys(a.b).forEach(k => {
-      const sub = {}; (b.b[k] || []).forEach(r => (sub[sqKey(r[3])] = r));
-      out.b[k] = a.b[k].map(r => { const s = sub[sqKey(r[3])]; if (!s) return r; const n = r[0] - s[0], w = r[0] * r[1] - s[0] * s[1]; return n > 0 ? [n, Math.min(1, Math.max(0, w / n)), r[2], r[3]] : null; }).filter(Boolean);
+      const sub = {}; (b.b[k] || []).forEach(r => (sub[ldKey(r[3])] = r));
+      out.b[k] = a.b[k].map(r => { const s = sub[ldKey(r[3])]; if (!s) return r; const n = r[0] - s[0], w = r[0] * r[1] - s[0] * s[1]; return n > 0 ? [n, Math.min(1, Math.max(0, w / n)), r[2], r[3]] : null; }).filter(Boolean);
     });
     const all = Object.values(out.b).flat();
     out.n = all.reduce((x, r) => x + r[0], 0);
@@ -521,8 +520,8 @@
     const pick = d => (d && Array.isArray(d.battles) ? d.battles.filter(b => sqKey([b.defenseLeadId, ...(b.defenseMemberIds || [])]) === want) : []);
     const rows = pick(await one(base + (div ? `&division=${div}` : '')));
     if (!I.ok) return null;
-    return rows.sort((a, b) => b.count - a.count).slice(0, 60)
-      .map(b => [b.count | 0, +b.percentage || 0, +b.avgBannersWinsOnly || 0, [b.attackLeadId, ...(b.attackMemberIds || [])]])
+    return rows.filter(b => b.count > 0 && Number.isFinite(+b.percentage) && b.percentage !== null && +b.percentage >= 0 && +b.percentage <= 1).sort((a, b) => b.count - a.count).slice(0, 60)
+      .map(b => [b.count | 0, +b.percentage, +b.avgBannersWinsOnly || 0, [b.attackLeadId, ...(b.attackMemberIds || [])]])
       .filter(r => r[3].every(x => /^[A-Z0-9_]{2,40}$/.test(String(x))));
   }
   // rows for one attacker from a bucketed Insight result: the bucket you asked for if it has enough battles, else all buckets
@@ -706,12 +705,10 @@
     const exact = gRows.filter(r => r[4][0] === defLead && sqKey(r[4]) === want);
     const exN = exact.reduce((a, r) => a + r[0], 0);
     // GAC Insight (your league/division) and HotUtils counters are always for this exact defence squad
-    const ins = S.INS && S.INS.ctr[want];
+    const ins = S.INS && S.INS.ctr[ldKey(defSquad)];
     const insAll = ins ? Object.values(ins.b).flat() : [], insN = insAll.reduce((a, r) => a + r[0], 0);
-    const hu = S.HU && S.HU.ctr[want], huN = hu ? hu.reduce((a, r) => a + r[0], 0) : 0;
-    const src = insN >= 20 ? 'ins' : huN >= 20 ? 'hu' : 'gg';
-    const live = src === 'ins' ? insAll : hu;
-    const rows = src !== 'gg' ? live.map(r => [r[0], r[1], r[2], r[3], defSquad]) : defSquad.length > 1 && exN >= 20 ? exact : gRows.filter(r => r[4][0] === defLead);
+    const src = insN >= 20 ? 'ins' : 'gg';
+    const rows = src !== 'gg' ? insAll.map(r => [r[0], r[1], r[2], r[3], defSquad]) : defSquad.length > 1 && exN >= 20 ? exact : gRows.filter(r => r[4][0] === defLead);
     const g = {};
     rows.forEach(([n, w, avg, att]) => {
       const o = (g[att[0]] = g[att[0]] || { n: 0, w: 0, ban: 0, banW: 0, squads: {}, rows: [] });
@@ -742,7 +739,7 @@
           const same = gAll.rows.filter(r => r[3] === sk), sameN = same.reduce((x, r) => x + r[0], 0);
           return sameN >= 20 ? { ...agg(same), gSquad: true, split: false } : { ...gAll, gSquad: false, split: false };
         }
-        const bySq = insRowsFor(ins, key, r => sqKey(r[3]) === sk);
+        const bySq = insRowsFor(ins, key, r => ldKey(r[3]) === ldKey(squad));
         if (agg(bySq.rows).n >= 20) return { ...agg(bySq.rows), gSquad: true, split: bySq.split };
         const byLead = insRowsFor(ins, key, r => r[3][0] === a);
         return { ...agg(byLead.rows), gSquad: false, split: byLead.split };
@@ -759,14 +756,14 @@
       const ggNo = myDc ? rate('none') : null;
       // a second-choice datacron, used when the plan has given the first one to another battle
       const myDc2 = myDc ? bestDc(me.dcs, squad, new Set([...(S.myDcRes || []), myDc.dc.id])) : null;
-      const est2 = myDc2 ? estOf(rate(bandKey(myDc2.band))) : null;
+      const g2 = myDc2 ? rate(bandKey(myDc2.band)) : null, est2 = g2 ? estOf(g2) : null;
       const total = h.n + gg.n;
       return {
         lead: a, n: h.n, w: h.w, raw: h.n ? h.w / h.n : null, myN: h.myN, myW: h.myW, gN: gg.n, gRate, gSquad: gg.gSquad,
         squad, missing, own: !missing.length,
         ready: !missing.length && squad.every(u => { const x = me.units[u]; return x.ship ? x.stars >= 7 : x.relic != null && x.relic >= 5; }),
         myLv, delta, est: estOf(gg), estNo: ggNo ? estOf(ggNo) : null, gNoN: ggNo ? ggNo.n : 0, gNoRate: ggNo && ggNo.n ? ggNo.w / ggNo.n : null,
-        myDc, myDc2, est2, theirDc, dcSplit: gg.split,
+        myDc, myDc2, est2, n2: g2 ? g2.n : 0, rate2: g2 && g2.n ? g2.w / g2.n : null, theirDc, dcSplit: gg.split,
         conf: total >= 20 ? 'high' : total >= 6 ? 'med' : 'low', total,
         avgBan: h.banN ? h.ban / h.banN : gg.banW ? gg.ban / gg.banW : null,
         exact: src !== 'gg' || rows === exact, src, scope: src === 'ins' ? ins.scope : null, dFilt: src === 'ins' ? ins.dBand : undefined,
@@ -793,7 +790,7 @@
     });
     const tot = Object.values(C).reduce((a, o) => [a[0] + o.held, a[1] + o.n], [0, 0]);
     const poolHold = tot[1] ? tot[0] / tot[1] : 0.25;
-    const attN = atts.reduce((a, o) => a + o.n, 0) || 1;
+    const gAtts = atts.filter(a => !SHIP[a.lead]), attN = gAtts.reduce((a, o) => a + o.n, 0) || 1;
     // candidate squads: every meta defence you own at R5+, plus the squad you'd field for each leader in the histories
     // HotUtils' pasted league meta (whole league, live datacrons only) stands in for swgoh.gg's all-league squad meta,
     // and with GAC Insight on it is shown next to Insight's division hold % and used where Insight is thin
@@ -822,7 +819,8 @@
         // than that (and says so); without Insight, the pasted HotUtils meta or swgoh.gg's squad meta
         const mt = v && v.n >= 50 ? { n: v.n, h: v.h, scope: v.scope, src: 'ins' }
           : hu ? { n: hu.n, h: hu.h, src: 'hu', insThin: v ? v.n : cd ? 0 : undefined }
-          : !v && meta[key] ? { ...meta[key], src: metaSrc } : null;
+          : !v && meta[key] ? { ...meta[key], src: metaSrc }
+          : (S.metaSG || {})[key] ? { ...S.metaSG[key], src: 'gg', insThin: v ? v.n : cd ? 0 : undefined } : null;
         const mine = !v && S.HU && S.HU.mine[key];
         const oneAtt = lead => {
           if (v) {
@@ -838,7 +836,7 @@
         const base = mt ? mt.h : gN ? (gN - gW + 10 * floor) / (gN + 10) : floor;
         const K = mt ? Math.min(mt.n, 200) : gN ? Math.min(gN, 30) : 20;
         const prior = (o.held + K * base) / (o.n + K);
-        const vs = atts.map(a => {
+        const vs = gAtts.map(a => {
           const h = (H[L] || {})[a.lead], n = h ? h.n : 0, held = h ? h.n - h.w : 0;
           const ga = oneAtt(a.lead);
           const gaN = ga.reduce((x, r) => x + r[0], 0), gaW = ga.reduce((x, r) => x + r[0] * r[1], 0);
@@ -846,7 +844,7 @@
           return { lead: a.lead, n, held, gN: gaN, gHold: gaN ? 1 - gaW / gaN : null, p: (held + k * p0) / (n + k), weight: a.n / attN, theirDc: !!(S.oppDcAtt && S.oppDcAtt[a.lead]) };
         });
         // half the score is how it holds in general (meta), half how it holds against this opponent's attack teams
-        const vsScore = atts.length ? vs.reduce((x, v) => x + v.p * v.weight, 0) : prior;
+        const vsScore = gAtts.length ? vs.reduce((x, v) => x + v.p * v.weight, 0) : prior;
         return { mt, gN, gHold, prior, score: 0.5 * prior + 0.5 * vsScore, vs, exactVs: !!(v || mine) };
       };
       const onDef = myDefKeys.has(key), usesDef = !onDef && squad.some(u => S.locked && S.locked.has(u));
@@ -860,7 +858,7 @@
         lead: L, n: o.n, held: o.held, myN: o.myN, myHeld: o.myHeld, squad, prior: A.prior, gN: A.gN, gHold: A.gHold, score: A.score,
         meta: A.mt || null, metaSrc: A.mt ? A.mt.src : 'gg', hu, sg: (S.metaSG || {})[key] || null, sgAlt: sgAlt(squad), exactVs: A.exactVs,
         vs: A.vs.filter(v => v.n || v.gN).sort((a, b) => b.weight - a.weight), vsAll: A.vs,
-        dc: myX, onDef, usesDef, dBand: cd ? (cd.dc ? cd.dc.dBand : cd.no ? 0 : null) : undefined, no: B ? { score: B.score, meta: B.mt, fallback: !!B.fallback, vsAll: B.vs, vs: B.vs.filter(v => v.n || v.gN).sort((a, b) => b.weight - a.weight) } : null,
+        dc: myX, onDef, usesDef, dBand: cd ? (cd.dc ? cd.dc.dBand : cd.no ? 0 : null) : undefined, no: B ? { score: B.score, prior: B.prior, meta: B.mt, fallback: !!B.fallback, vsAll: B.vs, vs: B.vs.filter(v => v.n || v.gN).sort((a, b) => b.weight - a.weight) } : null,
         conf: evidence >= 20 ? 'high' : evidence >= 6 ? 'med' : 'low', hasGL: squad.some(u => me.units[u] && me.units[u].gl),
       };
     }).sort((a, b) => b.score - a.score);
@@ -935,7 +933,8 @@
     // then give every defence still without a counter the best one that only uses units nobody else needs
     for (let i = 0; i < defs.length; i++) {
       if (best.pick[i]) continue;
-      const c = free[i].find(c => !c.squad.some(u => taken.has(u)));
+      const busyNow = new Set([...takenDc, ...S.myDcRes]);
+      const c = free[i].filter(c => !c.squad.some(u => taken.has(u))).sort((a, b) => val(b, pickDc(b, busyNow)) - val(a, pickDc(a, busyNow)))[0];
       best.pick[i] = c || null;
       best.dc[i] = c ? pickDc(c, new Set([...takenDc, ...S.myDcRes])) : null;
       if (c) { c.squad.forEach(u => taken.add(u)); if (best.dc[i]) takenDc.add(best.dc[i].dc.id); }
@@ -968,13 +967,14 @@
       pick.c.useDc = !!pick.dcOk; pick.c.eff = pick.eff;
       S.defPlan.push(pick.c);
     }
-    // a squad the brief swaps out frees its datacron: offer it to the squads coming in
+    // the keep/remove/add decision is made once here, then a squad swapped out frees its datacron for the one coming in
+    S.review = null;
     try {
-      const R = defReview(), freed = new Set(R.swaps.map(x => (S.myDefDc || {})[ldKey(x.out.squad)]).filter(Boolean).map(x => x.dc.id));
+      const R = (S.review = defReview()), freed = new Set(R.swaps.map(x => (S.myDefDc || {})[ldKey(x.out.squad)]).filter(Boolean).map(x => x.dc.id));
       if (freed.size) {
         const busy2 = new Set([...busyDc].filter(id => !freed.has(id)));
         R.swaps.forEach(({ in: c }) => {
-          if (!c.dc || c.useDc) return;
+          if (!c.dc || c.useDc) return; // rated with a datacron only when Insight has battles at that strength
           const x = bestDc(S.me.dcs, c.squad, busy2);
           if (x && x.band === c.dc.band) { c.dc = x; c.useDc = true; c.eff = c.score; busy2.add(x.dc.id); }
         });
@@ -1012,7 +1012,9 @@
       if (oppHist.failed) return status(blockedMsg(`${esc(opp.name)}'s GAC history`), true);
       const myHist = await loadHistory(myAlly, oppHist.fmt);
       S = { me, opp, myHist, oppHist, G: {}, HU: null, INS: null, metaSG: {}, filter: 'own', rank: store.rank || 'odds', keepGL: store.keepGL !== false, autoFmt: !wantFmt };
-      S.locked = new Set(((store.myDefence && store.myDefence.ids) || []).filter(u => me.units[u] && !me.units[u].ship));
+      const md = store.myDefence || {};
+      S.defSq = Array.isArray(md.squads) ? md.squads.map(q => [...q]) : chunk(md.ids || []);
+      syncLocked();
       analyse(S);
       S.fleet = new Set((store.myFleet && Array.isArray(store.myFleet.ids) ? store.myFleet.ids : S.fleetDetected).filter(u => me.units[u] && me.units[u].ship));
       // swgoh.gg counters pages: their likely + unseen defences, then my best defence candidates
@@ -1038,7 +1040,7 @@
         assignDcs(S);
         // their defences: split by your datacron, with the datacron they can put on that team
         const theirs = {};
-        [...S.defs.filter(d => d.likely >= 0.1 || d.recent).slice(0, 18), ...S.unseen.slice(0, 6)].filter(d => !d.ships).forEach(d => (theirs[sqKey(d.squad)] = d));
+        [...S.defs.filter(d => d.likely >= 0.1 || d.recent).slice(0, 18), ...S.unseen.slice(0, 6)].filter(d => !d.ships).forEach(d => (theirs[ldKey(d.squad)] = d));
         // their defences are assumed to have every GAC omicron their units can take (worst case for you)
         const fmt = oppHist.fmt;
         const jobs = Object.values(theirs).map(d => { const om = gacOmis(d.squad, fmt); return { kind: 'ctr', sq: d.squad, band: S.oppDcDef[d.lead] ? S.oppDcDef[d.lead].band : 0, keys: ['none', 'low', 'high'], oq: OQ(om), om }; });
@@ -1067,11 +1069,11 @@
         const runJobs = js => pool(js, 2, async j => { const v = await insightSquad(I, j.sq, j.band, j.keys, j.oq); status(`Reading swgoh.gg GAC Insight for ${nice(I.league)}${I.div ? ' Division ' + I.dn : ''}, split by datacron and omicron: ${++k}/${total}…`); return v; });
         const takeJobs = (js, got) => {
           js.forEach((j, i) => {
-            const key = j.kind === 'cand' ? ldKey(j.sq) : sqKey(j.sq);
+            const key = ldKey(j.sq);
             // a checked squad with no Insight battles still gets an (empty) entry, so it isn't reported as unchecked
             if (j.kind === 'cand') S.INS.cand[key] = S.INS.cand[key] || {};
             const v = got[i]; if (!v) return;
-            if (j.kind === 'ctr') { v.om = j.om; S.INS.ctr[key] = v; S.INS.hold[key] = { n: v.n, h: v.h, scope: v.scope }; }
+            if (j.kind === 'ctr') { v.om = j.om; S.INS.ctr[key] = v; }
             else { const c = (S.INS.cand[key] = S.INS.cand[key] || {}); c[j.which] = v; if (j.have) { c.have = j.have; c.lack = j.lack; } }
           });
           // a defence missing an omicron: its battles minus the ones where the defender had the omicron you lack
@@ -1086,7 +1088,7 @@
         };
         const got = await runJobs(jobs);
         if (got.some(Boolean)) {
-          S.INS = { league: I.league, dn: I.dn, ctr: {}, hold: {}, cand: {} };
+          S.INS = { league: I.league, dn: I.dn, ctr: {}, cand: {} };
           takeJobs(jobs, got);
           gsave();
           analyse(S);
@@ -1131,7 +1133,7 @@
     let j;
     try { j = JSON.parse(text); } catch (e) { return status("That isn't HotUtils' data. Open the link, press Ctrl+A then Ctrl+C on that page, and paste everything here.", true); }
     const ids = a => Array.isArray(a) && a.length && a.every(x => typeof x === 'string' && /^[A-Z0-9_]{2,40}$/.test(x));
-    const rows = (j && Array.isArray(j.rows) ? j.rows : []).filter(r => r && ids(r.units) && Number.isFinite(r.battles) && Number.isFinite(r.holdPct));
+    const rows = (j && Array.isArray(j.rows) ? j.rows : []).filter(r => r && ids(r.units) && Number.isFinite(r.battles) && r.battles > 0 && Number.isFinite(r.holdPct) && r.holdPct >= 0 && r.holdPct <= 100);
     if (!rows.length) return status("That paste has no defence squads in it. Make sure you copied the whole HotUtils page.", true);
     if (j.mode && j.mode !== S.oppHist.fmt) return status(`That's HotUtils' ${esc(j.mode)} data, but this scout is ${S.oppHist.fmt}. Use the link above, which asks for ${S.oppHist.fmt}.`, true);
     const league = LEAGUES.includes(j.league) ? j.league : leagueName();
@@ -1181,7 +1183,7 @@
   // GAC omicrons assumed on their defence (all of them: worst case for you), and whether the numbers could use that
   const omiNames = list => list.map(o => `${esc(nm(o.key.split(':')[0]))} "${esc(o.name)}"`).join(', ');
   const theirOmiLine = d => {
-    const v = S.INS && S.INS.ctr[sqKey(d.squad)];
+    const v = S.INS && S.INS.ctr[ldKey(d.squad)];
     if (!v || !v.om || !v.om.length) return '';
     return `<div class="sub">GAC omicrons assumed on: <span class="opp">${omiNames(v.om)}</span>${v.oq ? '' : ' <span class="warn">(too few battles with them, so the numbers include teams without)</span>'}</div>`;
   };
@@ -1190,7 +1192,7 @@
     if (c.src !== 'ins') return S.INS ? '' : '<div class="sub">Not split by datacron (needs swgoh.gg GAC Insight).</div>';
     const them = c.dFilt == null ? 'any datacron on their side (too few battles to split)' : `their side with ${bandTxt(c.dFilt)}`;
     const mine = !c.myDc ? 'none of your datacrons work for this team'
-      : dcOn ? `with your <b class="me">${dcTxt(x, '')}</b>${x.band < 9 ? ` <small>(${x.band === 6 ? 'faction' : 'alignment'} tier only)</small>` : ''}${x !== c.myDc ? ` <small>(your ${dcTxt(c.myDc, '')} is used in another battle)</small>` : ''}`
+      : dcOn ? `with your <b class="me">${dcTxt(x, '')}</b>${x.band < 9 ? ` <small>(${x.band === 6 ? 'faction' : 'alignment'} tier only)</small>` : ''}${x !== c.myDc ? ` <small>(your ${dcTxt(c.myDc, '')} is used in another battle; this figure is from ${c.n2 ? `${pct(c.rate2)} of ${kNum(c.n2)} battles at this datacron's strength` : 'no battles at this strength'})</small>` : ''}`
       : `your ${dcTxt(c.myDc, '')} is used in another battle, so this is without it${c.gNoN ? ` (${pct(c.gNoRate)} of ${kNum(c.gNoN)})` : ''}`;
     return `<div class="sub">Datacrons: ${mine} · ${them}${c.dcSplit || !c.myDc || !dcOn ? '' : ' · <span class="warn">too few battles with your datacron strength, so all datacrons counted</span>'}</div>`;
   };
@@ -1274,16 +1276,16 @@
       insight: S.INS ? { league: S.INS.league, division: S.INS.dn || null } : null, hotutils: S.HU ? { league: S.HU.league, season: S.HU.season } : null,
       settings: { rank: S.rank, keepGL: S.keepGL, defenceSaved: store.myDefence && store.myDefence.saved || null, eventStart: EVSTART ? new Date(EVSTART).toISOString() : null },
       myDefence: ids(S.locked), myFleet: ids(S.fleet),
-      attackPlan: (S.plan || []).map(p => ({ their: p.d.squad, likely: p.d.likely, held: p.d.held, attacks: p.d.n, zone: zoneTxt(p.d), counter: p.pick ? p.pick.squad : null, est: p.est ?? null, clash: p.clash ? p.clash.squad : null })),
+      attackPlan: (S.plan || []).map(p => ({ their: p.d.squad, likely: p.d.likely, held: p.d.held, attacks: p.d.n, zone: zoneTxt(p.d), counter: p.pick ? p.pick.squad : null, datacron: p.dcX ? dcNo(p.dcX.dc) + ' ' + T0(dcTxt(p.dcX, '')) : null, est: p.est ?? null, clash: p.clash ? p.clash.squad : null })),
       suggestedDefence: (S.defPlan || []).map(c => ({ squad: c.squad, holdEst: c.eff ?? c.score, conf: c.conf, datacron: c.useDc && c.dc ? T0(dcTxt(c.dc, '')) : null,
         insight: insEff(c) ? { hold: insEff(c).h, battles: insEff(c).n, datacron: c.useDc && c.dc ? 'with' : 'without' } : null, hotutils: c.hu ? { hold: c.hu.h, battles: c.hu.n } : null,
         swgohggSquads: c.sg ? { hold: c.sg.h, battles: c.sg.n } : null, betterLeadOrder: (c.sgAlt || [])[0] && (!c.sg || c.sgAlt[0].h - c.sg.h >= 0.02) ? { squad: c.sgAlt[0].u, hold: c.sgAlt[0].h, battles: c.sgAlt[0].n } : null })),
       swgohggSquadsSeason: SG.season,
-      decisionBrief: (() => { try { const sl = slotCounts(), R = defReview(); const sum = c => ({ squad: c.squad, score: +effS(c).toFixed(3), swgohggSquads: c.sg ? { hold: c.sg.h, battles: c.sg.n } : null, hotutils: c.hu ? { hold: c.hu.h, battles: c.hu.n } : null, insight: insEff(c) ? { hold: insEff(c).h, battles: insEff(c).n } : null });
+      decisionBrief: (() => { try { const sl = slotCounts(), R = S.review || defReview(); const sum = c => ({ squad: c.squad, score: +effS(c).toFixed(3), swgohggSquads: c.sg ? { hold: c.sg.h, battles: c.sg.n } : null, hotutils: c.hu ? { hold: c.hu.h, battles: c.hu.n } : null, insight: insEff(c) ? { hold: insEff(c).h, battles: insEff(c).n } : null });
         const P = S.pkg, pk = x => x && { expectedHolds: +x.exp.toFixed(2), matchups: x.rows.map(r => ({ squad: r.c.squad, attackedBy: r.att ? r.att.squad : 'other teams', hold: +r.hold.toFixed(3), battlesHere: r.n, leagueBattles: r.gN })) };
         const zs = myZones();
         return { slots: sl.zones, slotsAreMinimums: true, zones: Object.fromEntries(R.mine.map(c => { const e = zs['@' + ldKey(c.squad)] || zs[c.squad[0]]; return [c.squad.join('/'), e ? (e.saved ? e.zone : e.zone + ' (from history)') : null]; })),
-          datacrons: (S.me.dcs || []).filter(dcLive).map(dc => ({ no: dcNo(dc), level: dc.lv, set: setName(dc.s), characters: dc.ab.filter(t => t.type === 4).map(t => t.name), onDefence: (() => { const k = Object.keys(S.myDefDc || {}).find(k => S.myDefDc[k].dc.id === dc.id); return k || null; })() })), package: P ? { current: pk(P.cur), withSwaps: pk(P.rec) } : null, keep: R.mine.filter(c => !R.outSet.has(c)).map(sum), swaps: R.swaps.map(x => ({ remove: x.out.squad, add: sum(x.in) })) }; } catch (e) { return null; } })(),
+          datacrons: (S.me.dcs || []).filter(dcLive).map(dc => ({ no: dcNo(dc), level: dc.lv, set: setName(dc.s), characters: dc.ab.filter(t => t.type === 4).map(t => t.name), finalUse: (() => { const k = Object.keys(S.myDefDc || {}).find(k => S.myDefDc[k].dc.id === dc.id), sw = R.swaps.find(x => x.in.useDc && x.in.dc && x.in.dc.dc.id === dc.id), out = k && R.swaps.some(x => ldKey(x.out.squad) === k), p = (S.plan || []).find(p => p.dcX && p.dcX.dc.id === dc.id); return sw ? 'defence (added): ' + sw.in.squad.join('/') : k && !out ? 'defence: ' + k : p ? 'attack: ' + p.pick.squad.join('/') : 'spare'; })() })).filter(x => !COMPACT || x.finalUse !== 'spare'), package: P ? { current: pk(P.cur), withSwaps: pk(P.rec) } : null, keep: R.mine.filter(c => !R.outSet.has(c)).map(sum), swaps: R.swaps.map(x => ({ remove: x.out.squad, add: sum(x.in) })) }; } catch (e) { return null; } })(),
       myDefenceSquads: myDefSquads().map(sq => { const c = (S.defCands || []).find(x => ldKey(x.squad) === ldKey(sq)) || {}; return { squad: sq, datacron: c.dc ? T0(dcTxt(c.dc, '')) : null, insight: insWith(c) ? { hold: insWith(c).h, battles: insWith(c).n } : null, hotutils: c.hu ? { hold: c.hu.h, battles: c.hu.n } : null, swgohggSquads: c.sg ? { hold: c.sg.h, battles: c.sg.n } : null }; }),
       ownedSquadHolds: (S.defCands || []).filter(c => c.sg || c.hu || c.onDef).map(c => ({ squad: c.squad, onDefence: !!c.onDef, usesDefenceUnits: !!c.usesDef, swgohggSquads: c.sg ? { hold: c.sg.h, battles: c.sg.n } : null, hotutils: c.hu ? { hold: c.hu.h, battles: c.hu.n } : null,
         insightWithDatacron: c.dc && insWith(c) ? { hold: insWith(c).h, battles: insWith(c).n } : null, insightWithoutDatacron: c.dc ? (insWithout(c) ? { hold: insWithout(c).h, battles: insWithout(c).n } : null) : insWith(c) ? { hold: insWith(c).h, battles: insWith(c).n } : null })),
@@ -1324,7 +1326,7 @@
     try {
       TABS.filter(([k]) => !(compact && (k === 'about' || k === 'time'))).forEach(([k, l]) => { let b; try { b = mdOf(VIEWS[k]()); } catch (e) { b = `(this tab could not be exported: ${e.message})`; } parts.push('', `# Tab: ${l}`, '', b); });
     } finally { S.filter = keep.filter; store.showShips = keep.ships; COMPACT = keep.c; }
-    const data = reportData(); if (compact) delete data.ownedSquadHolds;
+    COMPACT = compact; const data = reportData(); COMPACT = keep.c; if (compact) delete data.ownedSquadHolds;
     parts.push('', '# Data (machine-readable)', '', '```json', JSON.stringify(data, null, compact ? 0 : 1), '```', '');
     return parts.join('\n');
   }
@@ -1367,7 +1369,9 @@
   }
 
   function persistAndReplan(tab = 'plan') {
-    store.myDefence = { ids: [...S.locked], saved: new Date().toISOString() };
+    syncLocked();
+    store.myDefence = { ids: [...S.locked], squads: S.defSq, saved: new Date().toISOString() };
+    S.defCands = defenceCandidates(S); // squads on your defence changed: rebuild which candidates are on it
     store.rank = S.rank; store.keepGL = S.keepGL; save();
     plan(S); show(tab);
   }
@@ -1377,8 +1381,8 @@
     out.querySelectorAll('[data-t]').forEach(a => (a.onclick = e => { e.preventDefault(); show(a.dataset.t); }));
     out.querySelectorAll('[data-filter]').forEach(b => (b.onclick = () => { S.filter = b.dataset.filter; show(tab); }));
     out.querySelectorAll('[data-rank]').forEach(b => (b.onclick = () => { S.rank = b.dataset.rank; persistAndReplan(tab); }));
-    out.querySelectorAll('[data-unlock]').forEach(b => (b.onclick = () => { S.locked.delete(b.dataset.unlock); persistAndReplan(tab); }));
-    out.querySelectorAll('[data-lock]').forEach(b => (b.onclick = () => { b.dataset.lock.split(',').forEach(u => S.locked.add(u)); persistAndReplan(tab); }));
+    out.querySelectorAll('[data-unlock]').forEach(b => (b.onclick = () => { S.defSq = S.defSq.map(q => q.filter(u => u !== b.dataset.unlock)); persistAndReplan(tab); }));
+    out.querySelectorAll('[data-lock]').forEach(b => (b.onclick = () => { const q = b.dataset.lock.split(',').filter(u => !S.locked.has(u)); if (q.length) S.defSq.push(q); persistAndReplan(tab); }));
     const fb = $('#fleetbox'); if (fb) fb.ontoggle = () => { S.fleetOpen = fb.open; };
     const mb = $('#metabox'); if (mb) mb.ontoggle = () => { S.metaOpen = mb.open; };
     const db = $('#defbox'); if (db) db.ontoggle = () => { S.defOpen = db.open; };
@@ -1388,12 +1392,12 @@
     out.querySelectorAll('[data-act="fleetreset"]').forEach(b => (b.onclick = () => { fleetReset(); persistAndReplan(tab); }));
     const hp = $('#hupaste'); if (hp) hp.onpaste = e => { const t = (e.clipboardData || window.clipboardData).getData('text'); e.preventDefault(); takeHotUtils(t); };
     out.querySelectorAll('[data-act="hureset"]').forEach(b => (b.onclick = e => { e.preventDefault(); S.HU = null; delete gstore.hu; gsave(); S.defCands = defenceCandidates(S); plan(S); show(tab); }));
-    out.querySelectorAll('[data-act="clear"]').forEach(b => (b.onclick = () => { S.locked.clear(); fleetReset(); persistAndReplan(tab); }));
+    out.querySelectorAll('[data-act="clear"]').forEach(b => (b.onclick = () => { S.defSq = []; fleetReset(); persistAndReplan(tab); }));
     out.querySelectorAll('[data-zone]').forEach(sel => (sel.onchange = () => { const z = (store.defZones = store.defZones || {}); if (sel.value) z[sel.dataset.zone] = sel.value; else delete z[sel.dataset.zone]; save(); S.defOpen = true; try { packageSim(S); } catch (e) {} show(tab); }));
     const gl = $('#keepgl'); if (gl) gl.onchange = () => { S.keepGL = gl.checked; persistAndReplan(tab); };
     const sh = $('#ships'); if (sh) sh.onchange = () => { store.showShips = sh.checked; save(); show(tab); };
     out.querySelectorAll('[data-act="export"]').forEach(b => (b.onclick = () => {
-      const data = { app: 'gac-scout-plus', ally: MY, saved: new Date().toISOString(), defence: [...S.locked].map(id => ({ id, name: nm(id) })), fleet: [...S.fleet].map(id => ({ id, name: nm(id) })), zones: store.defZones || {} };
+      const data = { app: 'gac-scout-plus', ally: MY, saved: new Date().toISOString(), defence: [...S.locked].map(id => ({ id, name: nm(id) })), squads: S.defSq, fleet: [...S.fleet].map(id => ({ id, name: nm(id) })), zones: store.defZones || {} };
       const a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
       a.download = `gac-defence-${new Date().toISOString().slice(0, 10)}.json`;
@@ -1410,7 +1414,7 @@
         const ids = pick(j.defence, false), ships = pick(j.fleet, true);
         if (new Set(ids).size !== ids.length) throw new Error('a unit is listed twice, which would shift the squads');
         if (j.app !== 'gac-scout-plus' || !(ids.length + ships.length)) throw new Error('not a GAC Scout+ defence file');
-        S.locked = new Set(ids);
+        S.defSq = Array.isArray(j.squads) && j.squads.every(Array.isArray) ? j.squads.map(q => q.filter(u => ids.includes(u))) : chunk(ids);
         if (j.zones && typeof j.zones === 'object') store.defZones = j.zones;
         if (Array.isArray(j.fleet)) { S.fleet = new Set(ships); fleetEdited(); }
         persistAndReplan(tab);
@@ -1429,7 +1433,10 @@
         return status(`${esc(nm(u.id))} is already on your defence. Tap ✕ on it to take it off.`);
       }
       const ids = usualSquad(u.id);
-      ids.forEach(id => (SHIP[id] ? S.fleet : S.locked).add(id));
+      const ch = ids.filter(id => !SHIP[id] && !S.locked.has(id));
+      ids.filter(id => SHIP[id]).forEach(id => S.fleet.add(id));
+      if (ch.length > 1) S.defSq.push(ch); // a usual team: its own squad
+      else if (ch.length) { const part = S.defSq.find(q => q.length < sqSize()); part ? part.push(ch[0]) : S.defSq.push(ch); } // one unit: fills a part squad first
       if (ids.some(id => SHIP[id])) fleetEdited();
       S.defOpen = true;
       persistAndReplan(tab);
@@ -1464,13 +1471,12 @@
     const stale = [];
     if (chars > maxSq * size) stale.push(`It has ${chars} characters, about ${Math.round(chars / size)} squads of ${size}: more than a GAC defence holds.`);
     if (S.locked.size && EVSTART && savedT && savedT < EVSTART) stale.push(`It was last changed before this GAC event started.`);
-    const odd = chars % size;
+    const part = (S.defSq || []).filter(q => q.length !== size);
     const staleH = stale.length ? `<p class="warn">⚠ This list looks left over from an earlier event. ${stale.join(' ')} Everything on it is kept out of the attack plan and the suggested defence, so the plan will be wrong until it's fixed: press <b>Clear all</b>, then add this round's teams.</p>` : '';
-    const chunks = []; const ids = [...S.locked];
-    for (let i = 0; i < ids.length; i += size) chunks.push(ids.slice(i, i + size));
-    const nSq = Math.round(chars / size);
+    const chunks = S.defSq || [];
+    const nSq = myDefSquads().length;
     const open = S.defOpen ?? (!S.locked.size || stale.length > 0);
-    return `<h2>Your defence</h2>${staleH}${odd ? `<p class="warn">⚠ The last ${odd} unit${odd === 1 ? '' : 's'} on your defence list ${odd === 1 ? "doesn't" : "don't"} make a full squad of ${size}, so ${odd === 1 ? "it isn't" : "they aren't"} counted as a defence team (no datacron, not in the brief). Add the rest of that team or remove ${odd === 1 ? 'it' : 'them'}.</p>` : ''}<details id="defbox"${open ? ' open' : ''}><summary><b>${S.locked.size ? `${nSq} squad${nSq === 1 ? '' : 's'} (${chars} characters)` : 'Nothing set yet'}</b> · fleet: ${[...S.fleet].filter(id => CAP[id]).map(nm).map(esc).join(', ') || 'none'} <span class="sub">(tap to ${open ? 'hide' : 'show and edit'})</span></summary><p class="sub">Pick a leader and the team you usually set with it is added. Tap ✕ on any unit to correct it, or add single units. The attack plan won't use them.</p>
+    return `<h2>Your defence</h2>${staleH}${part.length ? `<p class="warn">⚠ ${part.map(q => esc(q.map(nm).join(' / '))).join('; ')}: not a full squad of ${size}, so not counted as a defence team (no datacron, not in the brief). Add a unit to it, or remove it.</p>` : ''}<details id="defbox"${open ? ' open' : ''}><summary><b>${S.locked.size ? `${nSq} squad${nSq === 1 ? '' : 's'} (${chars} characters)` : 'Nothing set yet'}</b> · fleet: ${[...S.fleet].filter(id => CAP[id]).map(nm).map(esc).join(', ') || 'none'} <span class="sub">(tap to ${open ? 'hide' : 'show and edit'})</span></summary><p class="sub">Pick a leader and the team you usually set with it is added. Tap ✕ on any unit to correct it, or add single units. The attack plan won't use them.</p>
       <p class="sub">Saved in this browser (one list, not per opponent), so it carries over to rounds 2 and 3. Use <b>Save to file</b> to move it to another device, and <b>Clear all</b> when a new GAC event starts.${saved}</p>
       <div class="picker"><input id="addu" list="myunits" placeholder="Add a unit or ship…" autocomplete="off"><datalist id="myunits">${mine.map(u => `<option value="${esc(nm(u.id))}">${lv(u)}${placed(u) ? ' · already on your defence' : u.ship ? (CAP[u.id] ? ' · adds your usual fleet' : ' · ship') : S.myDefByLead[u.id] ? ' · adds your usual team' : ''}</option>`).join('')}</datalist>
       ${any ? '<button class="chip" data-act="export">Save to file</button>' : ''}<button class="chip" data-act="import">Load from file</button><input type="file" id="impfile" accept=".json,application/json" hidden>${S.locked.size || store.myFleet ? '<button class="chip" data-act="clear">Clear all</button>' : ''}</div>
@@ -1560,7 +1566,7 @@
     const keep = new Set((S.defs || []).filter(d => d.likely >= 0.5 && !d.ships).flatMap(d => d.squad)), usedU = new Set();
     const atts = (S.atts || []).filter(a => !SHIP[a.lead]).map(a => ({ lead: a.lead, squad: top(a.squads, 1)[0][0].split(',') }))
       .filter(a => !a.squad.some(u => keep.has(u) || usedU.has(u)) && (a.squad.forEach(u => usedU.add(u)), true)).slice(0, 12);
-    const holdP = (c, lead) => { const v = lead && effVs(c).find(x => x.lead === lead); return v ? v.p : c.prior; };
+    const holdP = (c, lead) => { const v = lead && effVs(c).find(x => x.lead === lead); return v ? v.p : !c.onDef && c.dc && c.useDc !== true && c.no && c.no.prior != null ? c.no.prior : c.prior; };
     const run = list => {
       if (!list.length) return null;
       const n = Math.max(list.length, atts.length);
@@ -1568,9 +1574,9 @@
       const asg = hungarian(cost), rows = list.map(c => ({ c, att: null }));
       asg.forEach((j, i) => { if (j < list.length && i < atts.length) rows[j].att = atts[i]; });
       rows.forEach(r => { r.hold = holdP(r.c, r.att && r.att.lead); const v = r.att && effVs(r.c).find(x => x.lead === r.att.lead); r.n = v ? v.n : 0; r.gN = v ? v.gN || 0 : 0; });
-      return { exp: rows.reduce((a, r) => a + r.hold, 0), rows };
+      return { exp: rows.reduce((a, r) => a + r.hold, 0), base: rows.filter(r => !r.att).reduce((a, r) => a + r.hold, 0), rows };
     };
-    const R = defReview();
+    const R = S.review || defReview();
     S.pkg = R.mine.length ? { atts, cur: run(R.mine), rec: R.swaps.length ? run(R.mine.map(c => (R.swaps.find(x => x.out === c) || { in: c }).in)) : null } : null;
   }
   function pkgH() {
@@ -1580,13 +1586,13 @@
     const tbl = x => `<table class="stack"><tr><th>Your squad</th><th>Likely attacked by</th><th>Holds</th></tr>${x.rows.map(r => `<tr><td>${squadH(r.c.squad, 'me')}</td><td>${r.att ? squadH(r.att.squad, 'opp') : '<span class="sub">other teams</span>'}</td><td>${r.hold < 0.01 ? 'under 1%' : pct(r.hold)}${r.hold < 0.15 ? ' <span class="warn">weak spot</span>' : ''}${ev(r)}</td></tr>`).join('')}</table>`;
     const worse = P.rec && P.rec.exp < P.cur.exp - 0.05, gain = P.rec ? P.rec.exp - P.cur.exp : 0;
     return `<h3>2b. Defence as a package</h3><p class="sub">${esc(S.opp.name)}'s ${P.atts.length} known attack teams (leaving out units they need for their usual defence), each sent at the squad of yours it does best against. One attack per squad; second attempts and teams they haven't shown aren't modelled.</p>
-      <p>Expected holds: <b>${P.cur.exp.toFixed(1)}</b> with your current defence${P.rec ? `, <b>${P.rec.exp.toFixed(1)}</b> with the swaps above` : ''} (out of ${P.cur.rows.length}).</p>
-      ${worse ? '<p class="warn">The swaps look worse once their attackers are matched up: consider keeping your current defence.</p>' : P.rec && gain < 0.5 ? `<p class="sub"><b>Small gain</b> (+${gain.toFixed(1)} expected holds): well within the uncertainty of these figures, so keeping your current defence is just as reasonable.</p>` : ''}
+      <p>Expected holds: <b>${P.cur.exp.toFixed(1)}</b> with your current defence${P.rec ? `, <b>${P.rec.exp.toFixed(1)}</b> with the swaps above` : ''} (out of ${P.cur.rows.length}). ${P.cur.base ? `<small>${P.cur.base.toFixed(1)} of that is squads none of their known attack teams reach, at their overall meta hold %.</small>` : ''}</p>
+      ${worse ? '<p class="warn">The swaps look worse once their attackers are matched up: consider keeping your current defence.</p>' : P.rec && gain < 0.5 ? `<p class="sub"><b>Small gain</b> (+${gain.toFixed(1)} expected holds, under the 0.5 this tool treats as meaningful), so keeping your current defence is just as reasonable.</p>` : ''}
       ${tbl(P.rec && !worse ? P.rec : P.cur)}`;
   }
   function viewBrief() {
-    const me = S.me.name, opp = S.opp.name, sl = slotCounts(), zs = myZones(), R = defReview();
-    const top2 = S.atts.slice(0, 2), zOrder = ['Front top', 'Front bottom', 'Back', 'Fleet'];
+    const me = S.me.name, opp = S.opp.name, sl = slotCounts(), zs = myZones(), R = S.review || defReview();
+    const top2 = S.atts.filter(a => !SHIP[a.lead]).slice(0, 2), zOrder = ['Front top', 'Front bottom', 'Back', 'Fleet'];
     const zSort = (a, b) => (zOrder.indexOf(a) + 1 || 9) - (zOrder.indexOf(b) + 1 || 9);
     const nSq = Object.entries(sl.zones).filter(([z]) => z !== 'Fleet').reduce((a, [, n]) => a + n, 0), nFl = sl.zones.Fleet || 0;
     let h = `<h2>Decision brief</h2><p class="sub">Everything needed for the defence decision on one page. The other tabs have the detail.</p>`;
@@ -1620,7 +1626,7 @@
         (by[z] = by[z] || []).push({ c: sq, src: !e ? '' : e.saved ? '' : 'from history: check', sw: !!sw });
       });
       const caps = [...S.fleet].filter(u => CAP[u]), inF = new Set();
-      const fleets = caps.map(cp => { const base = (S.myFleetByCap[cp] || [cp]).filter(u => S.fleet.has(u)); base.forEach(u => inF.add(u)); return base; });
+      const fleets = caps.map(cp => { const base = (S.myFleetByCap[cp] || [cp]).filter(u => S.fleet.has(u) && !inF.has(u)); base.forEach(u => inF.add(u)); return base; });
       caps.forEach((cp, i) => [...S.fleet].filter(u => !inF.has(u) && !CAP[u] && S.fleetSeen && S.fleetSeen[cp] && S.fleetSeen[cp].has(u)).forEach(u => { inF.add(u); fleets[i].push(u); }));
       const rest = [...S.fleet].filter(u => !inF.has(u));
       const unset = R.mine.filter(c => !zs['@' + ldKey(c.squad)]).length;
@@ -1722,7 +1728,7 @@
       if (!m) return `<b>Meta: holds ${pct(c.hu.h)} of ${kNum(c.hu.n)}</b> (${huLabel}, not in the score)<br>`;
       let h = `<b>Meta: holds ${pct(m.h)} of ${kNum(m.n)}</b> (${metaLabel(m)})`;
       // insThin: Insight's battle count when it was checked and found thin (0 = none); undefined when Insight never checked this squad
-      if (m.src === 'hu' && S.INS && m.insThin !== undefined) h += ` <span class="warn">· ${insLabel('div')} had ${m.insThin ? `only ${m.insThin}` : 'no'} battles for this squad, so HotUtils is used</span>`;
+      if (m.src !== 'ins' && S.INS && m.insThin !== undefined) h += ` <span class="warn">· ${insLabel('div')} had ${m.insThin ? `only ${m.insThin}` : 'no'} battles for this squad, so ${m.src === 'hu' ? 'HotUtils' : 'the swgoh.gg squads page'} is used</span>`;
       h += '<br>';
       // HotUtils on its own line under Insight's, and a flag when the two disagree by 5 points or more:
       // a big gap usually means a small, lucky (or unlucky) Insight sample, or a datacron/omicron effect
