@@ -123,7 +123,7 @@
   .status{padding:0 20px}.status span{display:block;margin-top:12px;color:#ffd166}.status .err{color:#ff7b72}
   nav{display:flex;gap:4px;flex-wrap:wrap;padding:12px 20px 0}nav button{background:#141b2e;color:#9aa6c0;border:1px solid #263050;border-radius:8px 8px 0 0;padding:8px 14px}
   nav button.on{background:#1b2440;color:#fff;border-bottom-color:#1b2440}
-  main{padding:16px 20px 60px;max-width:1240px}h2{color:#8cc8ff;font-size:17px;margin:24px 0 8px}h3{color:#cfe3ff;font-size:14px;margin:14px 0 6px}
+  main{padding:16px 20px 60px;max-width:none}h2{color:#8cc8ff;font-size:17px;margin:24px 0 8px}h3{color:#cfe3ff;font-size:14px;margin:14px 0 6px}
   .vs{display:flex;align-items:center;gap:16px}.vs b{display:block;font-size:18px}.vs small{color:#9aa6c0}.vs .v{color:#ffd166;font-weight:800}
   .sub{color:#8f9ab5;font-size:12px;margin:4px 0}.sub a,a.lnk{color:#8cc8ff}.warn{color:#ffb86b}.hu{color:#8cc8ff}
   table{border-collapse:collapse;width:100%;color:inherit;font:inherit}th,td{text-align:left;vertical-align:top;padding:8px;border-bottom:1px solid #1e2742}th{color:#8cc8ff;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
@@ -147,7 +147,7 @@
   details{margin:6px 0}summary{cursor:pointer;font-size:13px}
   .dchint{border-bottom:1px dotted #5d6a88;cursor:help}
   .picker{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}#addu{width:260px;margin:0}
-  .locked{margin-bottom:8px}button.u.lk{cursor:pointer;color:inherit;font:inherit;font-size:12px}button.u.lk:hover{border-color:#ff7b72}
+  .locked{margin-bottom:8px}.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:6px;margin-bottom:8px}.dsq{display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;background:#0f1526;border:1px solid #263050;border-radius:10px;padding:4px}#defbox>summary{font-size:14px;margin:4px 0 8px}button.u.lk{cursor:pointer;color:inherit;font:inherit;font-size:12px}button.u.lk:hover{border-color:#ff7b72}
   .ban{font-size:16px;color:#ffd166}.sg{color:#d2a8ff}.gstat{color:#8f9ab5;font-size:12px}
   .tog{display:inline-flex;align-items:center;gap:6px;margin-left:12px;cursor:pointer}.tog input{width:auto;margin:0;accent-color:#1f6feb}
   .zones{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.zone{background:#111829;border:1px solid #263050;border-radius:10px;padding:8px 12px}.zone b{display:block;color:#8cc8ff;margin-bottom:4px}.zone small{color:#8f9ab5}
@@ -1280,6 +1280,7 @@
     out.querySelectorAll('[data-lock]').forEach(b => (b.onclick = () => { b.dataset.lock.split(',').forEach(u => S.locked.add(u)); persistAndReplan(tab); }));
     const fb = $('#fleetbox'); if (fb) fb.ontoggle = () => { S.fleetOpen = fb.open; };
     const mb = $('#metabox'); if (mb) mb.ontoggle = () => { S.metaOpen = mb.open; };
+    const db = $('#defbox'); if (db) db.ontoggle = () => { S.defOpen = db.open; };
     const fleetEdited = () => { store.myFleet = { ids: [...S.fleet] }; S.fleetOpen = true; };
     out.querySelectorAll('[data-unfleet]').forEach(b => (b.onclick = () => { S.fleet.delete(b.dataset.unfleet); fleetEdited(); persistAndReplan(tab); }));
     const fleetReset = () => { delete store.myFleet; S.fleet = new Set(S.fleetDetected); };
@@ -1326,6 +1327,7 @@
       const ids = usualSquad(u.id);
       ids.forEach(id => (SHIP[id] ? S.fleet : S.locked).add(id));
       if (ids.some(id => SHIP[id])) fleetEdited();
+      S.defOpen = true;
       persistAndReplan(tab);
       setTimeout(() => $('#addu') && $('#addu').focus(), 0);
     };
@@ -1358,14 +1360,18 @@
     if (chars > maxSq * size) stale.push(`It has ${chars} characters, about ${Math.round(chars / size)} squads of ${size}: more than a GAC defence holds.`);
     if (S.locked.size && EVSTART && savedT && savedT < EVSTART) stale.push(`It was last changed before this GAC event started.`);
     const staleH = stale.length ? `<p class="warn">⚠ This list looks left over from an earlier event. ${stale.join(' ')} Everything on it is kept out of the attack plan and the suggested defence, so the plan will be wrong until it's fixed: press <b>Clear all</b>, then add this round's teams.</p>` : '';
-    return `<h2>Your defence</h2><p class="sub">Pick a leader and the team you usually set with it is added. Tap ✕ on any unit to correct it, or add single units. The attack plan won't use them.</p>
+    const chunks = []; const ids = [...S.locked];
+    for (let i = 0; i < ids.length; i += size) chunks.push(ids.slice(i, i + size));
+    const nSq = Math.round(chars / size);
+    const open = S.defOpen ?? (!S.locked.size || stale.length > 0);
+    return `<h2>Your defence</h2>${staleH}<details id="defbox"${open ? ' open' : ''}><summary><b>${S.locked.size ? `${nSq} squad${nSq === 1 ? '' : 's'} (${chars} characters)` : 'Nothing set yet'}</b> · fleet: ${[...S.fleet].filter(id => CAP[id]).map(nm).map(esc).join(', ') || 'none'} <span class="sub">(tap to ${open ? 'hide' : 'show and edit'})</span></summary><p class="sub">Pick a leader and the team you usually set with it is added. Tap ✕ on any unit to correct it, or add single units. The attack plan won't use them.</p>
       <p class="sub">Saved in this browser (one list, not per opponent), so it carries over to rounds 2 and 3. Use <b>Save to file</b> to move it to another device, and <b>Clear all</b> when a new GAC event starts.${saved}</p>
       <div class="picker"><input id="addu" list="myunits" placeholder="Add a unit or ship…" autocomplete="off"><datalist id="myunits">${mine.map(u => `<option value="${esc(nm(u.id))}">${lv(u)}${placed(u) ? ' · already on your defence' : u.ship ? (CAP[u.id] ? ' · adds your usual fleet' : ' · ship') : S.myDefByLead[u.id] ? ' · adds your usual team' : ''}</option>`).join('')}</datalist>
       ${any ? '<button class="chip" data-act="export">Save to file</button>' : ''}<button class="chip" data-act="import">Load from file</button><input type="file" id="impfile" accept=".json,application/json" hidden>${S.locked.size || store.myFleet ? '<button class="chip" data-act="clear">Clear all</button>' : ''}</div>
-      ${staleH}<div class="sq locked">${[...S.locked].map(id => chip(id, 'data-unlock')).join('') || '<span class="sub">No squads added yet.</span>'}</div>
+      ${chunks.length ? `<div class="dgrid">${chunks.map(c => `<div class="dsq">${c.map(id => chip(id, 'data-unlock')).join('')}</div>`).join('')}</div>` : '<p class="sub">No squads added yet.</p>'}
       <details id="fleetbox" ${S.fleetOpen ? 'open' : ''}><summary><b>Fleet defence:</b> ${[...S.fleet].filter(id => CAP[id]).map(nm).map(esc).join(', ') || (S.fleet.size ? S.fleet.size + ' ships' : 'none')} <span class="sub">(${store.myFleet ? 'edited by you' : 'from your latest season'}; tap to change)</span></summary>
       <p class="sub">Tap ✕ to remove a ship, or add a capital ship in the box above to add its usual fleet. These ships are kept out of the attack plan.${store.myFleet ? ' <button class="chip" data-act="fleetreset">Reset from my history</button>' : ''}</p>
-      <div class="sq locked">${[...S.fleet].map(id => chip(id, 'data-unfleet')).join('') || '<span class="sub">No ships.</span>'}</div></details>`;
+      <div class="sq locked">${[...S.fleet].map(id => chip(id, 'data-unfleet')).join('') || '<span class="sub">No ships.</span>'}</div></details></details>`;
   }
 
   function viewPlan() {
