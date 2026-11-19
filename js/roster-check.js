@@ -86,7 +86,8 @@
   }
 
   // ---------- main map: count ready missions per planet, from each planet's own data ----------
-  function isMain() { return /\/main\.html$|\/html\/?$/.test(location.pathname); }
+  // the main map is the page whose missions link to planets
+  function isMain() { return !!(window.ROTE_PLANET_LINKS && window.ROTE_PLANET_LINKS.length); }
   function planetData(link) {
     return fetch('../js/' + link.replace(/\.html$/, '.js')).then(function (r) { return r.text(); }).then(function (txt) {
       var opts = null, Fake = function () {};
@@ -110,7 +111,7 @@
 
   // ---------- hooks used by the page templates ----------
   Vue.mixin({
-    created: function () { if (this.missions && isMain()) window.ROTE_PLANET_LINKS = this.missions.map(function (m) { return m.planetlink; }).filter(Boolean); },
+    created: function () { if (this.missions) { var l = this.missions.map(function (m) { return m.planetlink; }).filter(Boolean); if (l.length) { window.ROTE_PLANET_LINKS = l; if (RC.units) loadPlanets(); } } },
     methods: {
       rcClass: function (m) {
         if (!RC.units || !m) return '';
