@@ -18,24 +18,33 @@
     gl_rey: 'GLREY', gl_vader: 'LORDVADER', ig12: 'IG12', jedi_cal: 'JEDIKNIGHTCAL', kyle_katarn_o: 'KYLEKATARN',
     mandalorbokatan: 'MANDALORBOKATAN', mara_jade_teh: 'MARAJADE', nute_gunrey: 'NUTEGUNRAY', paz_visla: 'PAZVIZSLA',
     sith_supremacy_class: 'SITHSUPREMACYCLASS', skiff_lando: 'UNDERCOVERLANDO', tie_interceptor: 'TIEINTERCEPTOR',
-    triplezero: 'TRIPLEZERO', doctoraphra: 'DOCTORAPHRA', dark_trooper_moff_gideon: 'MOFFGIDEONS3'
+    triplezero: 'TRIPLEZERO', doctoraphra: 'DOCTORAPHRA', dark_trooper_moff_gideon: 'MOFFGIDEONS3',
+    rolo: 'HOTHLEIA' // Rebel Officer Leia Organa (team lead on many light-side planets)
   };
-  var SKIP = { noone: 1, qi: 1, rolo: 1, '': 1 }; // empty slots in short teams
+  var SKIP = { noone: 1, qi: 1, '': 1 }; // empty slots in short teams
+  // slots any of several units can fill: the best one owned counts (Zeffo unlock: Cere + either Cal)
+  var EITHER = { jedi_cal: ['JEDIKNIGHTCAL', 'CALKESTIS'] };
   var OPEN = { unknown: 1 }; // "any qualifying unit" slots: can't be checked, so the team can't count as fully owned
   var slug = function (n) { return String(n).toLowerCase().replace(/ /g, '_').replace(/"/g, '_'); };
   var norm = function (n) { return String(n).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, ''); };
+  var ago = function (t) { var ms = Date.now() - Date.parse(t); if (!(ms >= 0)) return String(t).slice(0, 10); var h = Math.round(ms / 36e5); return h < 1 ? 'under an hour ago' : h < 48 ? h + ' h ago' : Math.round(h / 24) + ' days ago'; };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
-  var RC = Vue.observable({ ally: '', name: '', units: null, bySlug: null, byNorm: null, loading: false, err: '', planets: {} });
+  var RC = Vue.observable({ ally: '', name: '', updated: '', units: null, bySlug: null, byNorm: null, loading: false, err: '', planets: {} });
 
   // ---------- roster ----------
   function load(ally) {
     ally = String(ally || '').replace(/\D/g, '');
     if (ally.length !== 9) { RC.err = 'An ally code has 9 digits.'; return; }
-    RC.loading = true; RC.err = '';
-    fetch('https://swgoh.gg/api/player/' + ally + '/').then(function (r) {
-      if (!r.ok) throw new Error(r.status === 404 ? 'No player with that ally code on swgoh.gg.' : 'swgoh.gg answered ' + r.status + '. Try again in a minute.');
+    if (load.ctl) load.ctl.abort();
+    var ctl = load.ctl = typeof AbortController === 'function' ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 10000);
+    RC.loading = true; RC.err = ''; RC.units = null; RC.planets = {}; RC.updated = '';
+    fetch('https://swgoh.gg/api/player/' + ally + '/', ctl ? { signal: ctl.signal } : {}).then(function (r) {
+      if (!r.ok) throw new Error(r.status === 404 ? 'No player with that ally code on swgoh.gg.' : 'swgoh.gg answered ' + r.status + '. Roster not checked; try again in a minute.');
       return r.json();
     }).then(function (j) {
+      if (load.ctl !== ctl) return; // a newer lookup has started
+      if (!j || !Array.isArray(j.units) || !j.units.length || !(j.units[0].data || j.units[0]).base_id) throw new Error('swgoh.gg sent a roster in a format this map doesn\'t recognise. Roster not checked.');
       var units = {}, bySlug = {}, byNorm = {};
       (j.units || []).forEach(function (u) {
         var d = u.data || u, ship = d.combat_type === 2;
@@ -43,12 +52,17 @@
         bySlug[slug(d.name)] = d.base_id; byNorm[norm(d.name)] = d.base_id;
       });
       RC.units = units; RC.bySlug = bySlug; RC.byNorm = byNorm; RC.ally = ally; RC.name = (j.data && j.data.name) || ally;
+      RC.updated = (j.data && (j.data.last_updated || j.data.updated)) || '';
       try { localStorage.setItem(KEY, ally); } catch (e) {}
       if (isMain()) loadPlanets();
-    }).catch(function (e) { RC.err = e.message || 'Could not reach swgoh.gg.'; }).then(function () { RC.loading = false; });
+    }).catch(function (e) {
+      if (load.ctl !== ctl) return;
+      RC.err = e && e.name === 'AbortError' ? 'swgoh.gg didn\'t answer within 10 seconds. Roster not checked; try again.' : (e && e.message) || 'Couldn\'t reach swgoh.gg. Roster not checked.';
+    }).then(function () { clearTimeout(timer); if (load.ctl === ctl) RC.loading = false; });
   }
   function unitFor(s) {
     if (SKIP[s]) return { skip: true };
+    if (EITHER[s]) { var best = null; EITHER[s].forEach(function (id) { var u = RC.units[id]; if (u && (!best || u.relic > best.relic)) best = u; }); return best; }
     var id = ALIAS[s] || RC.bySlug[s] || RC.byNorm[norm(s)];
     return id && RC.units[id] ? RC.units[id] : null;
   }
@@ -68,7 +82,7 @@
       var u = unitFor(s);
       if (u && u.skip) return;
       counted++;
-      if (!u) short.push({ s: s, why: 'not unlocked' });
+      if (!u) short.push({ s: s, why: 'not unlocked, or name not recognised' });
       else if (u.ship) { if (u.stars < 7) short.push({ s: s, n: u.name, why: u.stars + '★, needs 7★' }); }
       else if (rel && u.relic < rel) short.push({ s: s, n: u.name, why: (u.gear === 13 ? 'R' + u.relic : 'G' + u.gear) + ', needs R' + rel });
     });
@@ -114,6 +128,8 @@
 
   // ---------- hooks used by the page templates ----------
   Vue.mixin({
+    // the pages define a phone check (mq) but never ran it, so phones got the desktop hover behaviour
+    mounted: function () { if (typeof this.mq === 'function' && this.isMobile === false) this.mq(); },
     created: function () { if (this.missions) { var l = this.missions.map(function (m) { return m.planetlink; }).filter(Boolean); if (l.length) { window.ROTE_PLANET_LINKS = l; if (RC.units) loadPlanets(); } } },
     methods: {
       rcClass: function (m) {
@@ -147,7 +163,7 @@
     css.textContent = 'img.mission.rc-ready{filter:drop-shadow(0 0 7px #3fb950) drop-shadow(0 0 3px #3fb950)}img.mission.rc-some{filter:drop-shadow(0 0 7px #d29922) drop-shadow(0 0 3px #d29922)}img.mission.rc-no{filter:drop-shadow(0 0 6px #f85149) grayscale(.5)}'
       + '#rc-box{position:fixed;bottom:10px;right:10px;z-index:50;background:rgba(10,14,24,.88);border:1px solid #33406a;border-radius:10px;padding:8px 10px;color:#dbe3f4;font:13px system-ui,sans-serif;text-align:left;max-width:300px}'
       + '#rc-box input{width:110px;background:#0d1322;color:#fff;border:1px solid #33406a;border-radius:6px;padding:3px 6px}#rc-box button{margin-left:4px;border-radius:6px;border:1px solid #1f6feb;background:#1f6feb;color:#fff;padding:3px 8px}#rc-box button.rc-clear{background:transparent;color:#8f9ab5;border-color:#33406a}'
-      + '#rc-box .rc-msg{margin-top:5px;font-size:12px;color:#8f9ab5}.rc-yes{color:#3fb950;font-weight:700}.rc-some-t{color:#d29922;font-weight:700}.rc-x{color:#f85149;font-weight:700}.rc-list{text-align:left;padding-left:18px;margin:0}.rc-note p{margin:2px 0}.rc-sub{font-size:11px;color:#8f9ab5}';
+      + '#rc-box .rc-msg{margin-top:5px;font-size:12px;color:#8f9ab5}.rc-yes{color:#3fb950;font-weight:700}.rc-some-t{color:#d29922;font-weight:700}.rc-x{color:#f85149;font-weight:700}.rc-list{text-align:left;padding-left:18px;margin:0}.rc-note p{margin:2px 0}[v-cloak]{display:none}.description img[style*="512px"]{max-width:100%;height:auto!important}.rc-sub{font-size:11px;color:#8f9ab5}';
     document.head.appendChild(css);
     var box = document.createElement('div');
     box.id = 'rc-box';
@@ -159,7 +175,7 @@
     box.querySelector('#rc-clear').onclick = function () { try { localStorage.removeItem(KEY); } catch (e) {} RC.units = null; RC.name = ''; RC.planets = {}; inp.value = ''; };
     new Vue({ data: { RC: RC }, watch: { RC: { deep: true, immediate: true, handler: function () {
       msg.innerHTML = RC.loading ? 'Reading swgoh.gg…' : RC.err ? '<span class="rc-x">' + esc(RC.err) + '</span>'
-        : RC.units ? esc(RC.name) + ': <span class="rc-yes">green</span> = you own a suggested team at the required relic (not a promise it auto-wins), <span class="rc-some-t">amber</span> = ' + (isMain() ? 'some missions' : 'partly') + ', <span class="rc-x">red</span> = not yet.' : '';
+        : RC.units ? esc(RC.name) + (RC.updated ? ' <span title="swgoh.gg roster sync">(swgoh.gg updated ' + esc(ago(RC.updated)) + ')</span>' : '') + ': <span class="rc-yes">green</span> = you own a suggested team at the required relic (not a promise it auto-wins), <span class="rc-some-t">amber</span> = ' + (isMain() ? 'some missions' : 'partly') + ', <span class="rc-x">red</span> = not yet.' : '';
     } } } });
     var saved = ''; try { saved = localStorage.getItem(KEY) || ''; } catch (e) {}
     if (saved) { inp.value = saved.replace(/(\d{3})(\d{3})(\d{3})/, '$1-$2-$3'); load(saved); }
