@@ -55,7 +55,7 @@ details{margin-top:14px}summary{cursor:pointer;color:#8cc8ff}
 <div class="f"><b>Your defence</b><p>One click fills it from the defence you set in your last round; tap ✕ on anything you've changed. The plan stops using those units. Saved for rounds 2 and 3.</p></div>
 <div class="f"><b>Their actual defence</b><p>Once their defence is up, tick the teams you can see in game and the attack plan uses exactly those instead of guessing from their history.</p></div>
 <div class="f"><b>Defence planner</b><p>Squads you own that hold best against the attack teams your opponent uses. Keeps GLs for attack unless you say otherwise.</p></div>
-<div class="f"><b>Zones and banners</b><p>Where they usually put each team (Front top, Front bottom, Back, Fleet), and counters ranked by expected banners.</p></div>
+<div class="f"><b>Zones and banners</b><p>Where they usually put each team (North, South, Trap, Fleet), and counters ranked by expected banners.</p></div>
 <div class="f"><b>HotUtils meta</b><p>HotUtils' defence hold % for your own league (live datacrons only) loads automatically from a daily copy. It sits beside swgoh.gg Insight's division figure, and fills in where Insight is thin.</p></div>
 <div class="f"><b>Speed check</b><p>A ⚡ warning when the team you're attacking is clearly faster than your counter (30+ speed on the fastest unit).</p></div>
 <div class="f"><b>Datacrons</b><p>Your datacrons and theirs are in the odds: each counter and defence is rated from battles with the datacron strength each side can actually bring, and the plan never uses one datacron twice.</p></div>
