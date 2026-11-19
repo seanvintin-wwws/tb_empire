@@ -20,7 +20,8 @@
     sith_supremacy_class: 'SITHSUPREMACYCLASS', skiff_lando: 'UNDERCOVERLANDO', tie_interceptor: 'TIEINTERCEPTOR',
     triplezero: 'TRIPLEZERO', doctoraphra: 'DOCTORAPHRA', dark_trooper_moff_gideon: 'MOFFGIDEONS3'
   };
-  var SKIP = { noone: 1, unknown: 1, qi: 1, rolo: 1, '': 1 };
+  var SKIP = { noone: 1, qi: 1, rolo: 1, '': 1 }; // empty slots in short teams
+  var OPEN = { unknown: 1 }; // "any qualifying unit" slots: can't be checked, so the team can't count as fully owned
   var slug = function (n) { return String(n).toLowerCase().replace(/ /g, '_').replace(/"/g, '_'); };
   var norm = function (n) { return String(n).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, ''); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -61,8 +62,9 @@
   }
   // a suggested team: is every unit owned at the level needed? (placeholders are ignored)
   function squadCheck(toons, rel) {
-    var short = [], counted = 0;
+    var short = [], counted = 0, open = 0;
     (toons || []).forEach(function (s) {
+      if (OPEN[s]) { open++; return; }
       var u = unitFor(s);
       if (u && u.skip) return;
       counted++;
@@ -70,7 +72,8 @@
       else if (u.ship) { if (u.stars < 7) short.push({ s: s, n: u.name, why: u.stars + '★, needs 7★' }); }
       else if (rel && u.relic < rel) short.push({ s: s, n: u.name, why: (u.gear === 13 ? 'R' + u.relic : 'G' + u.gear) + ', needs R' + rel });
     });
-    return counted ? { ok: !short.length, short: short } : null;
+    // a team with open slots is at best partly checked: its named units can be owned, the rest isn't known
+    return counted ? { ok: !short.length && !open, partial: !short.length && open > 0, open: open, short: short } : null;
   }
   function missionCheck(m, squads, reqs) {
     if (!RC.units || !m || m.type === 'platoon' || m.type === 'deploy' || !(m.preferredSquads || []).length) return null;
@@ -78,11 +81,11 @@
     m.preferredSquads.forEach(function (i) {
       var sq = squads && squads[i]; if (!sq) return;
       var c = squadCheck(sq.toons, rel);
-      if (c) res.push({ name: sq.name, ok: c.ok, short: c.short });
+      if (c) res.push({ name: sq.name, ok: c.ok, partial: c.partial, open: c.open, short: c.short });
     });
     if (!res.length) return null;
-    res.sort(function (a, b) { return a.short.length - b.short.length; });
-    return { rel: rel, ready: res.some(function (r) { return r.ok; }), res: res };
+    res.sort(function (a, b) { return (b.ok - a.ok) || (b.partial - a.partial) || a.short.length - b.short.length; });
+    return { rel: rel, ready: res.some(function (r) { return r.ok; }), partial: res.some(function (r) { return r.partial; }), res: res };
   }
 
   // ---------- main map: count ready missions per planet, from each planet's own data ----------
@@ -117,7 +120,7 @@
         if (!RC.units || !m) return '';
         if (m.planetlink) { var p = RC.planets[m.planetlink]; return !p || !p.total ? '' : p.ready === p.total ? 'rc-ready' : p.ready ? 'rc-some' : 'rc-no'; }
         var c = missionCheck(m, this.squads, this.reqs);
-        return c ? (c.ready ? 'rc-ready' : 'rc-no') : '';
+        return c ? (c.ready ? 'rc-ready' : c.partial ? 'rc-some' : 'rc-no') : '';
       },
       rcNote: function (m) {
         if (!RC.units || !m) return '';
@@ -129,10 +132,11 @@
         var c = missionCheck(m, this.squads, this.reqs);
         if (!c) return '';
         var lines = c.res.slice(0, 3).map(function (r) {
+          if (r.partial) return '<li><span class="rc-some-t">◐</span> ' + esc(r.name) + ': named units owned; ' + r.open + ' more slot' + (r.open === 1 ? '' : 's') + ' not checked (any unit meeting the requirement)</li>';
           return r.ok ? '<li><span class="rc-yes">✓</span> ' + esc(r.name) + '</li>'
             : '<li><span class="rc-x">✕</span> ' + esc(r.name) + ': ' + r.short.slice(0, 3).map(function (x) { return esc(x.n || x.s.replace(/_/g, ' ')) + ' (' + esc(x.why) + ')'; }).join(', ') + (r.short.length > 3 ? ', +' + (r.short.length - 3) + ' more' : '') + '</li>';
         }).join('');
-        return '<p class="h4">Your roster</p><p class="rc-sub">Checked against the map\'s built-in team list. The Recommended teams table below is community text and isn\'t checked.</p><p>' + who + (c.ready ? ' <span class="rc-yes">has a suggested team ready</span>' : ' <span class="rc-x">isn\'t ready yet</span>') + (c.rel ? ' (Relic ' + c.rel + '+)' : '') + '</p><ul class="rc-list">' + lines + '</ul>';
+        return '<p class="h4">Your roster</p><p class="rc-sub">Checked against the map\'s built-in team list. The Recommended teams table below is community text and isn\'t checked.</p><p>' + who + (c.ready ? ' <span class="rc-yes">owns a suggested team</span>' : c.partial ? ' <span class="rc-some-t">owns part of a suggested team</span>' : ' <span class="rc-x">doesn\'t own a suggested team yet</span>') + (c.rel ? ' (Relic ' + c.rel + '+)' : '') + '</p><ul class="rc-list">' + lines + '</ul>';
       }
     }
   });
@@ -143,7 +147,7 @@
     css.textContent = 'img.mission.rc-ready{filter:drop-shadow(0 0 7px #3fb950) drop-shadow(0 0 3px #3fb950)}img.mission.rc-some{filter:drop-shadow(0 0 7px #d29922) drop-shadow(0 0 3px #d29922)}img.mission.rc-no{filter:drop-shadow(0 0 6px #f85149) grayscale(.5)}'
       + '#rc-box{position:fixed;bottom:10px;right:10px;z-index:50;background:rgba(10,14,24,.88);border:1px solid #33406a;border-radius:10px;padding:8px 10px;color:#dbe3f4;font:13px system-ui,sans-serif;text-align:left;max-width:300px}'
       + '#rc-box input{width:110px;background:#0d1322;color:#fff;border:1px solid #33406a;border-radius:6px;padding:3px 6px}#rc-box button{margin-left:4px;border-radius:6px;border:1px solid #1f6feb;background:#1f6feb;color:#fff;padding:3px 8px}#rc-box button.rc-clear{background:transparent;color:#8f9ab5;border-color:#33406a}'
-      + '#rc-box .rc-msg{margin-top:5px;font-size:12px;color:#8f9ab5}.rc-yes{color:#3fb950;font-weight:700}.rc-x{color:#f85149;font-weight:700}.rc-list{text-align:left;padding-left:18px;margin:0}.rc-note p{margin:2px 0}.rc-sub{font-size:11px;color:#8f9ab5}';
+      + '#rc-box .rc-msg{margin-top:5px;font-size:12px;color:#8f9ab5}.rc-yes{color:#3fb950;font-weight:700}.rc-some-t{color:#d29922;font-weight:700}.rc-x{color:#f85149;font-weight:700}.rc-list{text-align:left;padding-left:18px;margin:0}.rc-note p{margin:2px 0}.rc-sub{font-size:11px;color:#8f9ab5}';
     document.head.appendChild(css);
     var box = document.createElement('div');
     box.id = 'rc-box';
@@ -155,7 +159,7 @@
     box.querySelector('#rc-clear').onclick = function () { try { localStorage.removeItem(KEY); } catch (e) {} RC.units = null; RC.name = ''; RC.planets = {}; inp.value = ''; };
     new Vue({ data: { RC: RC }, watch: { RC: { deep: true, immediate: true, handler: function () {
       msg.innerHTML = RC.loading ? 'Reading swgoh.gg…' : RC.err ? '<span class="rc-x">' + esc(RC.err) + '</span>'
-        : RC.units ? esc(RC.name) + ': <span class="rc-yes">green</span> = a suggested team is ready, <span class="rc-x">red</span> = not yet' + (isMain() ? ', amber = some.' : '. Tap a mission for details.') : '';
+        : RC.units ? esc(RC.name) + ': <span class="rc-yes">green</span> = you own a suggested team at the required relic (not a promise it auto-wins), <span class="rc-some-t">amber</span> = ' + (isMain() ? 'some missions' : 'partly') + ', <span class="rc-x">red</span> = not yet.' : '';
     } } } });
     var saved = ''; try { saved = localStorage.getItem(KEY) || ''; } catch (e) {}
     if (saved) { inp.value = saved.replace(/(\d{3})(\d{3})(\d{3})/, '$1-$2-$3'); load(saved); }
