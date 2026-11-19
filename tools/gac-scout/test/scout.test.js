@@ -213,3 +213,21 @@ test('zones are North / South / Trap, and old saved zone names are renamed', () 
   assert.deepStrictEqual(plain(T.store.defZones), { 'A>B,C': 'North', 'D>E,F': 'South', 'G>H,I': 'Trap' });
   assert.ok(!/Front top|Front bottom/.test(SRC.replace(/\/\/.*$/gm, '').replace(/'Front top': 'North', 'Front bottom': 'South'/, '')), 'no old zone names left in the tool');
 });
+
+test('decision brief: placed squads in North, South, Trap order, then a divider before suggested additions', () => {
+  const T = load();
+  const ids = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3', 'D1', 'D2', 'D3'];
+  const S = mkS(T, { mine: ids.map(id => unit(id)) });
+  setDefence(S, [['A1', 'A2', 'A3'], ['B1', 'B2', 'B3'], ['C1', 'C2', 'C3']]);
+  T.store.defZones = { [T.ldKey(['A1', 'A2', 'A3'])]: 'Trap', [T.ldKey(['B1', 'B2', 'B3'])]: 'North', [T.ldKey(['C1', 'C2', 'C3'])]: 'South' };
+  S.metaSG = T.metaMap([[5000, 0.10, 55, ['A1', 'A2', 'A3']], [5000, 0.30, 55, ['B1', 'B2', 'B3']], [5000, 0.30, 55, ['C1', 'C2', 'C3']], [5000, 0.40, 55, ['D1', 'D2', 'D3']]]);
+  S.defCands = T.defenceCandidates(S);
+  T.plan(S);
+  for (const short of [true, false]) {
+    T.store.briefShort = short;
+    const h = T.viewBrief();
+    const at = id => h.indexOf('>' + id + '<');
+    assert.ok(at('B1') < at('C1') && at('C1') < at('A1'), `North, South, Trap order (${short ? 'short' : 'full'})`);
+    assert.ok(at('A1') < h.indexOf('Suggested addition') && h.indexOf('Suggested addition') < at('D1'), `divider before the added squad (${short ? 'short' : 'full'})`);
+  }
+});

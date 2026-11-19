@@ -12,7 +12,7 @@
    - Round by round report (from Arrikhan): result, score, first attack time and delay, their holds and their drops (export only since v3.7.2).
 */
 (async () => {
-  const VERSION = '3.7.3';
+  const VERSION = '3.7.4';
   // tests (tools/gac-scout/test) load this file in Node with globalThis.__gacScoutTest set: no overlay, internals exposed
   const TEST = typeof globalThis.__gacScoutTest === 'object' && globalThis.__gacScoutTest ? globalThis.__gacScoutTest : null;
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
@@ -152,6 +152,7 @@
   .hrs span{display:block;width:100%;background:#1f6feb;border-radius:3px 3px 0 0;min-height:1px}.hrs small{color:#8f9ab5;font-size:10px}
   details.units>summary{font-size:14px;margin:8px 0}
   details{margin:6px 0}summary{cursor:pointer;font-size:13px}
+  tr.divider td{border-top:3px solid #1f6feb;border-bottom:0;padding:10px 8px 4px;color:#8cc8ff;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
   details.fold>summary{list-style:none}details.fold>summary::-webkit-details-marker{display:none}
   details.fold>summary>h2,details.fold>summary>h3{display:inline-flex;align-items:center;gap:10px;margin:14px 0 6px;padding:6px 14px 6px 8px;background:#141b2e;border:1px solid #33406a;border-radius:10px}
   details.fold>summary:hover>*{border-color:#1f6feb}details.fold>summary small{color:#8f9ab5;font-weight:400;font-size:12px}
@@ -1733,7 +1734,7 @@
     else {
       h += `<p class="sub">Score = a ranking guide, roughly an estimated hold against ${esc(opp)}: half the meta hold % (${S.INS ? insLabel('div') : S.HU ? 'HotUtils' : 'swgoh.gg'}), half how it does against the attack teams ${esc(opp)} uses. A squad is only swapped when the replacement scores at least 3 points higher, holds at least as well on the meta sources, and the hold % driving its score has 20+ battles. Keep Galactic Legends for attack: <b>${S.keepGL ? 'on' : 'off'}</b>.</p>
       <table class="stack"><tr><th></th><th>Squad</th><th>Score</th><th>${sgLabel()}</th><th>HotUtils</th><th>${S.INS ? insLabel('div') : 'Insight'}</th><th>Their main attackers${top2.length ? ` (${top2.map(a => esc(nm(a.lead))).join(', ')})` : ''}</th></tr>
-      ${R.mine.map(c => (R.outSet.has(c) ? row(c, 'REMOVE', 'warn') : row(c, 'KEEP', 'me'))).join('')}${R.swaps.map(x => row(x.in, 'ADD', 'me')).join('')}</table>
+      ${byZoneOrder(R.mine, zs).map(c => (R.outSet.has(c) ? row(c, 'REMOVE', 'warn') : row(c, 'KEEP', 'me'))).join('')}${addDivider(R.swaps.length, 7)}${R.swaps.map(x => row(x.in, 'ADD', 'me')).join('')}</table>
       ${R.swaps.length ? R.swaps.map(x => `<p>Swap <b>${esc(x.out.squad.map(nm).join(' / '))}</b> for <b>${esc(x.in.squad.map(nm).join(' / '))}</b> (${pct(effS(x.out))} → ${pct(effS(x.in))}).</p>`).join('') : '<p><b class="me">No swaps: nothing free scores clearly better than what you have set.</b></p>'}`;
     }
     h += pkgH();
@@ -1820,6 +1821,13 @@
     const th = fast(d.squad, S.opp), mi = fast(c.squad, S.me);
     return th && mi && th - mi >= 30 ? `<div class="sub warn">⚡ Their team is faster: fastest ${th} speed vs your ${mi} (+${th - mi}). Speed isn't in the win %.</div>` : '';
   }
+  // your placed squads in zone order (North, South, Trap, zone unknown last), keeping your order within a zone
+  const ZORDER = ['North', 'South', 'Trap'];
+  const byZoneOrder = (list, zs) => {
+    const zr = c => { const e = zs['@' + ldKey(c.squad)] || zs[c.squad[0]]; const i = e ? ZORDER.indexOf(e.zone) : -1; return i < 0 ? 9 : i; };
+    return list.map((c, i) => [c, i]).sort((a, b) => zr(a[0]) - zr(b[0]) || a[1] - b[1]).map(x => x[0]);
+  };
+  const addDivider = (n, cols) => (n ? `<tr class="divider"><td colspan="${cols}">▼ Suggested addition${n === 1 ? '' : 's'}: not on your defence yet</td></tr>` : '');
   // a section that starts folded; on screen only (exports show it open as a normal heading). Open/closed is remembered.
   function foldH(id, title, body, tag = 'h3') {
     if (EXPORTING) return `<${tag}>${esc(title)}</${tag}>${body}`;
@@ -1847,7 +1855,7 @@
     const dcOf = c => (c.onDef ? (c.dc ? dcNo(c.dc.dc) : '–') : c.useDc && c.dc ? dcNo(c.dc.dc) : '–');
     const line = (c, v, cls, zFrom = c) => { const m = decM(c); return `<tr><td><b class="${cls}">${v}</b></td><td>${squadH(c.squad, 'me')}</td><td>${zoneOf(zFrom)}</td><td>${dcOf(c)}</td><td>${m ? `${pct(m.h)} <small>${esc(srcName(m))}, ${kNum(m.n)} battles</small>${m.n < 20 ? ' <span class="warn">⚠ thin</span>' : ''}` : '–'}</td><td>${agree(c)}</td></tr>`; };
     let h = `<table class="stack"><tr><th></th><th>Squad</th><th>Zone</th><th>Datacron</th><th>Deciding hold %</th><th>${S.INS ? esc(insLabel('div')).replace('swgoh.gg ', '') : 'Insight'} · HotUtils · all leagues</th></tr>
-      ${R.mine.map(c => (R.outSet.has(c) ? line(c, 'REMOVE', 'warn') : line(c, 'KEEP', 'me'))).join('')}${R.swaps.map(x => line(x.in, 'ADD', 'me', x.out)).join('')}</table>`;
+      ${byZoneOrder(R.mine, zs).map(c => (R.outSet.has(c) ? line(c, 'REMOVE', 'warn') : line(c, 'KEEP', 'me'))).join('')}${addDivider(R.swaps.length, 6)}${R.swaps.map(x => line(x.in, 'ADD', 'me', x.out)).join('')}</table>`;
     h += R.swaps.length ? R.swaps.map(x => `<p>Swap <b>${esc(x.out.squad.map(nm).join(' / '))}</b> for <b>${esc(x.in.squad.map(nm).join(' / '))}</b>.</p>`).join('') : '<p><b class="me">No swaps.</b></p>';
     const P = S.pkg;
     if (P && P.cur) h += `<p class="sub">Expected holds against ${esc(S.opp.name)}'s attack teams: <b>${P.cur.exp.toFixed(1)}</b> now${P.rec ? `, <b>${P.rec.exp.toFixed(1)}</b> with the swaps` : ''} (out of ${P.cur.rows.length}).</p>`;
