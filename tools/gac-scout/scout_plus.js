@@ -12,7 +12,7 @@
    - Round by round report (from Arrikhan): result, score, first attack time and delay, their holds and their drops (export only since v3.7.2).
 */
 (async () => {
-  const VERSION = '3.7.6';
+  const VERSION = '3.7.7';
   // tests (tools/gac-scout/test) load this file in Node with globalThis.__gacScoutTest set: no overlay, internals exposed
   const TEST = typeof globalThis.__gacScoutTest === 'object' && globalThis.__gacScoutTest ? globalThis.__gacScoutTest : null;
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
@@ -886,8 +886,9 @@
   // defence package use only the ticked teams instead of guessing from their history.
   const seenEntry = () => { const e = S && S.opp && (store.theirSeen || {})[S.opp.ally]; return e && Date.now() - e.t < 7 * DAY && (!EVSTART || !e.ev || e.ev === EVSTART) ? e : null; };
   const seenSet = () => new Set((seenEntry() || {}).leads || []);
-  // every defence they have ever set (no cap: fleets used to push rarer squads like Baylan and The Stranger off the list), then unseen roster teams
-  const seenPool = () => [...(S.defs || []), ...(S.unseen || [])];
+  // every squad they have ever set on defence (no cap), then unseen roster teams. Fleets aren't ticked: the plan adds their usual fleets itself
+  const seenPool = () => [...(S.defs || []).filter(d => !d.ships), ...(S.unseen || [])];
+  const usualFleets = () => (S.defs || []).filter(d => d.ships && (d.likely >= 0.1 || d.recent));
   function setSeen(leads) {
     const all = store.theirSeen = store.theirSeen || {};
     Object.keys(all).forEach(k => { if (Date.now() - all[k].t > 7 * DAY) delete all[k]; });
@@ -941,7 +942,7 @@
     const estX = (c, x) => (!c.myDc || x === c.myDc ? c.est : x && x === c.myDc2 && c.est2 != null ? c.est2 : c.estNo != null ? c.estNo : c.est);
     const val = (c, x = c.myDc) => (S.rank === 'banners' ? estX(c, x) * (c.avgBan || S.defaultBan) : estX(c, x));
     const seen = seenSet();
-    const defs = seen.size ? seenPool().filter(d => seen.has(d.lead)) : S.defs.filter(d => d.likely >= 0.1 || d.recent || S.defs.length <= 12).slice(0, 18);
+    const defs = seen.size ? [...seenPool().filter(d => seen.has(d.lead)), ...usualFleets()] : S.defs.filter(d => d.likely >= 0.1 || d.recent || S.defs.length <= 12).slice(0, 18);
     const wt = d => (seen.size ? 1 : d.likely); // ticked in game: certain
     const free = defs.map(d => d.counters.filter(c => c.own && !c.squad.some(u => blocked.has(u))).sort((a, b) => val(b) - val(a)));
     const opts = free.map(f => f.slice(0, 4));
@@ -1850,8 +1851,8 @@
     if (!pool.length) return '';
     if (EXPORTING) return seen.size ? `<p>Their defence as ticked in game (the attack plan uses only these): ${pool.filter(d => seen.has(d.lead)).map(d => esc(d.squad.map(nm).join(' / '))).join('; ')}.</p>` : '';
     const open = S.seenOpen ?? false;
-    return `<details id="seenbox" class="sub"${open ? ' open' : ''}><summary><b>Their actual defence:</b> ${seen.size ? `<b class="opp">${seen.size} ticked</b>, the plan uses only those` : 'tick what you see in game (optional)'}</summary>
-      <p class="sub">Once their defence is up, tick the teams you can see. The attack plan then plans against exactly those instead of guessing from their history.${seen.size ? ' <button class="chip" data-act="seenclear">Clear ticks</button>' : ''}</p>
+    return `<details id="seenbox" class="sub"${open ? ' open' : ''}><summary><b>Their actual defence:</b> ${seen.size ? `<b class="opp">${seen.size} ticked</b>, the plan uses those plus their usual fleets` : 'tick what you see in game (optional)'}</summary>
+      <p class="sub">Once their defence is up, tick the squads you can see. The attack plan then plans against exactly those (and their usual fleets) instead of guessing from their history.${seen.size ? ' <button class="chip" data-act="seenclear">Clear ticks</button>' : ''}</p>
       <div class="dgrid">${pool.map(d => `<label class="dsq seen"><input type="checkbox" data-seen="${esc(d.lead)}"${seen.has(d.lead) ? ' checked' : ''}>${squadH(d.squad, 'opp')}<small>${d.ships ? 'Fleet' : d.unseen ? 'never seen' : pct(d.likely)}</small></label>`).join('')}</div></details>`;
   }
   // a flag when their team is clearly faster than your counter (speed isn't in the odds)
