@@ -39,7 +39,7 @@
 <template id="mission">
 	<div>
 		<img class="mission"
-		v-for="mission in missions" 
+		v-for="mission in missions.filter(function (m) { return m.type !== 'deploy'; })" 
 		v-bind:key="mission.name" 
 		v-bind:class="[mission.name, rcClass(mission)]"
 		v-bind:src="'../media/mission_' +  mission.type + '.png'"
