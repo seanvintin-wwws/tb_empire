@@ -12,7 +12,7 @@
    - Round by round report (from Arrikhan): result, score, first attack time and delay, their holds and their drops (export only since v3.7.2).
 */
 (async () => {
-  const VERSION = '3.7.8';
+  const VERSION = '3.7.9';
   // tests (tools/gac-scout/test) load this file in Node with globalThis.__gacScoutTest set: no overlay, internals exposed
   const TEST = typeof globalThis.__gacScoutTest === 'object' && globalThis.__gacScoutTest ? globalThis.__gacScoutTest : null;
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
@@ -2117,7 +2117,7 @@
 
   function viewRoster() {
     const me = S.me, op = S.opp;
-    const stats = p => { const us = Object.values(p.units), ch = us.filter(u => !u.ship); return { gls: us.filter(u => u.gl).length, r9: ch.filter(u => u.relic >= 9).length, r7: ch.filter(u => u.relic >= 7).length, r5: ch.filter(u => u.relic >= 5).length, zetas: ch.reduce((a, u) => a + u.zetas, 0), omis: ch.reduce((a, u) => a + u.omis, 0), ships7: us.filter(u => u.ship && u.stars >= 7).length }; };
+    const stats = p => { const us = Object.values(p.units), ch = us.filter(u => !u.ship); return { gls: us.filter(u => u.gl).length, r10: ch.filter(u => u.relic >= 10).length, r9: ch.filter(u => u.relic >= 9).length, r7: ch.filter(u => u.relic >= 7).length, r5: ch.filter(u => u.relic >= 5).length, zetas: ch.reduce((a, u) => a + u.zetas, 0), omis: ch.reduce((a, u) => a + u.omis, 0), ships7: us.filter(u => u.ship && u.stars >= 7).length }; };
     const a = stats(me), b = stats(op);
     const row = (l, x, y) => `<tr><td>${l}</td><td class="me">${x.toLocaleString()}</td><td class="opp">${y.toLocaleString()}</td><td class="${x >= y ? 'pos' : 'neg'}">${x - y >= 0 ? '+' : ''}${(x - y).toLocaleString()}</td></tr>`;
     const ids = [...new Set([...Object.keys(me.units), ...Object.keys(op.units)])].map(id => ({ id, a: me.units[id], b: op.units[id] }))
@@ -2125,7 +2125,7 @@
     const gls = ids.filter(x => x.a?.gl || x.b?.gl);
     const behind = ids.filter(x => x.b && !x.b.ship && (!x.a || x.b.score - (x.a.score || 0) >= 3) && x.b.relic >= 5).slice(0, 15);
     return `<h2>Roster compare</h2><table class="cmp"><tr><th></th><th class="me">${esc(me.name)}</th><th class="opp">${esc(op.name)}</th><th>Diff</th></tr>
-      ${row('Galactic power', me.gp, op.gp)}${row('Character GP', me.cgp, op.cgp)}${row('Ship GP', me.sgp, op.sgp)}${row('Galactic Legends', a.gls, b.gls)}${row('Relic 9+', a.r9, b.r9)}${row('Relic 7+', a.r7, b.r7)}${row('Relic 5+', a.r5, b.r5)}${row('Zetas', a.zetas, b.zetas)}${row('Omicrons', a.omis, b.omis)}${row('7★ ships', a.ships7, b.ships7)}</table>
+      ${row('Galactic power', me.gp, op.gp)}${row('Character GP', me.cgp, op.cgp)}${row('Ship GP', me.sgp, op.sgp)}${row('Galactic Legends', a.gls, b.gls)}${row('Relic 10', a.r10, b.r10)}${row('Relic 9+', a.r9, b.r9)}${row('Relic 7+', a.r7, b.r7)}${row('Relic 5+', a.r5, b.r5)}${row('Zetas', a.zetas, b.zetas)}${row('Omicrons', a.omis, b.omis)}${row('7★ ships', a.ships7, b.ships7)}</table>
       <h2>Galactic Legends</h2><div class="gl">${gls.map(x => `<div>${esc(nm(x.id))}<span class="me">${lv(x.a)}</span><span class="opp">${lv(x.b)}</span></div>`).join('') || '<p class="sub">None.</p>'}</div>
       <h2>Their key units you're behind on</h2><div class="gl">${behind.map(x => `<div>${esc(nm(x.id))}<span class="me">${lv(x.a)}</span><span class="opp">${lv(x.b)}</span></div>`).join('') || '<p class="sub">Nothing major.</p>'}</div>
       ${COMPACT ? '' : (() => {
