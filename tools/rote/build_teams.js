@@ -109,7 +109,7 @@ const CATWORD = {
 const REQCAT = { jedi: 'Jedi', geonosian: 'Geonosian', 'light side wookiees': 'Wookiee', wookiees: 'Wookiee', empire: 'Empire', nightsisters: 'Nightsister',
   inquisitorius: 'Inquisitorius', pheonix: 'Phoenix', phoenix: 'Phoenix', mandalorians: 'Mandalorian', 'unaligned force users': 'Unaligned Force User',
   'clone troopers': 'Clone Trooper', 'rebel fighter': 'Rebel Fighter' };
-const REQNAME = { 'lando s millenium falcon': 'MILLENNIUMFALCONPRISTINE', 'any cal kestis': ['JEDIKNIGHTCAL', 'CALKESTIS'], 'bo katan mand alor': 'MANDALORBOKATAN',
+const REQNAME = { 'lando s millenium falcon': 'MILLENNIUMFALCONPRISTINE', 'lando s millennium falcon': 'MILLENNIUMFALCONPRISTINE', 'any cal kestis': ['JEDIKNIGHTCAL', 'CALKESTIS'], 'bo katan mand alor': 'MANDALORBOKATAN',
   'imperial tie fighter': 'TIEFIGHTERIMPERIAL', 'gauntlet starfighter': 'GAUNTLETSTARFIGHTER', 'qi ra': 'QIRA', 'the mandalorian beskar armor': 'THEMANDALORIANBESKARARMOR' };
 const problems = [];
 function lookupName(t) {
