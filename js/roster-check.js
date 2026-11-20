@@ -138,7 +138,7 @@
     var pi = phaseOf(b); if (pi < 0) return null;
     return { key: 'p' + pi, phase: pi, planets: PHASES[pi].filter(function (x) { return open.indexOf(x) < 0 && (!BONUS[x] || x === b && RC.open[x]); }) };
   }
-  // exact search for one group of missions that share units: most special missions first, then most missions
+  // exact search for one group of missions that share units: most Territory Point missions first, then specials
   function solve(items) {
     items = items.slice().sort(function (a, b) { return a.opts.length - b.opts.length; });
     var best = { s: -1, pick: [] }, used = {}, pick = [], budget = 400000, cut = false;
@@ -204,7 +204,7 @@
   function planFor(b) { var g = groupOf(b); return g ? RC.plans[g.key] : null; }
   function planNote(link) {
     var b = String(link).replace(/\.html$/, ''), p = planFor(b);
-    if (BONUS[b] && !RC.open[b]) return '<p class="h4">Phase plan</p><p class="rc-sub">' + esc(pname(b)) + ' is a bonus planet, so it isn\'t in the phase plan until you tick it as open.</p>' + openBox(b);
+    if (BONUS[b] && !RC.open[b]) return '<p class="h4">Phase plan</p><p class="rc-sub">' + esc(pname(b)) + ' is a bonus planet, so it isn\'t in the phase plan until you tick it under "Planets open now" (bottom right).</p>';
     if (!p) return '';
     var g = groupOf(b), title = g.key === 'open' ? 'Plan for the planets open now' : 'Phase ' + (g.phase + 1) + ' plan';
     var clash = p.rows.filter(function (x) { return x.ready && !x.team; });
@@ -214,7 +214,7 @@
       + (p.missing.length ? ' <span class="rc-x">' + esc(p.missing.map(pname).join(', ')) + ': data unavailable, not planned.</span>' : '')
       + (p.cut ? ' <span class="rc-some-t">Best plan found, not proven best (too many combinations).</span>' : '') + '</p>'
       + '<ul class="rc-list">' + mine.map(function (x) { return '<li>' + esc(x.mission) + ': ' + (x.team ? '<span class="rc-yes">' + esc(x.team) + '</span>' : x.flexShort ? '<span class="rc-some-t">not enough spare units for its open slots</span>' : x.ready ? '<span class="rc-some-t">units needed elsewhere</span>' : '<span class="rc-x">no ready team</span>') + '</li>'; }).join('') + '</ul>'
-      + openBox(b) + '<p class="rc-sub">Combat and fleet missions come first (they earn Territory Points); special missions get the units left over. Units you place in operations (platoons) can\'t fight on that planet and aren\'t counted here.</p>';
+      + '<p class="rc-sub">Combat and fleet missions come first (they earn Territory Points); special missions get the units left over. Units you place in operations (platoons) can\'t fight on that planet and aren\'t counted here.</p>';
   }
   // tick boxes: which planets are open right now (each path moves on separately, and bonus planets need unlocking)
   // what's ticked: the saved "open now" set, or before anything is saved, this planet's phase (without bonus planets)
@@ -227,8 +227,15 @@
       + (set ? ' <a href="#" data-rc-reset="1">Back to planning by phase</a>' : '') + '</p>'
       + near.map(function (x) { return '<label class="rc-tick"><input type="checkbox" data-rc-open="' + x + '" data-rc-here="' + b + '"' + (on.indexOf(x) >= 0 ? ' checked' : '') + '> ' + esc(pname(x)) + '</label>'; }).join('') + '</details>';
   }
+  var mapBoxOpen = false;
+  function mapOpenBox() {
+    var on = openList(), set = on.length > 0;
+    return '<details class="rc-open" id="rc-mapopen"' + (mapBoxOpen ? ' open' : '') + '><summary>Planets open now: ' + (set ? esc(on.map(pname).join(', ')) : 'planning by phase') + '</summary>'
+      + '<p class="rc-sub">Tick the planets your guild can fight on today; they\'re planned together. Zeffo and Mandalore are left out until ticked.' + (set ? ' <a href="#" data-rc-reset="1">Back to planning by phase</a>' : '') + '</p>'
+      + PHASES.map(function (ph, i) { return '<div>' + (i + 1) + ': ' + ph.map(function (x) { return '<label class="rc-tick"><input type="checkbox" data-rc-open="' + x + '" data-rc-here="' + x + '"' + (on.indexOf(x) >= 0 ? ' checked' : '') + '> ' + esc(pname(x)) + '</label>'; }).join('') + '</div>'; }).join('') + '</details>';
+  }
   function saveOpen(o) { RC.open = o; try { localStorage.setItem(OPENKEY, JSON.stringify(o)); } catch (x) {} RC.plans = {}; if (RC.units) loadPlanets(); }
-  document.addEventListener('toggle', function (e) { if (e.target && e.target.classList && e.target.classList.contains('rc-open')) boxOpen = e.target.open; }, true);
+  document.addEventListener('toggle', function (e) { if (e.target && e.target.classList && e.target.classList.contains('rc-open')) { if (e.target.id === 'rc-mapopen') mapBoxOpen = e.target.open; else boxOpen = e.target.open; } }, true);
   document.addEventListener('click', function (e) { if (e.target && e.target.getAttribute && e.target.getAttribute('data-rc-reset')) { e.preventDefault(); saveOpen({}); } });
   document.addEventListener('change', function (e) {
     var b = e.target && e.target.getAttribute && e.target.getAttribute('data-rc-open'); if (!b) return;
@@ -317,15 +324,16 @@
     document.head.appendChild(css);
     var box = document.createElement('div');
     box.id = 'rc-box';
-    box.innerHTML = '<label>Your ally code <input id="rc-ally" inputmode="numeric" placeholder="123-456-789"></label><button id="rc-go">Check</button><button class="rc-clear" id="rc-clear" title="Forget the ally code">✕</button><div class="rc-msg" id="rc-msg"></div>';
+    box.innerHTML = '<label>Your ally code <input id="rc-ally" inputmode="numeric" placeholder="123-456-789"></label><button id="rc-go">Check</button><button class="rc-clear" id="rc-clear" title="Forget the ally code">✕</button><div class="rc-msg" id="rc-msg"></div><div id="rc-mapopenwrap"></div>';
     document.body.appendChild(box);
-    var inp = box.querySelector('#rc-ally'), msg = box.querySelector('#rc-msg');
+    var inp = box.querySelector('#rc-ally'), msg = box.querySelector('#rc-msg'), mapOpen = box.querySelector('#rc-mapopenwrap');
     box.querySelector('#rc-go').onclick = function () { load(inp.value); };
     inp.onkeydown = function (e) { if (e.key === 'Enter') load(inp.value); };
     box.querySelector('#rc-clear').onclick = function () { try { localStorage.removeItem(KEY); } catch (e) {} if (load.ctl && load.ctl.abort) load.ctl.abort(); load.ctl = null; clearRoster(); RC.err = ''; RC.loading = false; inp.value = ''; };
     new Vue({ data: { RC: RC }, watch: { RC: { deep: true, immediate: true, handler: function () {
       msg.innerHTML = RC.loading ? 'Reading swgoh.gg…' : RC.err ? '<span class="rc-x">' + esc(RC.err) + '</span>'
         : RC.units ? esc(RC.name) + (RC.updated ? ' <span title="swgoh.gg roster sync">(swgoh.gg updated ' + esc(ago(RC.updated)) + ')</span>' : '') + ': <span class="rc-yes">green</span> = you have a recommended team at the level asked (not a promise it auto-wins), ' + '<span class="rc-some-t">amber</span> = ' + (isMain() ? 'some missions, ' : 'a legal lineup of your own but not a guide team, ') + '<span class="rc-x">red</span> = not yet.' : '';
+      mapOpen.innerHTML = RC.units && isMain() ? mapOpenBox() : '';
     } } } });
     var saved = ''; try { saved = localStorage.getItem(KEY) || ''; } catch (e) {}
     if (saved) { inp.value = saved.replace(/(\d{3})(\d{3})(\d{3})/, '$1-$2-$3'); load(saved); }

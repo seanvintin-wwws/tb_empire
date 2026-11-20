@@ -194,10 +194,7 @@
 		<!--v-click-outside="hide"-->
 		<div v-if="seen" class="description" v-bind:class="'desc_' + selectedMission.position">
 			
-			<div class="rewards mb-3" v-if="selectedMission.planet">
-				<p class="h4">Planet Info</p>
-				<span v-for="item in selectedMission.planet">&nbsp;&nbsp;{{item}}&nbsp;&nbsp;&nbsp;</span>
-			</div>
+			<p class="h4 mb-3" v-if="selectedMission.planet">{{ selectedMission.planet.join(' ') }}</p>
             <div class="mb-3 rc-note" v-if="rcNote(selectedMission)" v-html="rcNote(selectedMission)"></div>
 		</div>
 	</div>
