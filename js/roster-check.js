@@ -216,16 +216,24 @@
       + openBox(b) + '<p class="rc-sub">Special missions are filled first. Units you place in operations (platoons) can\'t fight on that planet and aren\'t counted here.</p>';
   }
   // tick boxes: which planets are open right now (each path moves on separately, and bonus planets need unlocking)
+  // what's ticked: the saved "open now" set, or before anything is saved, this planet's phase (without bonus planets)
+  function shownOpen(b) { var o = openList(); if (o.length) return o; var g = groupOf(b); return g ? g.planets : []; }
+  var boxOpen = false;
   function openBox(b) {
-    var pi = phaseOf(b), near = ALL.filter(function (x) { var q = phaseOf(x); return Math.abs(q - pi) <= 1 || RC.open[x]; });
-    return '<details class="rc-open"><summary>Planets open now' + (openList().length ? ': ' + esc(openList().map(pname).join(', ')) : ' (not set: planning by phase)') + '</summary><p class="rc-sub">Tick the planets your guild can fight on today. They\'re planned together. Zeffo and Mandalore are left out until ticked.</p>'
-      + near.map(function (x) { return '<label class="rc-tick"><input type="checkbox" data-rc-open="' + x + '"' + (RC.open[x] ? ' checked' : '') + '> ' + esc(pname(x)) + '</label>'; }).join('') + '</details>';
+    var pi = phaseOf(b), on = shownOpen(b), set = openList().length > 0;
+    var near = ALL.filter(function (x) { var q = phaseOf(x); return Math.abs(q - pi) <= 1 || on.indexOf(x) >= 0; });
+    return '<details class="rc-open"' + (boxOpen ? ' open' : '') + '><summary>Planets open now: ' + esc(on.map(pname).join(', ')) + (set ? '' : ' (this phase)') + '</summary><p class="rc-sub">Tick the planets your guild can fight on today; they\'re planned together. Zeffo and Mandalore are left out until ticked.'
+      + (set ? ' <a href="#" data-rc-reset="1">Back to planning by phase</a>' : '') + '</p>'
+      + near.map(function (x) { return '<label class="rc-tick"><input type="checkbox" data-rc-open="' + x + '" data-rc-here="' + b + '"' + (on.indexOf(x) >= 0 ? ' checked' : '') + '> ' + esc(pname(x)) + '</label>'; }).join('') + '</details>';
   }
+  function saveOpen(o) { RC.open = o; try { localStorage.setItem(OPENKEY, JSON.stringify(o)); } catch (x) {} RC.plans = {}; if (RC.units) loadPlanets(); }
+  document.addEventListener('toggle', function (e) { if (e.target && e.target.classList && e.target.classList.contains('rc-open')) boxOpen = e.target.open; }, true);
+  document.addEventListener('click', function (e) { if (e.target && e.target.getAttribute && e.target.getAttribute('data-rc-reset')) { e.preventDefault(); saveOpen({}); } });
   document.addEventListener('change', function (e) {
     var b = e.target && e.target.getAttribute && e.target.getAttribute('data-rc-open'); if (!b) return;
-    var o = {}; Object.keys(RC.open).forEach(function (k) { if (RC.open[k]) o[k] = true; }); if (e.target.checked) o[b] = true; else delete o[b];
-    RC.open = o; try { localStorage.setItem(OPENKEY, JSON.stringify(o)); } catch (x) {}
-    RC.plans = {}; if (RC.units) loadPlanets();
+    var o = {}; shownOpen(e.target.getAttribute('data-rc-here') || b).forEach(function (k) { o[k] = true; });
+    if (e.target.checked) o[b] = true; else delete o[b];
+    saveOpen(o);
   });
 
   var DATA = {};
