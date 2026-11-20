@@ -561,7 +561,7 @@ Vue.component('mission', {
         '5x characters (Relic 5+), Doctor Aphra',
         '5x characters (Relic 5+), Jabba the Hutt',
         '5x characters (Relic 5+), Qi\'ra, Young Han Solo',
-        'Lando\'s Millenium Falcon (7-Star)'//10
+        'Lando\'s Millennium Falcon (7-Star)'//10
         ],
 		platims:[
 		'Phase 1 Mixed Corellia (Self)',//0

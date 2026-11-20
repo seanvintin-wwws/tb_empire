@@ -604,7 +604,7 @@ Vue.component('mission', {
         '5x characters (Relic 5+), Doctor Aphra',
         '5x characters (Relic 5+), Jabba the Hutt',
         '5x characters (Relic 5+), Qi\'ra, Young Han Solo',
-        'Lando\'s Millenium Falcon (7-Star)',//10
+        'Lando\'s Millennium Falcon (7-Star)',//10
         'Ships (7-Star)',
         '5x characters (Relic 6+)',
         "5x characters (Relic 6+), Young Lando Calrissian",

@@ -539,7 +539,7 @@ Vue.component('mission', {
         "Wave 2: 3x Pike Sentinel (L), Pirate Spy, Pirate Saboteur, Pirate Enforcer",
         "Wave 1: Rebel Officer (L), 3x Rebel Soldier, 2x Rebel Pilot",
         "Wave 2: Rebel Officer (L), 3x Rebel Soldier, 2x Rebel Pilot",//50
-        "Wave 1: Home one, Rebel X-wing, Wedge's X-wing, Bigg's X-wing, Phantom II, Han's Millenium Falcon",
+        "Wave 1: Home one, Rebel X-wing, Wedge's X-wing, Bigg's X-wing, Phantom II, Han's Millennium Falcon",
         "TBC: Some combination of Rebel Officer/Rebel Solider/Old Ben",
 		"TBC: Some combination of Luke, R2, C3po, Stormtrooper Han, Leia, Chewbacca",
 
@@ -596,7 +596,7 @@ Vue.component('mission', {
         '5x characters (Relic 5+), Doctor Aphra',
         '5x characters (Relic 5+), Jabba the Hutt',
         '5x characters (Relic 5+), Qi\'ra, Young Han Solo',
-        'Lando\'s Millenium Falcon (7-Star)',//10,
+        'Lando\'s Millennium Falcon (7-Star)',//10,
         "Dark Side or Neutral (Relic 7+)",
         "Dark Side or Neutral (Relic 7+), Doctor Aphra",
         "Empire (Relic 7+)",

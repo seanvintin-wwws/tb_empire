@@ -68,8 +68,8 @@
 				<table class="guide-table" v-if="guide(selectedMission).length">
 					<tr v-for="t in guide(selectedMission)">
 						<td class="text-left">
-							<b>{{ t.lead }}</b>
-							<span v-if="t.with"> + {{ t.with }}</span>
+							<b>{{ gShow(selectedMission, t, 'lead') }}</b>
+							<span v-if="gShow(selectedMission, t, 'with')"> + {{ gShow(selectedMission, t, 'with') }}</span>
 							<div v-if="t.how" class="guide-how">{{ t.how }}</div>
 							<div v-if="t.notes" class="guide-notes">{{ t.notes }}</div>
 						</td>
