@@ -1816,7 +1816,13 @@ window.GUIDE = {
    "notes": ""
   }
  ],
- "hoth:c4": []
+ "hoth:c4": [
+  {
+   "lead": "Doctor Aphra",
+   "with": "IG-90, BT-1, 0-0-0, IG-88",
+   "notes": "ANZGC guild-tested (FireFight): wins every time."
+  }
+ ]
 };
 window.GUIDE_NOTES = {
  "zeffo:c3": "Captain Rex is essential here (a test with Kix instead lost in wave 1). Only do this once Saw on Kashyyyk is done with the Vel team; otherwise Captain Rex is already used.",
