@@ -12,7 +12,7 @@
    - Round by round report (from Arrikhan): result, score, first attack time and delay, their holds and their drops (export only since v3.7.2).
 */
 (async () => {
-  const VERSION = '3.7.7';
+  const VERSION = '3.7.8';
   // tests (tools/gac-scout/test) load this file in Node with globalThis.__gacScoutTest set: no overlay, internals exposed
   const TEST = typeof globalThis.__gacScoutTest === 'object' && globalThis.__gacScoutTest ? globalThis.__gacScoutTest : null;
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
@@ -1011,7 +1011,7 @@
           if (!c.dc || c.useDc) return; // rated with a datacron only when Insight has battles at that strength
           const x = bestDc(S.me.dcs, c.squad, busy2);
           // only when the with-datacron rating is at least as good as the one the swap was decided on
-          if (x && x.band === c.dc.band && c.score >= (c.eff ?? 0)) { c.dc = x; c.useDc = true; c.eff = c.score; busy2.add(x.dc.id); }
+          if (x && x.band === c.dc.band && c.score >= (c.eff ?? 0)) { c.pre = { dc: c.dc, useDc: c.useDc, eff: c.eff }; c.dc = x; c.useDc = true; c.eff = c.score; busy2.add(x.dc.id); }
         });
       }
     } catch (e) { console.warn('[GAC Scout+] freed datacrons', e); }
@@ -1342,7 +1342,7 @@
         const P = S.pkg, pk = x => x && { expectedHolds: +x.exp.toFixed(2), matchups: x.rows.map(r => ({ squad: r.c.squad, attackedBy: r.att ? r.att.squad : 'other teams', hold: +r.hold.toFixed(3), battlesHere: r.n, leagueBattles: r.gN })) };
         const zs = myZones();
         return { slots: sl.zones, slotsAreMinimums: true, zones: Object.fromEntries(R.mine.map(c => { const e = zs['@' + ldKey(c.squad)] || zs[c.squad[0]]; return [c.squad.join('/'), e ? (e.saved ? e.zone : e.zone + ' (from history)') : null]; })),
-          datacrons: (S.me.dcs || []).filter(dcLive).map(dc => ({ no: dcNo(dc), level: dc.lv, set: setName(dc.s), characters: dc.ab.filter(t => t.type === 4).map(t => t.name), finalUse: (() => { const k = Object.keys(S.myDefDc || {}).find(k => S.myDefDc[k].dc.id === dc.id), sw = R.swaps.find(x => x.in.useDc && x.in.dc && x.in.dc.dc.id === dc.id), out = k && R.swaps.some(x => ldKey(x.out.squad) === k), p = (S.plan || []).find(p => p.dcX && p.dcX.dc.id === dc.id); return sw ? 'defence (added): ' + sw.in.squad.join('/') : k && !out ? 'defence: ' + k : p ? 'attack: ' + p.pick.squad.join('/') : 'spare'; })() })).filter(x => !COMPACT || x.finalUse !== 'spare'), package: P ? { current: pk(P.cur), withSwaps: pk(P.rec) } : null, keep: R.mine.filter(c => !R.outSet.has(c)).map(sum), swaps: R.swaps.map(x => ({ remove: x.out.squad, add: sum(x.in) })) }; } catch (e) { return null; } })(),
+          datacrons: (S.me.dcs || []).filter(dcLive).map(dc => ({ no: dcNo(dc), level: dc.lv, set: setName(dc.s), characters: dc.ab.filter(t => t.type === 4).map(t => t.name), finalUse: (() => { const k = Object.keys(S.myDefDc || {}).find(k => S.myDefDc[k].dc.id === dc.id), sw = R.swaps.find(x => x.in.useDc && x.in.dc && x.in.dc.dc.id === dc.id), out = k && R.swaps.some(x => ldKey(x.out.squad) === k), p = (S.plan || []).find(p => p.dcX && p.dcX.dc.id === dc.id); return sw ? 'defence (added): ' + sw.in.squad.join('/') : k && !out ? 'defence: ' + k : p ? 'attack: ' + p.pick.squad.join('/') : 'spare'; })() })).filter(x => !COMPACT || x.finalUse !== 'spare'), package: P ? { current: pk(P.cur), withSwaps: pk(P.rec) } : null, keep: R.mine.filter(c => !R.outSet.has(c)).map(sum), swaps: R.swaps.map(x => ({ remove: x.out.squad, add: sum(x.in) })), swapsDropped: (R.dropped || []).map(x => ({ remove: x.out.squad, add: x.in.squad, reason: 'lowers expected holds', expectedHolds: +x.cur.toFixed(2), withSwap: +x.with.toFixed(2) })) }; } catch (e) { return null; } })(),
       myDefenceSquads: myDefSquads().map(sq => { const c = (S.defCands || []).find(x => ldKey(x.squad) === ldKey(sq)) || {}; return { squad: sq, datacron: c.dc ? T0(dcTxt(c.dc, '')) : null, insight: insWith(c) ? { hold: insWith(c).h, battles: insWith(c).n } : null, hotutils: c.hu ? { hold: c.hu.h, battles: c.hu.n } : null, swgohggSquads: c.sg ? { hold: c.sg.h, battles: c.sg.n } : null }; }),
       ownedSquadHolds: (S.defCands || []).filter(c => c.sg || c.hu || c.onDef).map(c => ({ squad: c.squad, onDefence: !!c.onDef, usesDefenceUnits: !!c.usesDef, swgohggSquads: c.sg ? { hold: c.sg.h, battles: c.sg.n } : null, hotutils: c.hu ? { hold: c.hu.h, battles: c.hu.n } : null,
         insightWithDatacron: c.dc && insWith(c) ? { hold: insWith(c).h, battles: insWith(c).n } : null, insightWithoutDatacron: c.dc ? (insWithout(c) ? { hold: insWithout(c).h, battles: insWithout(c).n } : null) : insWith(c) ? { hold: insWith(c).h, battles: insWith(c).n } : null })),
@@ -1689,14 +1689,22 @@
     syncLocked();
     return e || null;
   }
+  // a replacement must hold at least as well on EVERY source the placed squad has (swgoh.gg squads, HotUtils, Insight).
+  // A source the replacement has no figure for counts as a fail, and so does Insight from a different pool
+  // (e.g. whole league because there were too few battles in your division, against the placed squad's division figure).
+  // Averaging the sources (before v3.7.8) let one high Insight number outvote a lower HotUtils one and a missing one.
+  const metaBeats = (x, w) => [['sg', c => c.sg], ['hu', c => c.hu], ['ins', insEff]].every(([k, f]) => {
+    const a = f(w); if (!a) return true;
+    const b = f(x); if (!b) return false;
+    return (k !== 'ins' || (b.scope || 'div') === (a.scope || 'div')) && b.h >= a.h;
+  });
   function defReview() {
     const mine = myDefSquads().map(sq => (S.defCands || []).find(c => c.onDef && ldKey(c.squad) === ldKey(sq))).filter(Boolean);
     const asc = [...mine].sort((a, b) => effS(a) - effS(b));
     const pool = (S.defPlan || []).filter(enough).sort((a, b) => effS(b) - effS(a)), used = new Set(), swaps = [];
     for (const weak of asc) {
-      const mw = metaMean(weak);
       const no = swapNo();
-      const c = pool.find(x => !used.has(x) && !no.has(ldKey(weak.squad) + '|' + ldKey(x.squad)) && effS(x) >= effS(weak) + 0.03 && (mw == null || (metaMean(x) || 0) >= mw));
+      const c = pool.find(x => !used.has(x) && !no.has(ldKey(weak.squad) + '|' + ldKey(x.squad)) && effS(x) >= effS(weak) + 0.03 && metaBeats(x, weak));
       if (!c) continue;
       used.add(c); swaps.push({ out: weak, in: c });
     }
@@ -1737,7 +1745,21 @@
       return { exp: rows.reduce((a, r) => a + r.hold, 0), base: rows.filter(r => !r.att).reduce((a, r) => a + r.hold, 0), rows };
     };
     const R = S.review || defReview();
-    S.pkg = R.mine.length ? { atts, cur: run(R.mine), rec: R.swaps.length ? run(R.mine.map(c => (R.swaps.find(x => x.out === c) || { in: c }).in)) : null } : null;
+    const listFor = sw => R.mine.map(c => (sw.find(x => x.out === c) || { in: c }).in);
+    const cur = R.mine.length ? run(R.mine) : null;
+    // the package has the last word: a swap is only suggested if, with their attackers matched up, it doesn't lower
+    // the expected holds, on its own and together with the other swaps (before v3.7.8 it only printed a warning)
+    if (cur && R.swaps.length) {
+      let keep = R.swaps.filter(x => run(listFor([x])).exp >= cur.exp - 0.005);
+      if (keep.length && run(listFor(keep)).exp < cur.exp - 0.005) keep = [];
+      if (keep.length < R.swaps.length) {
+        R.dropped = [...(R.dropped || []), ...R.swaps.filter(x => !keep.includes(x)).map(x => ({ ...x, cur: cur.exp, with: run(listFor([x])).exp }))];
+        // a datacron loaned to a dropped squad goes back to the squad that stays
+        R.dropped.forEach(({ in: c }) => { if (c.pre) { Object.assign(c, c.pre); delete c.pre; } });
+        R.swaps = keep; R.outSet = new Set(keep.map(x => x.out));
+      }
+    }
+    S.pkg = cur ? { atts, cur, rec: R.swaps.length ? run(listFor(R.swaps)) : null } : null;
   }
   function pkgH() {
     const P = S.pkg;
@@ -1773,7 +1795,7 @@
     h += `<h3>1. Your defence: keep, remove, add</h3>`;
     if (!R.mine.length) h += `<p class="sub">No defence saved yet. Add your placed defence at the top of the Battle plan tab to get a keep/remove review. Best squads to set are under Suggested defence.</p>`;
     else {
-      h += `<p class="sub">Score = a ranking guide, roughly an estimated hold against ${esc(opp)}: half the meta hold % (${S.INS ? insLabel('div') : S.HU ? 'HotUtils' : 'swgoh.gg'}), half how it does against the attack teams ${esc(opp)} uses. A squad is only swapped when the replacement scores at least 3 points higher, holds at least as well on the meta sources, and the hold % driving its score has 20+ battles. Keep Galactic Legends for attack: <b>${S.keepGL ? 'on' : 'off'}</b>.</p>
+      h += `<p class="sub">Score = a ranking guide, roughly an estimated hold against ${esc(opp)}: half the meta hold % (${S.INS ? insLabel('div') : S.HU ? 'HotUtils' : 'swgoh.gg'}), half how it does against the attack teams ${esc(opp)} uses. A squad is only swapped when the replacement scores at least 3 points higher, holds at least as well on every meta source the placed squad has (swgoh.gg squads, HotUtils, Insight from the same pool), the hold % driving its score has 20+ battles, and it doesn't lower the expected holds once their attackers are matched up (section 2). Keep Galactic Legends for attack: <b>${S.keepGL ? 'on' : 'off'}</b>.</p>
       <table class="stack"><tr><th></th><th>Squad</th><th>Score</th><th>${sgLabel()}</th><th>HotUtils</th><th>${S.INS ? insLabel('div') : 'Insight'}</th><th>Their main attackers${top2.length ? ` (${top2.map(a => esc(nm(a.lead))).join(', ')})` : ''}</th></tr>
       ${byZoneOrder(R.mine, zs).map(c => (R.outSet.has(c) ? row(c, 'REMOVE', 'warn') : row(c, 'KEEP', 'me'))).join('')}${addDivider(R.swaps.length, 7)}${R.swaps.map(x => row(x.in, 'ADD', 'me')).join('')}</table>
       ${swapNoNote()}${R.swaps.length ? R.swaps.map((x, i) => swapLine(x, i, true)).join('') : '<p><b class="me">No swaps: nothing free scores clearly better than what you have set.</b></p>'}`;
@@ -1834,6 +1856,7 @@
     const W = [];
     const thin = [...R.mine.filter(c => !R.outSet.has(c)), ...R.swaps.map(x => x.in)].filter(c => !metaList(c).some(m => m.n >= 20));
     if (thin.length) W.push(`Under 20 battles on every source for: ${thin.map(c => esc(c.squad.map(nm).join(' / '))).join('; ')}.`);
+    (R.dropped || []).forEach(x => W.push(`Swap not suggested: ${esc(x.in.squad.map(nm).join(' / '))} for ${esc(x.out.squad.map(nm).join(' / '))} scored higher but lowers the expected holds against ${esc(opp)}'s attackers (${x.cur.toFixed(1)} → ${x.with.toFixed(1)}).`));
     if (S.unseen.length) W.push(`${S.unseen.length} strong teams in ${esc(opp)}'s roster have never been seen on their defence (${S.unseen.slice(0, 4).map(d => esc(nm(d.lead))).join(', ')}${S.unseen.length > 4 ? '…' : ''}). Check the Their defences tab.`);
     if (!S.HU) W.push('No HotUtils data (the daily copy couldn\'t be loaded and none was pasted), so its column is empty.');
     else if (S.HU.auto && Date.now() - Date.parse(S.HU.asOf) > 2 * DAY) W.push(`The HotUtils data is ${Math.round((Date.now() - Date.parse(S.HU.asOf)) / DAY)} days old.`);

@@ -258,3 +258,42 @@ test('swap buttons: Done puts the new squad on your defence in the same zone; No
   assert.ok(!(kA in T.store.defZones));
   assert.ok(S.locked.has('D1') && !S.locked.has('A1'));
 });
+
+test('swap needs every meta source: a higher whole-league Insight figure cannot outvote a lower HotUtils one and a missing swgoh.gg one (Veers vs Dash, Pyxroy 21 Nov)', () => {
+  const T = load();
+  const V = ['VEERS', 'DT', 'STC'], D = ['DASH', 'L3', 'VCHEW'];
+  const S = mkS(T, { mine: [...V, ...D].map(id => unit(id)) });
+  setDefence(S, [V]);
+  const kV = T.ldKey(V), kD = T.ldKey(D);
+  S.metaSG = T.metaMap([[2734, 0.15, 55, V]]); // Dash isn't on the swgoh.gg squads page with Dash leading
+  S.HU = { league: 'KYBER', season: 85, ctr: {}, mine: {}, meta: T.metaMap([[3019, 0.159, 55, V], [1671, 0.144, 55, D]]) };
+  S.INS = { league: 'KYBER', dn: 3, ctr: {}, cand: { [kV]: { no: ins(834, 0.127, 0) }, [kD]: { no: { ...ins(178, 0.185, 0), scope: 'league' } } } };
+  S.defCands = T.defenceCandidates(S); T.plan(S);
+  const dash = S.defCands.find(c => T.ldKey(c.squad) === kD);
+  assert.ok(dash && T.effS(dash) >= T.effS(S.review.mine[0]) + 0.03, 'Dash scores higher, so only the source check can stop the swap');
+  assert.strictEqual(S.review.swaps.length, 0, 'no swap');
+  // control: better on all three sources, Insight from the same pool -> swapped
+  S.metaSG = T.metaMap([[2734, 0.15, 55, V], [2000, 0.17, 55, D]]);
+  S.HU.meta = T.metaMap([[3019, 0.159, 55, V], [1671, 0.17, 55, D]]);
+  S.INS.cand[kD] = { no: ins(500, 0.185, 0) };
+  S.defCands = T.defenceCandidates(S); T.plan(S);
+  assert.strictEqual(S.review.swaps.length, 1, 'swapped when it holds at least as well everywhere');
+});
+
+test('a swap that lowers the expected holds against their attackers is dropped, and noted in the export only', () => {
+  const T = load();
+  const A = ['A1', 'A2', 'A3'], X = ['X1', 'X2', 'X3'], O = ['O1', 'O2', 'O3'];
+  const S = mkS(T, { mine: [...A, ...X].map(id => unit(id)), theirs: O.map(id => unit(id)) });
+  setDefence(S, [A]);
+  const kA = T.ldKey(A), kX = T.ldKey(X);
+  S.atts = [{ lead: 'O1', squads: { 'O1,O2,O3': 10 }, n: 10, w: 8 }];
+  // X holds better in the meta (40% vs 20%) but worse against their one attack team (50% vs 60%)
+  S.metaSG = T.metaMap([[5000, 0.20, 55, A], [5000, 0.40, 55, X]]);
+  S.INS = { league: 'KYBER', dn: 3, ctr: {}, cand: { [kA]: { no: { ...ins(1000, 0.20, 0), b: { none: [[200, 0.4, 55, O]] } } }, [kX]: { no: { ...ins(1000, 0.40, 0), b: { none: [[200, 0.5, 55, O]] } } } } };
+  S.defCands = T.defenceCandidates(S); T.plan(S);
+  assert.strictEqual(S.review.swaps.length, 0, 'the swap is not suggested');
+  assert.strictEqual(S.review.dropped.length, 1, 'it is recorded as dropped');
+  assert.strictEqual(S.pkg.rec, null);
+  const h = T.viewBrief();
+  assert.ok(!/REMOVE/.test(h) && !/Swap not suggested/.test(h), 'nothing about it on the page');
+});
