@@ -61,6 +61,8 @@ text:hover {
 
 .description {
 	position: absolute;
+	/* hover-only info box: let the mouse pass through so it can't cover the planet and make it flicker */
+	pointer-events: none;
 	background-color: rgb(35, 48, 67, 0.9);
 	transform: translate(0, -45%);
 	top: 50%;
