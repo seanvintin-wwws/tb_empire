@@ -199,16 +199,6 @@
 				<span v-for="item in selectedMission.planet">&nbsp;&nbsp;{{item}}&nbsp;&nbsp;&nbsp;</span>
 			</div>
             <div class="mb-3 rc-note" v-if="rcNote(selectedMission)" v-html="rcNote(selectedMission)"></div>
-            <div class="rewards mb-3" v-if="selectedMission.notes">
-				<span v-for="item in selectedMission.notes">&nbsp;&nbsp;{{item}}&nbsp;&nbsp;&nbsp;</span>
-			</div>
-
-			<div class="rewards mb-3" v-if="selectedMission.rewards">
-				<p class="h4">Points Needed</p>
-				<ul>
-					<li class="text-justify" v-for="item in selectedMission.rewards">{{item}}</li>
-				</ul>
-			</div>
 		</div>
 	</div>
 </template>
