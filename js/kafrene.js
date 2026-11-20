@@ -255,7 +255,7 @@ Vue.component('mission', {
 			 },
 			 {
 				id:44,
-				name: 'Rebels (Either CLS or oROLO Lead)',
+				name: 'Rebels (CLS Lead)',
 				toons: ['commander_luke_skywalker', 'chewbacca', 'han_solo', 'threepio_&_chewie', 'c-3po'],
 				 
 			 },
@@ -487,6 +487,11 @@ Vue.component('mission', {
 				id:86,
 				name: 'Rogue One',
 				toons: ['admiral_raddus','cassian_andor','k-2so','jyn_erso','scarif_rebel_pathfinder']
+			 },
+			 {
+				id:87,
+				name: 'Rebels (oROLO Lead)',
+				toons: ['rolo', 'chewbacca', 'han_solo', 'threepio_&_chewie', 'c-3po'],
 			 }
              
 
@@ -560,7 +565,7 @@ Vue.component('mission', {
 "Jedi Knight Revan",	"3","50R-T",	"2","Baze Malbus",	"2","C-3PO",	"2",
 "Eeth Koth",	"2","Profundity",	"2","R2-D2",	"2","Tech",	"2","Wedge Antilles's X-wing",	"2",
 "Amilyn Holdo",	"1","Barriss Offee",	"1","Bastila Shan",	"1","Bodhi Rook",	"1","Boushh (Leia Organa)",	"1",
-"Chewbacca",	"1","Chirrut ÃŽmwe",	"1","Chopper",	"1","Clone Sergeant's ARC-170",	"1",
+"Chewbacca",	"1","Chirrut Îmwe",	"1","Chopper",	"1","Clone Sergeant's ARC-170",	"1",
 "Clone Wars Chewbacca",	"1","CT-7567 Rex",	"1","Echo",	"1","Ghost",	"1","Han's Millennium Falcon",	"1",
 "Hoth Rebel Soldier",	"1","Ima-Gun Di",	"1","Lando Calrissian",	"1","Lobot",	"1",
 "Mon Mothma",	"1","Negotiator",	"1","Omega",	"1","Padme Amidala",	"1","Resistance Trooper",	"1",
@@ -671,7 +676,7 @@ Vue.component('mission', {
 				'Wave 1: 307,125',
                 'Wave 2: 721,744'
 				],
-			preferredSquads: [83,44],//br MJ
+			preferredSquads: [83,44,87],//br MJ
 			dangerousEnemies: [54,56],
 			modifiers: [4,2,5],
             reqs: [23],
