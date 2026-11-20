@@ -195,8 +195,19 @@ function parseTeam(g, key, req) {
   if (/^any r9s/i.test(withTxt)) withTxt = 'any 4';
   if (/^any resistance/i.test(withTxt)) withTxt = '+4 resistance';
   if (/^any$/i.test(withTxt.trim())) withTxt = '+4';
-  const toks = withTxt.split(/,|\.|;| and (?=[A-Z])|\s(?=\+)/).map(cleanTok).filter(Boolean);
-  toks.forEach(raw => {
+  const rawToks = withTxt.split(/,|\.|;| and (?=[A-Z])|\s(?=\+)/).filter(t => t.trim());
+  let grp = null, since = team.slots.length;
+  rawToks.forEach(rawTok => {
+    if (/\bstart(ing)?\s*:/i.test(rawTok)) { grp = 'start'; since = team.slots.length; }
+    if (/\breinforcements?\s*:/i.test(rawTok)) { grp = 'reinf'; since = team.slots.length; }
+    const endStart = /\b(start|starting)\s*$/i.test(rawTok.trim()), endReinf = /reinforcements?\s*$/i.test(rawTok.trim()) && !/:/.test(rawTok);
+    const before = team.slots.length;
+    handle(cleanTok(rawTok));
+    team.slots.slice(before).forEach(x => { if (grp) x.grp = grp; });
+    if (endStart || endReinf) { team.slots.slice(since).forEach(x => { if (!x.grp || x.grp !== (endStart ? 'start' : 'reinf')) x.grp = endStart ? 'start' : 'reinf'; }); since = team.slots.length; grp = null; }
+  });
+  function handle(raw) {
+    if (!raw) return;
     let tok = raw.trim();
     let omi = 0;
     if (/\((omi|omicron|o)\)|\bomi\b|omicron/i.test(tok)) { omi = 1; }
@@ -218,7 +229,7 @@ function parseTeam(g, key, req) {
     const cw = CATWORD[tok.toLowerCase()];
     if (cw) { team.flex.push({ n: Math.max(1, 5 - team.slots.length - team.flex.reduce((a, f) => a + f.n, 0)), cat: cw }); return; }
     if (!add(tok, omi)) problems.push(key + ': unit not found: ' + tok + '  [' + team.label + ']');
-  });
+  }
   // context fixes: Bad Batch Echo next to Tech/Hunter; Republic Y-wing with the Negotiator
   const has = id => team.slots.some(s => s.ids.includes(id));
   if (has('BADBATCHTECH')) team.slots.forEach(s => { if (s.ids[0] === 'CT210408') s.ids = ['BADBATCHECHO']; });
@@ -276,6 +287,23 @@ function tidy(team, req) {
     for (let i = team.flex.length - 1; i >= 0 && over > 0; i--) { const d = Math.min(over, team.flex[i].n); team.flex[i].n -= d; over -= d; }
     team.flex = team.flex.filter(f => f.n > 0); }
 }
+// the team written out with in-game names, for the Recommended teams list
+const nm = id => (U[id] ? U[id].name : id);
+function slotName(sl) { return sl.ids.map(nm).join(' or ') + (sl.omi === 2 ? ' (leader omicron)' : sl.omi ? ' (omicron)' : '') + (sl.req ? ' (required)' : ''); }
+function flexName(f, req) {
+  const cat = f.cat || req.cat, side = req.strict === 'L' || req.alignStrict === 'L' ? 'Light Side ' : req.align === 'L' ? 'Light Side or Neutral ' : req.align === 'D' ? 'Dark Side or Neutral ' : '';
+  return '+' + f.n + ' ' + (f.fill && !cat && !side ? 'more of your choice' : 'any ' + (cat ? (req.strict === 'L' || req.alignStrict === 'L' ? 'Light Side ' : '') + cat : side ? side + (f.n > 1 ? 'units' : 'unit') : 'unit' + (f.n > 1 ? 's' : '')));
+}
+function display(team, req) {
+  const [lead, ...rest] = team.slots;
+  if (!lead) return null;
+  let w;
+  if (req.ships && rest.some(x => x.grp)) {
+    const st = rest.filter(x => x.grp === 'start'), rf = rest.filter(x => x.grp === 'reinf'), other = rest.filter(x => !x.grp);
+    w = [st.length ? 'start: ' + st.map(slotName).join(', ') : '', rf.length ? 'reinforcements: ' + rf.map(slotName).join(', ') : '', other.length ? other.map(slotName).join(', ') : ''].filter(Boolean).join('; ');
+  } else w = rest.map(slotName).concat((team.flex || []).map(f => flexName(f, req))).join(', ');
+  return { lead: slotName(lead), with: w.replace(/^\+/, '') };
+}
 function teamFits(team, req) {
   tidy(team, req);
   const why = [];
@@ -320,7 +348,7 @@ fs.readdirSync(path.join(ROOT, 'js')).filter(f => f.endsWith('.js') && !skip.tes
     if (MANUAL[key]) { teams = MANUAL[key].map(t => ({ label: t.label, slots: t.slots.map(ids => ({ ids, omi: 0 })), flex: t.flex, fleet: false })); src = 'manual'; }
     else if (GUIDE[key] && GUIDE[key].length) teams = GUIDE[key].map(g => parseTeam(g, key, req));
     else { src = 'map'; teams = (m.preferredSquads || []).map(i => d.squads.find(s => s.id === i) || d.squads[i]).filter(Boolean).map(sq => mapTeam(sq, key, req, m)); }
-    teams.forEach(t => { t.bad = teamFits(t, req); });
+    teams.forEach(t => { t.bad = teamFits(t, req); t.show = display(t, req); });
     // missions that only ask for a faction ("5x Light Side Wookiees"): also accept each guide lead with any other
     // qualifying units at the relic asked. Shown amber ("your own lineup"), not as the guide's team.
     if (req.cat && !req.ships) {
@@ -336,7 +364,7 @@ fs.readdirSync(path.join(ROOT, 'js')).filter(f => f.endsWith('.js') && !skip.tes
       if (t.bad.length) report.push(key + ' [' + src + '] ' + t.label + ' -> ' + t.bad.join('; '));
     });
     OUT[key] = { kind, size: req.size, rel: req.rel, align: req.align, strict: req.alignStrict || null, cat: req.cat, named: req.named, max: req.max, ships: req.ships, src,
-      teams: teams.map(t => ({ label: t.label, slots: t.slots.map(s => s.omi ? [s.ids, s.omi] : [s.ids]), flex: t.flex, own: t.own ? 1 : undefined, bad: t.bad.length ? t.bad : undefined })) };
+      teams: teams.map(t => ({ label: src === 'guide' && !t.own && t.show ? t.show.lead + (t.show.with ? ' + ' + t.show.with : '') : t.label, slots: t.slots.map(s => s.omi ? [s.ids, s.omi] : [s.ids]), flex: t.flex, own: t.own ? 1 : undefined, show: src === 'guide' && !t.own ? t.show : undefined, bad: t.bad.length ? t.bad : undefined })) };
   });
 });
 const header = '// Generated by tools/rote/build_teams.js from js/guide_data.js, the planet files and js/rote-units.js. Don\'t edit by hand.\n';

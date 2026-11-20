@@ -263,6 +263,12 @@
     mounted: function () { if (typeof this.mq === 'function' && this.isMobile === false) this.mq(); },
     created: function () { if (this.missions) { var l = this.missions.map(function (m) { return m.planetlink; }).filter(Boolean); if (l.length) { window.ROTE_PLANET_LINKS = l; if (RC.units) loadPlanets(); } } },
     methods: {
+      // a guide team written out with in-game names (built by tools/rote/build_teams.js); falls back to the guide's text
+      gShow: function (m, t, field) {
+        var key = String(window.GUIDE_PLANET || '') + ':' + (m && m.name), G = window.GUIDE && window.GUIDE[key], T = TEAMS[key];
+        var i = G ? G.indexOf(t) : -1, x = T && T.src === 'guide' && i >= 0 && T.teams[i] && T.teams[i].show;
+        return x ? x[field] : t[field];
+      },
       rcClass: function (m) {
         if (!RC.units || !m) return '';
         if (m.planetlink) { var p = RC.planets[m.planetlink]; return !p || !p.total ? '' : p.ready === p.total ? 'rc-ready' : p.ready || p.own ? 'rc-some' : 'rc-no'; }
