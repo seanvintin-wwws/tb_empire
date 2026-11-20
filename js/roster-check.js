@@ -142,8 +142,9 @@
   function solve(items) {
     items = items.slice().sort(function (a, b) { return a.opts.length - b.opts.length; });
     var best = { s: -1, pick: [] }, used = {}, pick = [], budget = 400000, cut = false;
-    // special missions count most; a guide team counts slightly more than a lineup of your own
-    var w = items.map(function (it) { return it.kind === 'special' ? 10000 : 10; });
+    // combat and fleet missions earn Territory Points (stars), special missions only tokens: fill points first,
+    // then specials with the units left over. A guide team counts slightly more than a lineup of your own.
+    var w = items.map(function (it) { return it.kind === 'special' ? 3 : 1000; });
     var rest = []; for (var i = items.length - 1, acc = 0; i >= 0; i--) { acc += w[i]; rest[i] = acc; } rest[items.length] = 0;
     (function go(i, s) {
       if (--budget < 0) { cut = true; return; }
@@ -213,7 +214,7 @@
       + (p.missing.length ? ' <span class="rc-x">' + esc(p.missing.map(pname).join(', ')) + ': data unavailable, not planned.</span>' : '')
       + (p.cut ? ' <span class="rc-some-t">Best plan found, not proven best (too many combinations).</span>' : '') + '</p>'
       + '<ul class="rc-list">' + mine.map(function (x) { return '<li>' + esc(x.mission) + ': ' + (x.team ? '<span class="rc-yes">' + esc(x.team) + '</span>' : x.flexShort ? '<span class="rc-some-t">not enough spare units for its open slots</span>' : x.ready ? '<span class="rc-some-t">units needed elsewhere</span>' : '<span class="rc-x">no ready team</span>') + '</li>'; }).join('') + '</ul>'
-      + openBox(b) + '<p class="rc-sub">Special missions are filled first. Units you place in operations (platoons) can\'t fight on that planet and aren\'t counted here.</p>';
+      + openBox(b) + '<p class="rc-sub">Combat and fleet missions come first (they earn Territory Points); special missions get the units left over. Units you place in operations (platoons) can\'t fight on that planet and aren\'t counted here.</p>';
   }
   // tick boxes: which planets are open right now (each path moves on separately, and bonus planets need unlocking)
   // what's ticked: the saved "open now" set, or before anything is saved, this planet's phase (without bonus planets)
