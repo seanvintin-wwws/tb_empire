@@ -119,7 +119,7 @@ function lookupName(t) {
   return BYNORM[norm(t)] || null;
 }
 function parseReq(lines, key) {
-  const r = { rel: 0, align: null, cat: null, named: [], max: 5, ships: false, any5: false };
+  const r = { rel: 0, align: null, cat: null, named: [], max: 5, ships: false, group: false };
   lines.forEach(line => {
     const t = String(line);
     const m = t.match(/Relic\s*(\d+)/i); if (m) r.rel = Math.max(r.rel, +m[1]);
@@ -137,11 +137,12 @@ function parseReq(lines, key) {
       if (/ships$/i.test(s)) { r.ships = true; if (/light side/i.test(s)) r.align = 'L'; if (/dark side/i.test(s)) r.align = 'D'; return; }
       if (/^5x\s/i.test(s) || i === 0) {
         const g = s.replace(/^5x\s*/i, '');
-        if (/^characters$/i.test(g)) return;
-        if (/light side or neutral/i.test(g)) { r.align = 'L'; return; }
-        if (/dark side or neutral/i.test(g)) { r.align = 'D'; return; }
+        if (/^5x\s/i.test(s)) r.group = true;
+        if (/^characters$/i.test(g)) { r.group = true; return; }
+        if (/light side or neutral/i.test(g)) { r.align = 'L'; r.group = true; return; }
+        if (/dark side or neutral/i.test(g)) { r.align = 'D'; r.group = true; return; }
         const gc = REQCAT[g.toLowerCase()];
-        if (gc) { r.cat = gc; if (/light side/i.test(g) || /Light side only/i.test(t)) r.alignStrict = 'L'; return; }
+        if (gc) { r.cat = gc; r.group = true; if (/light side/i.test(g) || /Light side only/i.test(t)) r.alignStrict = 'L'; return; }
         if (i > 0 || !/^5x/i.test(s)) { /* falls through to a named unit, e.g. "Darth Vader (Relic 9+)" */ } else { problems.push(key + ': requirement group not understood: ' + g); return; }
       }
       const id = lookupName(s);
@@ -149,6 +150,9 @@ function parseReq(lines, key) {
     });
     if (/Light side only/i.test(t)) r.alignStrict = 'L';
   });
+  // how many units a ground team must have: 5, unless the mission caps it (Max Units) or only names its units
+  // (Lord Vader solo, Cere + Cal). The game doesn't let you enter with fewer.
+  r.size = r.ships ? 0 : r.max < 5 ? r.max : r.group ? 5 : (r.named.length || 5);
   return r;
 }
 
@@ -265,6 +269,8 @@ function tidy(team, req) {
   const seen = new Set(); team.slots = team.slots.filter(s => { const k = s.ids.join('/'); if (seen.has(k)) { const o = team.slots.find(x => x.ids.join('/') === k); o.omi = Math.max(o.omi, s.omi); return false; } seen.add(k); return true; });
   // guide teams leave out the unit the mission requires: add it
   req.named.forEach(n => { if (!team.slots.some(s => s.ids.some(i => n.includes(i)))) team.slots.push({ ids: n.slice(), omi: 0, req: 1 }); });
+  // fewer units than the mission needs: fill the rest with any unit that meets its rules
+  if (!req.ships) { const have = team.slots.length + team.flex.reduce((a, f) => a + f.n, 0); if (have < req.size) team.flex.push({ n: req.size - have, cat: null, fill: 1 }); }
   // more units than the mission allows: drop "any" slots first
   if (!req.ships) { let over = team.slots.length + team.flex.reduce((a, f) => a + f.n, 0) - req.max;
     for (let i = team.flex.length - 1; i >= 0 && over > 0; i--) { const d = Math.min(over, team.flex[i].n); team.flex[i].n -= d; over -= d; }
@@ -329,7 +335,7 @@ fs.readdirSync(path.join(ROOT, 'js')).filter(f => f.endsWith('.js') && !skip.tes
     teams.forEach(t => {
       if (t.bad.length) report.push(key + ' [' + src + '] ' + t.label + ' -> ' + t.bad.join('; '));
     });
-    OUT[key] = { kind, rel: req.rel, align: req.align, strict: req.alignStrict || null, cat: req.cat, named: req.named, max: req.max, ships: req.ships, src,
+    OUT[key] = { kind, size: req.size, rel: req.rel, align: req.align, strict: req.alignStrict || null, cat: req.cat, named: req.named, max: req.max, ships: req.ships, src,
       teams: teams.map(t => ({ label: t.label, slots: t.slots.map(s => s.omi ? [s.ids, s.omi] : [s.ids]), flex: t.flex, own: t.own ? 1 : undefined, bad: t.bad.length ? t.bad : undefined })) };
   });
 });
