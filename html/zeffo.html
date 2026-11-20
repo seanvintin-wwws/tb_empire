@@ -39,14 +39,14 @@
 <template id="mission">
 	<div>
 		<img class="mission"
-		v-for="mission in missions.filter(function (m) { return m.type !== 'deploy'; })" 
+		v-for="mission in missions" 
 		v-bind:key="mission.name" 
 		v-bind:class="[mission.name, rcClass(mission)]"
 		v-bind:src="'../media/mission_' +  mission.type + '.png'"
         @click="selectedMission = mission; seen = true"
 		>
 		<!--v-click-outside="hide"-->
-		<div v-if="seen && selectedMission.type !== 'platoon'" class="description" v-bind:class="'desc_' + selectedMission.position">
+		<div v-if="seen && selectedMission.type !== 'platoon' && selectedMission.type !== 'deploy'" class="description" v-bind:class="'desc_' + selectedMission.position">
 			
             <div class="mb-3">
             <h3><i class="fa fa-window-close fa-fw topcorner" @click="hide"></i></h3>
