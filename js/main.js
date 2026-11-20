@@ -558,7 +558,7 @@ Vue.component('mission', {
 			id: 5,
 			name: 'c6',
 			type: 'kessel',
-			position: 'right',
+			position: 'left',
 			planetlink: 'kessel.html',
 			rewards: [
 				'1*: 235,143,105',
