@@ -90,8 +90,7 @@
     if (flexNeed) {
       (t.flex || []).forEach(function (f) {
         var pool = Object.keys(RC.units).filter(function (id) {
-          var u = RC.units[id]; return ids.indexOf(id) < 0 && flexIds.indexOf(id) < 0 && fits(id, T) && levelOk(u, T) && (!f.cat || (CAT[id] && CAT[id].cats.indexOf(f.cat) >= 0));
-        });
+          var u = RC.units[id]; return ids.indexOf(id) < 0 && flexIds.indexOf(id) < 0 && fits(id, T) && levelOk(u, T) && (!f.cat || (CAT[id] && CAT[id].cats.indexOf(f.cat) >= 0));        }).sort(function (a, b) { return RC.units[b].relic - RC.units[a].relic; });
         if (pool.length < f.n) short.push({ n: f.n + ' more ' + (f.cat ? f.cat + ' ' : '') + 'unit' + (f.n === 1 ? '' : 's'), why: 'you have ' + pool.length + ' that qualif' + (pool.length === 1 ? 'ies' : 'y') });
         else flexIds = flexIds.concat(pool.slice(0, f.n));
       });
