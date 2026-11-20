@@ -12,7 +12,7 @@
    - Round by round report (from Arrikhan): result, score, first attack time and delay, their holds and their drops (export only since v3.7.2).
 */
 (async () => {
-  const VERSION = '3.7.5';
+  const VERSION = '3.7.6';
   // tests (tools/gac-scout/test) load this file in Node with globalThis.__gacScoutTest set: no overlay, internals exposed
   const TEST = typeof globalThis.__gacScoutTest === 'object' && globalThis.__gacScoutTest ? globalThis.__gacScoutTest : null;
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
@@ -886,7 +886,8 @@
   // defence package use only the ticked teams instead of guessing from their history.
   const seenEntry = () => { const e = S && S.opp && (store.theirSeen || {})[S.opp.ally]; return e && Date.now() - e.t < 7 * DAY && (!EVSTART || !e.ev || e.ev === EVSTART) ? e : null; };
   const seenSet = () => new Set((seenEntry() || {}).leads || []);
-  const seenPool = () => [...(S.defs || []).filter(d => d.likely >= 0.1 || d.recent || S.defs.length <= 12).slice(0, 18), ...(S.unseen || [])];
+  // every defence they have ever set (no cap: fleets used to push rarer squads like Baylan and The Stranger off the list), then unseen roster teams
+  const seenPool = () => [...(S.defs || []), ...(S.unseen || [])];
   function setSeen(leads) {
     const all = store.theirSeen = store.theirSeen || {};
     Object.keys(all).forEach(k => { if (Date.now() - all[k].t > 7 * DAY) delete all[k]; });
