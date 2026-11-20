@@ -96,15 +96,16 @@
         else flexIds = flexIds.concat(pool.slice(0, f.n));
       });
     }
-    return { name: t.label, ok: !short.length, short: short, ids: ids, flex: t.flex || [] };
+    return { name: t.label, ok: !short.length, own: !!t.own, short: short, ids: ids, flex: t.flex || [], flexIds: flexIds };
   }
   function missionCheck(m, planet) {
     if (!RC.units || !m || m.type === 'platoon' || m.type === 'deploy') return null;
     var T = TEAMS[planet + ':' + m.name]; if (!T || !T.teams.length) return null;
     var res = T.teams.filter(function (t) { return !t.bad; }).map(function (t) { return teamCheck(t, T); });
     if (!res.length) return null;
-    res.sort(function (a, b) { return (b.ok - a.ok) || a.short.length - b.short.length; });
-    return { rel: T.rel, kind: T.kind, src: T.src, ready: res.some(function (r) { return r.ok; }), res: res, T: T };
+    res.sort(function (a, b) { return (b.ok && !b.own) - (a.ok && !a.own) || (b.ok - a.ok) || a.own - b.own || a.short.length - b.short.length; });
+    var ready = res.some(function (r) { return r.ok && !r.own; });
+    return { rel: T.rel, kind: T.kind, src: T.src, ready: ready, own: !ready && res.some(function (r) { return r.ok && r.own; }), res: res, T: T };
   }
   var KIND = { combat: 'combat', special: 'special', fleet: 'fleet' };
   function mlabel(m, kind) { var x = String(m.name || '').match(/^[a-z](\d+)$/i); return (KIND[kind] || 'mission') + ' ' + (x ? x[1] : m.name); }
@@ -142,7 +143,8 @@
   function solve(items) {
     items = items.slice().sort(function (a, b) { return a.opts.length - b.opts.length; });
     var best = { s: -1, pick: [] }, used = {}, pick = [], budget = 400000, cut = false;
-    var w = items.map(function (it) { return it.kind === 'special' ? 1000 : 1; });
+    // special missions count most; a guide team counts slightly more than a lineup of your own
+    var w = items.map(function (it) { return it.kind === 'special' ? 10000 : 10; });
     var rest = []; for (var i = items.length - 1, acc = 0; i >= 0; i--) { acc += w[i]; rest[i] = acc; } rest[items.length] = 0;
     (function go(i, s) {
       if (--budget < 0) { cut = true; return; }
@@ -151,7 +153,7 @@
       items[i].opts.forEach(function (o) {
         if (o.ids.some(function (id) { return used[id]; })) return;
         o.ids.forEach(function (id) { used[id] = 1; }); pick[i] = o;
-        go(i + 1, s + w[i]);
+        go(i + 1, s + w[i] - (o.own ? 1 : 0));
         o.ids.forEach(function (id) { delete used[id]; }); pick[i] = null;
       });
       pick[i] = null; go(i + 1, s);
@@ -190,7 +192,7 @@
         (d.missions || []).forEach(function (m) {
           var c = missionCheck(m, p); if (!c) return;
           items.push({ planet: p, mission: mlabel(m, c.kind), kind: c.kind,
-            opts: c.res.filter(function (r) { return r.ok; }).map(function (r) { return { name: r.name, ids: r.ids, flex: r.flex, T: c.T }; }) });
+            opts: c.res.filter(function (r) { return r.ok; }).map(function (r) { return { name: (r.own ? 'your own lineup: ' : '') + r.name, own: r.own, ids: r.ids, flex: r.flex, T: c.T }; }) });
         });
       });
       if (!items.length) return;
@@ -240,9 +242,9 @@
       (DATA[link] ? Promise.resolve(DATA[link]) : planetData(link)).then(function (d) {
         if (!d) throw new Error('no data');
         DATA[link] = d;
-        var ready = 0, total = 0, kinds = {};
-        (d.missions || []).forEach(function (m) { var c = missionCheck(m, b); if (c) { total++; if (c.ready) ready++; kinds[c.kind] = (kinds[c.kind] || 0) + 1; } });
-        Vue.set(RC.planets, link, { ready: ready, total: total, kinds: kinds });
+        var ready = 0, own = 0, total = 0, kinds = {};
+        (d.missions || []).forEach(function (m) { var c = missionCheck(m, b); if (c) { total++; if (c.ready) ready++; else if (c.own) own++; kinds[c.kind] = (kinds[c.kind] || 0) + 1; } });
+        Vue.set(RC.planets, link, { ready: ready, own: own, total: total, kinds: kinds });
       }).catch(function () { Vue.set(RC.failed, b, true); }).then(doneOne);
     });
   }
@@ -256,9 +258,9 @@
     methods: {
       rcClass: function (m) {
         if (!RC.units || !m) return '';
-        if (m.planetlink) { var p = RC.planets[m.planetlink]; return !p || !p.total ? '' : p.ready === p.total ? 'rc-ready' : p.ready ? 'rc-some' : 'rc-no'; }
+        if (m.planetlink) { var p = RC.planets[m.planetlink]; return !p || !p.total ? '' : p.ready === p.total ? 'rc-ready' : p.ready || p.own ? 'rc-some' : 'rc-no'; }
         var c = missionCheck(m, String(window.GUIDE_PLANET || ''));
-        return c ? (c.ready ? 'rc-ready' : 'rc-no') : '';
+        return c ? (c.ready ? 'rc-ready' : c.own ? 'rc-some' : 'rc-no') : '';
       },
       rcNote: function (m) {
         if (!RC.units || !m) return '';
@@ -266,11 +268,12 @@
         if (m.planetlink) {
           var p = RC.planets[m.planetlink], b = m.planetlink.replace(/\.html$/, '');
           if (RC.failed[b]) return '<p class="h4">Your roster</p><p class="rc-x">This planet\'s data couldn\'t be loaded. Try reloading the page.</p>';
-          return p && p.total ? '<p class="h4">Your roster</p><p>' + who + ': ready for <b>' + p.ready + ' of ' + p.total + '</b> missions here (' + esc(kindsTxt(p.kinds)) + '). Open the planet for details.</p>' + planNote(m.planetlink) : '';
+          return p && p.total ? '<p class="h4">Your roster</p><p>' + who + ': ready for <b>' + p.ready + ' of ' + p.total + '</b> missions here (' + esc(kindsTxt(p.kinds)) + ')' + (p.own ? '; ' + p.own + ' more with a lineup of your own' : '') + '. Open the planet for details.</p>' + planNote(m.planetlink) : '';
         }
         var here = String(window.GUIDE_PLANET || ''), c = missionCheck(m, here);
         if (!c) return '';
-        var lines = c.res.slice(0, 4).map(function (r) {
+        var lines = c.res.filter(function (r) { return !r.own || r.ok; }).slice(0, 4).map(function (r) {
+          if (r.own) return '<li><span class="rc-some-t">◐</span> Your own lineup: ' + esc(r.name) + ', e.g. ' + esc(r.ids.concat(r.flexIds.slice(0, 4)).map(uname).join(', ')) + '. Meets the mission\'s rules, but isn\'t a guide team.</li>';
           return r.ok ? '<li><span class="rc-yes">✓</span> ' + esc(r.name) + '</li>'
             : '<li><span class="rc-x">✕</span> ' + esc(r.name) + ': ' + r.short.slice(0, 3).map(function (x) { return esc(x.n) + ' (' + esc(x.why) + ')'; }).join(', ') + (r.short.length > 3 ? ', +' + (r.short.length - 3) + ' more' : '') + '</li>';
         }).join('') + (c.res.length > 4 ? '<li class="rc-sub">+' + (c.res.length - 4) + ' more teams</li>' : '');
@@ -283,7 +286,7 @@
         else if (BONUS[here] && !RC.open[here]) pl = '<p class="rc-sub">' + esc(pname(here)) + ' is a bonus planet, so it isn\'t in the phase plan until you tick it as open.</p>' + openBox(here);
         var src = c.src === 'guide' ? 'Checked against the Recommended teams below (with omicrons where they say so) and the mission\'s rules.'
           : c.src === 'manual' ? 'Checked against the mission\'s own rules.' : 'The guide has no teams for this mission, so the map\'s own team list is checked.';
-        return '<p class="h4">Your roster</p><p class="rc-sub">' + src + '</p><p>' + who + (c.ready ? ' <span class="rc-yes">has a ready team</span>' : ' <span class="rc-x">doesn\'t have a ready team yet</span>')
+        return '<p class="h4">Your roster</p><p class="rc-sub">' + src + '</p><p>' + who + (c.ready ? ' <span class="rc-yes">has a ready team</span>' : c.own ? ' <span class="rc-some-t">can field a legal team of their own, but not a guide team</span>' : ' <span class="rc-x">doesn\'t have a ready team yet</span>')
           + ' (' + esc(KIND[c.kind] || 'mission') + (c.kind === 'fleet' ? ', 7★ ships' : c.rel ? ', Relic ' + c.rel + '+' : '') + ')</p><ul class="rc-list">' + lines + '</ul>' + pl;
       }
     }
@@ -308,7 +311,7 @@
     box.querySelector('#rc-clear').onclick = function () { try { localStorage.removeItem(KEY); } catch (e) {} if (load.ctl && load.ctl.abort) load.ctl.abort(); load.ctl = null; clearRoster(); RC.err = ''; RC.loading = false; inp.value = ''; };
     new Vue({ data: { RC: RC }, watch: { RC: { deep: true, immediate: true, handler: function () {
       msg.innerHTML = RC.loading ? 'Reading swgoh.gg…' : RC.err ? '<span class="rc-x">' + esc(RC.err) + '</span>'
-        : RC.units ? esc(RC.name) + (RC.updated ? ' <span title="swgoh.gg roster sync">(swgoh.gg updated ' + esc(ago(RC.updated)) + ')</span>' : '') + ': <span class="rc-yes">green</span> = you have a recommended team at the level asked (not a promise it auto-wins), ' + (isMain() ? '<span class="rc-some-t">amber</span> = some missions, ' : '') + '<span class="rc-x">red</span> = not yet.' : '';
+        : RC.units ? esc(RC.name) + (RC.updated ? ' <span title="swgoh.gg roster sync">(swgoh.gg updated ' + esc(ago(RC.updated)) + ')</span>' : '') + ': <span class="rc-yes">green</span> = you have a recommended team at the level asked (not a promise it auto-wins), ' + '<span class="rc-some-t">amber</span> = ' + (isMain() ? 'some missions, ' : 'a legal lineup of your own but not a guide team, ') + '<span class="rc-x">red</span> = not yet.' : '';
     } } } });
     var saved = ''; try { saved = localStorage.getItem(KEY) || ''; } catch (e) {}
     if (saved) { inp.value = saved.replace(/(\d{3})(\d{3})(\d{3})/, '$1-$2-$3'); load(saved); }
