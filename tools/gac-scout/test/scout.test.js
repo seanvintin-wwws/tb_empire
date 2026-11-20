@@ -297,3 +297,14 @@ test('a swap that lowers the expected holds against their attackers is dropped, 
   const h = T.viewBrief();
   assert.ok(!/REMOVE/.test(h) && !/Swap not suggested/.test(h), 'nothing about it on the page');
 });
+
+test('roster compare has a Relic 10 row above Relic 9+', () => {
+  const T = load();
+  const S = mkS(T, { mine: [unit('M1', { relic: 10 }), unit('M2', { relic: 9 })], theirs: [unit('O1', { relic: 9 })] });
+  S.me.gp = S.opp.gp = 1; S.me.cgp = S.opp.cgp = 1; S.me.sgp = S.opp.sgp = 1;
+  const h = T.viewRoster ? T.viewRoster() : null;
+  assert.ok(h, 'viewRoster is exposed');
+  const i10 = h.indexOf('Relic 10'), i9 = h.indexOf('Relic 9+');
+  assert.ok(i10 > 0 && i10 < i9, 'Relic 10 comes before Relic 9+');
+  assert.match(h.slice(i10, i9), />1<[\s\S]*>0</, 'me 1, them 0');
+});
