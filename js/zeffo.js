@@ -585,7 +585,7 @@ Vue.component('mission', {
 "Ki-Adi-Mundi",	"6","Jedi Master Luke Skywalker",	"5","Jedi Master Kenobi",	"4","Ben Solo",	"3","Commander Luke Skywalker",	"3","Han Solo",	"3",
 "Jedi Consular",	"3","Jedi Knight Guardian",	"3","Jolee Bindo",	"3","Kyle Katarn",	"3",
 "Rey",	"3","Rey (Jedi Training)",	"3","Chief Chirpa",	"2",
-"Chirrut ÃŽmwe",	"2","Clone Sergeant - Phase I",	"2","General Kenobi",	"2",
+"Chirrut Îmwe",	"2","Clone Sergeant - Phase I",	"2","General Kenobi",	"2",
 "Luke Skywalker (Farmboy)",	"2","MG-100 StarFortress SF-17",	"2","Razor Crest",	"2","BB-8",	"1","C-3PO",	"1",
 "Chewbacca",	"1","Clone Sergeant's ARC-170",	"1","Commander Ahsoka Tano",	"1",
 "Enfys Nest",	"1","Garazeb Zeb Orrelios",	"1","Hermit Yoda",	"1","Home One",	"1",

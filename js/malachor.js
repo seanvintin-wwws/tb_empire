@@ -643,7 +643,7 @@ Vue.component('mission', {
             reqs: [21],
 			},
             {
-			id: 5,
+			id: 4,
 			name: 'c4',
 			type: 'usual',
 			position: 'right',
