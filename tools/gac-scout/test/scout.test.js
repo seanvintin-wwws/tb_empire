@@ -309,32 +309,47 @@ test('roster compare has a Relic 10 row above Relic 9+', () => {
   assert.match(h.slice(i10, i9), />1<[\s\S]*>0</, 'me 1, them 0');
 });
 
-// an opponent history: rounds newest first, each listing the leaders on their defence that round ({ lead: true } = ran a strong datacron)
-const histOf = rounds => {
-  const rs = rounds.map((_, i) => ({ h: `/gac-history/O${1000 - i}/1/`, epoch: 1000 - i, rn: 1, season: 85 - Math.floor(i / 3) }));
+// an opponent history: rounds newest first, each listing the leaders on their defence that round
+const histOf = (rounds, attacks = []) => {
+  // latest round is round 2 of season 85, so the next round is in the same season
+  const rs = rounds.map((_, i) => ({ h: `/gac-history/O${1000 - Math.floor((i + 1) / 3)}/${3 - ((i + 1) % 3)}/`, epoch: 1000 - Math.floor((i + 1) / 3), rn: 3 - ((i + 1) % 3), season: 85 - Math.floor((i + 1) / 3) }));
   const battles = [];
-  rounds.forEach((leads, i) => Object.entries(leads).forEach(([L, dc]) => battles.push({ side: 'DEF', def: [L, L + '2', L + '3'], r: rs[i].h, season: rs[i].season, win: true, ddc: dc ? { t: 15, f: true } : null })));
+  rounds.forEach((leads, i) => leads.forEach(L => battles.push({ side: 'DEF', def: [L, L + '2', L + '3'], att: ['X'], r: rs[i].h, season: rs[i].season, win: true })));
+  attacks.forEach((leads, i) => (leads || []).forEach(L => battles.push({ side: 'ATT', att: [L, L + '2', L + '3'], def: ['Y'], r: rs[i].h, season: rs[i].season, win: true })));
   return { rounds: rs, battles, seasons: [...new Set(rs.map(r => r.season))] };
 };
+const dOf = (lead, share) => ({ lead, squad: [lead, lead + '2', lead + '3'], share, likely: share, recent: true, n: 3, held: 0, holdRate: 0, rounds: new Set(), zone: null, ships: false, theirLv: 20 });
 
-test('likely next round: set last round with its datacron beats a squad they set often but dropped (Darth Jar Jar, Pyxroy)', () => {
+test('likely next round: a team set in their last two rounds beats one they set often but dropped (Darth Jar Jar, Pyxroy)', () => {
   const T = load();
-  const core = { A: 0, B: 0, C: 0 };
-  // DJJ set in the latest 2 of 12 rounds (17%) with a Lvl 15 focused datacron; OLD set in 6 of 12 but not the last 6
-  const rounds = Array.from({ length: 12 }, (_, i) => ({ ...core, ...(i < 2 ? { DJJ: 1 } : {}), ...(i >= 6 ? { OLD: 0 } : {}) }));
+  const core = ['A', 'B', 'C'];
+  // DJJ set in the latest 2 of 12 rounds (17%); OLD set in 6 of 12 but not the last 6
+  const rounds = Array.from({ length: 12 }, (_, i) => [...core, ...(i < 2 ? ['DJJ'] : []), ...(i >= 6 ? ['OLD'] : [])]);
   const S = mkS(T, { mine: [unit('M1')], theirs: [] });
   S.oppHist = histOf(rounds);
-  const d = (lead, share) => ({ lead, squad: [lead, lead + '2', lead + '3'], share, likely: share, recent: true, n: 3, held: 0, holdRate: 0, rounds: new Set(), zone: null, ships: false, theirLv: 20 });
-  S.defs = [d('A', 1), d('B', 1), d('C', 1), d('OLD', 0.5), d('DJJ', 2 / 12)];
+  S.defs = [dOf('A', 1), dOf('B', 1), dOf('C', 1), dOf('OLD', 0.5), dOf('DJJ', 2 / 12)];
   S.unseen = [];
   T.likelyModel(S);
   const L = Object.fromEntries(S.defs.map(x => [x.lead, x.likely]));
   if (process.env.SHOW) console.log(L, S.likelyFit);
   assert.ok(S.defs.find(x => x.lead === 'DJJ').lastRound, 'flagged as set last round');
-  assert.ok(L.DJJ > 0.5, `DJJ likely ${L.DJJ}, should be well above its 17% share`);
-  assert.ok(L.DJJ > L.OLD, `DJJ ${L.DJJ} should beat OLD ${L.OLD}`);
+  assert.ok(L.DJJ > 0.6, `DJJ likely ${L.DJJ}, should be well above its 17% share`);
+  assert.ok(L.OLD < 0.2, `OLD likely ${L.OLD}, dropped 6 rounds ago`);
   assert.ok(L.A > 0.9, 'an every-round squad stays near certain');
-  assert.ok(S.likelyFit && S.likelyFit.rounds > 0 && S.likelyFit.acc >= S.likelyFit.flat, 'backtest ran, and is at least as good as counting rounds equally');
+  assert.ok(S.likelyFit.hit >= S.likelyFit.hitOld, 'its own backtest is at least as good as counting rounds equally');
+});
+
+test('likely next round: a leader they keep using on attack is less likely on defence', () => {
+  const T = load();
+  const rounds = Array.from({ length: 10 }, (_, i) => ['A', 'B', ...(i % 2 ? ['ATK'] : []), ...(i % 2 ? ['DEFONLY'] : [])]);
+  const attacks = Array.from({ length: 10 }, () => ['ATK']);
+  const S = mkS(T, { mine: [unit('M1')] });
+  S.oppHist = histOf(rounds, attacks);
+  S.defs = [dOf('A', 1), dOf('B', 1), dOf('ATK', 0.5), dOf('DEFONLY', 0.5)];
+  S.unseen = [];
+  T.likelyModel(S);
+  const L = Object.fromEntries(S.defs.map(x => [x.lead, x.likely]));
+  assert.ok(L.ATK < L.DEFONLY, `ATK ${L.ATK} should be below DEFONLY ${L.DEFONLY}`);
 });
 
 test('likely next round: no history leaves the old share alone', () => {
