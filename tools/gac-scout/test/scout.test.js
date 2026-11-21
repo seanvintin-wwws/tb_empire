@@ -308,3 +308,40 @@ test('roster compare has a Relic 10 row above Relic 9+', () => {
   assert.ok(i10 > 0 && i10 < i9, 'Relic 10 comes before Relic 9+');
   assert.match(h.slice(i10, i9), />1<[\s\S]*>0</, 'me 1, them 0');
 });
+
+// an opponent history: rounds newest first, each listing the leaders on their defence that round ({ lead: true } = ran a strong datacron)
+const histOf = rounds => {
+  const rs = rounds.map((_, i) => ({ h: `/gac-history/O${1000 - i}/1/`, epoch: 1000 - i, rn: 1, season: 85 - Math.floor(i / 3) }));
+  const battles = [];
+  rounds.forEach((leads, i) => Object.entries(leads).forEach(([L, dc]) => battles.push({ side: 'DEF', def: [L, L + '2', L + '3'], r: rs[i].h, season: rs[i].season, win: true, ddc: dc ? { t: 15, f: true } : null })));
+  return { rounds: rs, battles, seasons: [...new Set(rs.map(r => r.season))] };
+};
+
+test('likely next round: set last round with its datacron beats a squad they set often but dropped (Darth Jar Jar, Pyxroy)', () => {
+  const T = load();
+  const core = { A: 0, B: 0, C: 0 };
+  // DJJ set in the latest 2 of 12 rounds (17%) with a Lvl 15 focused datacron; OLD set in 6 of 12 but not the last 6
+  const rounds = Array.from({ length: 12 }, (_, i) => ({ ...core, ...(i < 2 ? { DJJ: 1 } : {}), ...(i >= 6 ? { OLD: 0 } : {}) }));
+  const S = mkS(T, { mine: [unit('M1')], theirs: [] });
+  S.oppHist = histOf(rounds);
+  const d = (lead, share) => ({ lead, squad: [lead, lead + '2', lead + '3'], share, likely: share, recent: true, n: 3, held: 0, holdRate: 0, rounds: new Set(), zone: null, ships: false, theirLv: 20 });
+  S.defs = [d('A', 1), d('B', 1), d('C', 1), d('OLD', 0.5), d('DJJ', 2 / 12)];
+  S.unseen = [];
+  T.likelyModel(S);
+  const L = Object.fromEntries(S.defs.map(x => [x.lead, x.likely]));
+  if (process.env.SHOW) console.log(L, S.likelyFit);
+  assert.ok(S.defs.find(x => x.lead === 'DJJ').lastRound, 'flagged as set last round');
+  assert.ok(L.DJJ > 0.5, `DJJ likely ${L.DJJ}, should be well above its 17% share`);
+  assert.ok(L.DJJ > L.OLD, `DJJ ${L.DJJ} should beat OLD ${L.OLD}`);
+  assert.ok(L.A > 0.9, 'an every-round squad stays near certain');
+  assert.ok(S.likelyFit && S.likelyFit.rounds > 0 && S.likelyFit.acc >= S.likelyFit.flat, 'backtest ran, and is at least as good as counting rounds equally');
+});
+
+test('likely next round: no history leaves the old share alone', () => {
+  const T = load();
+  const S = mkS(T, { mine: [unit('M1')] });
+  S.oppHist = { rounds: [], battles: [], seasons: [] };
+  S.defs = [{ lead: 'A', squad: ['A'], share: 0.4, likely: 0.4, ships: false }];
+  T.likelyModel(S);
+  assert.strictEqual(S.defs[0].likely, 0.4);
+});
