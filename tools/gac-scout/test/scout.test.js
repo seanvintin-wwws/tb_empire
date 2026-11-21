@@ -360,3 +360,25 @@ test('likely next round: no history leaves the old share alone', () => {
   T.likelyModel(S);
   assert.strictEqual(S.defs[0].likely, 0.4);
 });
+
+test('the attack plan weighs all their defences together: a 94% team does not take the counter a 90% team needs far more (Ahsoka vs Baylan, Pyxroy)', () => {
+  const T = load();
+  const sq = p => [p + '1', p + '2', p + '3'];
+  const fill = Array.from({ length: 12 }, (_, i) => 'F' + String.fromCharCode(65 + i));
+  const mineIds = [...fill.flatMap(f => sq('K' + f)), ...sq('X'), ...sq('Y'), ...sq('Z')];
+  const theirs = [...fill, 'A', 'B'].flatMap(sq);
+  const S = mkS(T, { mine: mineIds.map(id => unit(id)), theirs: theirs.map(id => unit(id)) });
+  const d = (p, likely) => ({ lead: p + '1', squad: sq(p), likely, recent: true, n: 4, held: 1, holdRate: 0.25, rounds: new Set(), zone: null, ships: false, theirLv: 20 });
+  S.defs = [...fill.map(f => d(f, 0.95)), d('A', 0.94), d('B', 0.9)];
+  S.unseen = []; S.defCands = [];
+  const ctr = rows => ({ scope: 'div', dBand: 0, b: { none: rows, low: [], high: [] } });
+  S.INS = { league: 'KYBER', dn: 3, cand: {}, ctr: Object.fromEntries([
+    ...fill.map(f => [T.ldKey(sq(f)), ctr([[200, 0.9, 55, sq('K' + f)]])]),
+    [T.ldKey(sq('A')), ctr([[500, 0.89, 55, sq('X')], [300, 0.82, 55, sq('Y')]])],
+    [T.ldKey(sq('B')), ctr([[2400, 0.99, 55, sq('X')], [200, 0.43, 55, sq('Z')]])]]) };
+  T.plan(S);
+  const pick = lead => { const p = S.plan.find(p => p.d.lead === lead); return p && p.pick ? p.pick.squad[0] : null; };
+  assert.strictEqual(pick('B1'), 'X1', 'Baylan gets the 99% counter');
+  assert.strictEqual(pick('A1'), 'Y1', 'Ahsoka takes the next best');
+  assert.ok(S.planSearch.complete, 'search finished');
+});

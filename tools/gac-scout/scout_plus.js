@@ -12,7 +12,7 @@
    - Round by round report (from Arrikhan): result, score, first attack time and delay, their holds and their drops (export only since v3.7.2).
 */
 (async () => {
-  const VERSION = '3.8.1';
+  const VERSION = '3.8.3';
   // tests (tools/gac-scout/test) load this file in Node with globalThis.__gacScoutTest set: no overlay, internals exposed
   const TEST = typeof globalThis.__gacScoutTest === 'object' && globalThis.__gacScoutTest ? globalThis.__gacScoutTest : null;
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
@@ -1035,12 +1035,36 @@
     const defs = seen.size ? [...seenPool().filter(d => seen.has(d.lead)), ...usualFleets()] : S.defs.filter(d => d.likely >= 0.1 || d.recent || S.defs.length <= 12).slice(0, 18);
     const wt = d => (seen.size ? 1 : d.likely); // ticked in game: certain
     const free = defs.map(d => d.counters.filter(c => c.own && !c.squad.some(u => blocked.has(u))).sort((a, b) => val(b) - val(a)));
-    const opts = free.map(f => f.slice(0, 4));
+    // Choose counters for ALL their likely defences together (before 3.8.2 only the 9 most likely were searched and the
+    // rest filled one at a time, so a 94% team could take the counter a 90% team needed far more: Pyxroy's Ahsoka took
+    // Supreme Leader Kylo Ren at 89% and left Baylan with a 43% counter, when SLKR beats that Baylan 99%).
+    // Branch and bound: each defence tries its best free counters (7 if it's likely or ticked, 4 if not) or none; a branch
+    // stops as soon as even the best possible remaining picks can't beat the best plan found, which starts from a
+    // one-at-a-time plan.
+    const opts = free.map((f, i) => f.slice(0, wt(defs[i]) >= 0.5 ? 7 : 4));
+    const N = defs.length;
+    const cap = c => Math.max(val(c), c.myDc2 ? val(c, c.myDc2) : 0, val(c, null));
+    const ub = opts.map((o, i) => Math.max(0, ...o.map(cap)) * wt(defs[i]));
+    const tail = new Array(N + 1).fill(0);
+    for (let i = N - 1; i >= 0; i--) tail[i] = tail[i + 1] + ub[i];
     let best = { score: -1, pick: [], dc: [] };
     const used = new Set(), usedDc = new Set(), cur = [], curDc = [];
-    const N = Math.min(9, defs.length);
+    // starting point: one at a time, most likely first
+    (() => {
+      let sc = 0; const pk = [], dx = [];
+      opts.forEach((o, i) => {
+        const c = o.find(c => !c.squad.some(u => used.has(u)));
+        const x = c ? pickDc(c, usedDc) : null;
+        if (c) { c.squad.forEach(u => used.add(u)); if (x) usedDc.add(x.dc.id); sc += val(c, x) * wt(defs[i]); }
+        pk.push(c || null); dx.push(x);
+      });
+      best = { score: sc, pick: pk, dc: dx };
+      used.clear(); usedDc.clear();
+    })();
+    let nodes = 0;
     (function go(i, sc) {
-      if (i === N) { if (sc > best.score) best = { score: sc, pick: [...cur], dc: [...curDc] }; return; }
+      if (sc + tail[i] <= best.score + 1e-9 || ++nodes > 2e6) return;
+      if (i === N) { best = { score: sc, pick: [...cur], dc: [...curDc] }; return; }
       for (const c of opts[i]) {
         if (c.squad.some(u => used.has(u))) continue;
         const x = pickDc(c, usedDc);
@@ -1052,6 +1076,7 @@
       }
       cur.push(null); curDc.push(null); go(i + 1, sc); cur.pop(); curDc.pop();
     })(0, 0);
+    S.planSearch = { nodes, complete: nodes <= 2e6, defences: N, countersTried: opts.map(o => o.length) };
     const taken = new Set(best.pick.filter(Boolean).flatMap(c => c.squad));
     const takenDc = new Set(best.dc.filter(Boolean).map(x => x.dc.id));
     // then give every defence still without a counter the best one that only uses units nobody else needs
@@ -1423,6 +1448,7 @@
       insight: S.INS ? { league: S.INS.league, division: S.INS.dn || null } : null, hotutils: S.HU ? { league: S.HU.league, season: S.HU.season, loaded: S.HU.auto ? 'automatically (daily copy)' : 'pasted', asOf: S.HU.asOf || null } : null,
       settings: { rank: S.rank, keepGL: S.keepGL, defenceSaved: store.myDefence && store.myDefence.saved || null, eventStart: EVSTART ? new Date(EVSTART).toISOString() : null },
       myDefence: ids(S.locked), myFleet: ids(S.fleet), theirDefenceTickedInGame: [...seenSet()],
+      planSearch: S.planSearch ? { result: S.planSearch.complete ? 'best plan among the counters tried' : 'search limit reached: best plan found so far', nodes: S.planSearch.nodes, countersTriedPerDefence: S.planSearch.countersTried } : null,
       attackPlan: (S.plan || []).map(p => ({ their: p.d.squad, likely: p.d.likely, setShare: p.d.share, setLastRound: !!p.d.lastRound, attackUse: p.d.attackUse != null ? +p.d.attackUse.toFixed(2) : null, held: p.d.held, attacks: p.d.n, zone: zoneTxt(p.d), counter: p.pick ? p.pick.squad : null, datacron: p.dcX ? dcNo(p.dcX.dc) + ' ' + T0(dcTxt(p.dcX, '')) : null, est: p.est ?? null, clash: p.clash ? p.clash.squad : null })),
       suggestedDefence: (S.defPlan || []).map(c => ({ squad: c.squad, holdEst: c.eff ?? c.score, conf: c.conf, datacron: c.useDc && c.dc ? T0(dcTxt(c.dc, '')) : null,
         insight: insEff(c) ? { hold: insEff(c).h, battles: insEff(c).n, datacron: c.useDc && c.dc ? 'with' : 'without' } : null, hotutils: c.hu ? { hold: c.hu.h, battles: c.hu.n } : null,
