@@ -49,9 +49,10 @@ var STUDY = (() => {
     const last = P[0] && P[0].set.has(L) ? 1 : 0;
     const newSeason = P[0] && tgt.season !== P[0].season ? 1 : 0;
     const m = meta[L] || { pop: 0, hold: 0 };
-    return [lg(clip(rec)), last, last * H, an ? attW / an : 0, dcLast, m.pop, m.hold, last * newSeason];
+    const last2 = P.slice(0, 2).some(r => r.set.has(L)) ? 1 : 0;
+    return [lg(clip(rec)), last, last * H, an ? attW / an : 0, dcLast, m.pop, m.hold, last * newSeason, rec, last2];
   }
-  const NAMES = ['logit(recent share, shrunk)', 'set last round', 'set last round x steadiness', 'used on attack recently', 'ran a Lvl 9+/focused datacron on it last time', 'meta popularity', 'meta hold %', 'set last round x new season'];
+  const NAMES = ['logit(recent share, shrunk)', 'set last round', 'set last round x steadiness', 'used on attack recently', 'ran a Lvl 9+/focused datacron on it last time', 'meta popularity', 'meta hold %', 'set last round x new season', 'recent share (linear)', 'set in either of last 2 rounds'];
 
   // rows: every leader they have set before, for each round with 4+ earlier rounds; negatives weighted by coverage
   function rows(players, meta, prm, minPrior = 4) {
@@ -121,7 +122,7 @@ var STUDY = (() => {
     const best = res[0], R = best.R;
     const coef = fit(R, 1);
     const ab = (name, mask) => { const x = looScore(players, meta, best.prm, 1, mask, best.R).s; return [name, +x.brier.toFixed(4), +x.logloss.toFixed(4), +x.recallTopK.toFixed(3), +x.recallK2.toFixed(3)]; };
-    const ablation = [ab('decay only', [0]), ab('+ set last round', [0, 1]), ab('+ steadiness', [0, 1, 2]), ab('+ attack use', [0, 1, 2, 3]), ab('+ datacron last time', [0, 1, 2, 3, 4]), ab('+ meta popularity', [0, 1, 2, 3, 4, 5]), ab('+ meta hold %', [0, 1, 2, 3, 4, 5, 6]), ab('+ new season', null)];
+    const ablation = [ab('decay only', [0]), ab('+ set last round', [0, 1]), ab('+ steadiness', [0, 1, 2]), ab('+ attack use', [0, 1, 2, 3]), ab('+ datacron last time', [0, 1, 2, 3, 4]), ab('+ meta popularity', [0, 1, 2, 3, 4, 5]), ab('+ meta hold %', [0, 1, 2, 3, 4, 5, 6]), ab('+ new season', [0, 1, 2, 3, 4, 5, 6, 7]), ab('+ linear share', [0, 1, 2, 3, 4, 5, 6, 7, 8]), ab('+ last 2 rounds', null), ab('lean: share, last, attack, popularity, linear share', [0, 1, 3, 5, 8]), ab('lean + last 2', [0, 1, 3, 5, 8, 9])];
     const baselines = {
       repeatLastRound: score(R, r => (r.last ? 0.85 : 0.15)),
       oldShare: score(R, r => r.share),
