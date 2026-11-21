@@ -12,7 +12,7 @@
    - Round by round report (from Arrikhan): result, score, first attack time and delay, their holds and their drops (export only since v3.7.2).
 */
 (async () => {
-  const VERSION = '3.7.9';
+  const VERSION = '3.8.1';
   // tests (tools/gac-scout/test) load this file in Node with globalThis.__gacScoutTest set: no overlay, internals exposed
   const TEST = typeof globalThis.__gacScoutTest === 'object' && globalThis.__gacScoutTest ? globalThis.__gacScoutTest : null;
   if (!/(^|\.)swgoh\.gg$/.test(location.hostname)) {
@@ -592,6 +592,93 @@
   }
 
   // ---------- analysis ----------
+  // ---------- how likely each of their defences is next round ----------
+  // A logistic model with ONE set of weights for everyone, fitted on the 3v3 GAC histories of 45 Kyber players
+  // (1,419 rounds; tools/gac-scout/likely-study) and tested by leaving each player out in turn, so no opponent's own
+  // ~30 rounds tune their own weights. Only signals that improved the held-out predictions were kept:
+  //   share   - share of their rounds it was on defence: each older round counts half as much as the one after it,
+  //             rounds from an earlier season count half again, and it's pulled slightly toward the average (0.5
+  //             pseudo-rounds). A round where few of their squads were attacked counts only partly as "not set",
+  //             because histories only show defences that got attacked. Used both as log-odds and as a plain share.
+  //   attack  - how often they used that leader to attack, same weighting (a team kept for attack isn't on defence)
+  //   pop     - how popular it is in your league's HotUtils meta (log of battles, 0 to 1)
+  //   season  - set last round x a new season starting (last round says less at the start of a season)
+  // Tested and dropped (no gain): an extra "set last round" flag, how much their defence changes between rounds,
+  // the datacron they ran on it last time, and meta hold %. The model's output then goes through a calibration
+  // table from the same test, so "70%" came true about 70% of the time.
+  // Teams never seen on their defence get no figure: there's no history to base one on.
+  const LIKELY_FIT = {
+    players: 45, rounds: 1419, tested: 937, w: 0.5, kappa: 0.5, qs: 0.5, base: 0.66,
+    names: ['intercept', 'log-odds of recent share', 'recent share', 'used on attack recently', 'meta popularity', 'set last round x new season'],
+    coef: [-5.311, -0.352, 8.326, -2.867, 1.621, -1.05],
+    cal: [[0.026, 0.015], [0.076, 0.039], [0.14, 0.068], [0.246, 0.287], [0.351, 0.456], [0.451, 0.642], [0.552, 0.778], [0.653, 0.859], [0.755, 0.906], [0.854, 0.931], [0.933, 0.967], [0.954, 0.977]],
+    loo: { topK: 15, recall: 0.98, recallK2: 0.99, brier: 0.060, recallOld: 0.879, brierOld: 0.196, recallRepeat: 0.979, brierRepeat: 0.189 }
+  };
+  const sigm = z => 1 / (1 + Math.exp(-z));
+  const clip01 = p => Math.min(0.99, Math.max(0.01, p));
+  const likelyCal = p => { const xs = [[0, 0], ...LIKELY_FIT.cal, [1, 1]]; for (let i = 1; i < xs.length; i++) if (p <= xs[i][0]) { const [x0, y0] = xs[i - 1], [x1, y1] = xs[i]; return y0 + (y1 - y0) * (p - x0) / ((x1 - x0) || 1); } return 1; };
+  function likelyRounds(H) {
+    const has = new Set(H.battles.map(b => b.r));
+    const order = H.rounds.filter(r => has.has(r.h)).sort((a, b) => b.epoch - a.epoch || b.rn - a.rn);
+    const by = {}; order.forEach(r => (by[r.h] = { h: r.h, season: r.season, rn: r.rn, set: new Set(), att: new Set() }));
+    H.battles.forEach(b => {
+      const r = by[b.r]; if (!r) return;
+      if (b.side === 'DEF') { const L = b.def[0]; if (!SHIP[L]) r.set.add(L); }
+      else if (!SHIP[b.att[0]]) r.att.add(b.att[0]);
+    });
+    const rs = order.map(r => by[r.h]);
+    const K = Math.max(1, ...rs.map(r => r.set.size));
+    rs.forEach(r => (r.cov = Math.min(1, r.set.size / K)));
+    return { rs, K };
+  }
+  function likelyMeta(S) {
+    const rows = Object.values((S.HU && S.HU.meta) || S.metaSG || {}), L = {};
+    rows.forEach(m => { const k = m.u && m.u[0]; if (!k) return; L[k] = (L[k] || 0) + m.n; });
+    const mx = Math.log1p(Math.max(1, ...Object.values(L)));
+    const out = {}; Object.entries(L).forEach(([k, n]) => (out[k] = Math.log1p(n) / mx));
+    return out;
+  }
+  // P: earlier rounds, newest first; season: the season being predicted
+  function likelyFeats(L, P, season, pop, f = LIKELY_FIT) {
+    let x = 0, n = 0, k = 1, aw = 0, an = 0;
+    P.forEach(r => {
+      const on = r.set.has(L), q = season != null && r.season !== season ? f.qs : 1;
+      x += k * q * (on ? 1 : 0); n += k * q * (on ? 1 : r.cov);
+      aw += k * (r.att.has(L) ? 1 : 0); an += k; k *= f.w;
+    });
+    const rec = (x + f.kappa * f.base) / (n + f.kappa), last = P[0] && P[0].set.has(L) ? 1 : 0;
+    return [Math.log(clip01(rec) / (1 - clip01(rec))), rec, an ? aw / an : 0, pop[L] || 0, last * (P[0] && season != null && season !== P[0].season ? 1 : 0)];
+  }
+  const likelyP = fv => likelyCal(sigm([1, ...fv].reduce((s, v, i) => s + v * LIKELY_FIT.coef[i], 0)));
+  function likelyModel(S) {
+    const H = S.oppHist;
+    if (!H || !H.rounds || !S.defs) return;
+    const { rs, K } = likelyRounds(H);
+    if (!rs.length) return;
+    const pop = likelyMeta(S);
+    // the next round is in the same season as their latest one, unless that was round 3
+    const nextSeason = rs[0].rn >= 3 ? -1 : rs[0].season;
+    S.defs.forEach(d => {
+      if (d.ships) { d.likely = d.share; return; }
+      const fv = likelyFeats(d.lead, rs, nextSeason, pop);
+      d.likely = likelyP(fv); d.lastRound = !!(rs[0].set.has(d.lead)); d.attackUse = fv[2];
+      d.why = [d.lastRound ? 'set last round' : '', fv[2] >= 0.3 ? 'often used on attack' : ''].filter(Boolean);
+    });
+    (S.unseen || []).forEach(d => (d.likely = 0));
+    // how this would have done on their own past rounds: each one predicted from the rounds before it
+    let hit = 0, tot = 0, hitOld = 0;
+    rs.forEach((t, i) => {
+      const P = rs.slice(i + 1); if (P.length < 4 || t.cov < 0.5) return;
+      const cands = [...new Set(P.flatMap(r => [...r.set]))];
+      const top = new Set(cands.map(L => [L, likelyP(likelyFeats(L, P, t.season, pop))]).sort((a, b) => b[1] - a[1]).slice(0, K).map(x => x[0]));
+      const ss = [...new Set(P.map(r => r.season))].slice(0, 2); let span = P.filter(r => ss.includes(r.season)); if (span.length < 6) span = P;
+      const topOld = new Set(cands.map(L => [L, span.filter(r => r.set.has(L)).length]).sort((a, b) => b[1] - a[1]).slice(0, K).map(x => x[0]));
+      t.set.forEach(L => { tot++; if (top.has(L)) hit++; if (topOld.has(L)) hitOld++; });
+    });
+    S.likelyFit = { top: K, rounds: rs.length, hit: tot ? hit / tot : null, hitOld: tot ? hitOld / tot : null };
+    S.defs.sort((a, b) => b.likely - a.likely || b.n - a.n);
+  }
+
   function analyse(S) {
     const { me, opp, myHist, oppHist, G } = S;
     // all battles from both histories, deduped
@@ -641,7 +728,8 @@
       const squad = top(o.squads, 1)[0][0].split(',');
       const theirLv = mean(squad.map(u => opp.units[u]).filter(Boolean).map(u => u.score));
       const zt = top(o.zones, 1)[0], zn = Object.values(o.zones).reduce((a, b) => a + b, 0);
-      return { ...o, likely: [...o.rounds].filter(r => span.has(r)).length / (span.size || 1), holdRate: o.held / o.n, squad, theirLv, zone: zt ? { z: +zt[0], share: zt[1] / zn, n: zn, of: o.zn } : null };
+      const share = [...o.rounds].filter(r => span.has(r)).length / (span.size || 1);
+      return { ...o, share, likely: share, holdRate: o.held / o.n, squad, theirLv, zone: zt ? { z: +zt[0], share: zt[1] / zn, n: zn, of: o.zn } : null };
     }).sort((a, b) => b.likely - a.likely || b.n - a.n);
     // strong teams in their roster never seen on their defence
     const seenLeads = new Set(Object.keys(D)), U = {};
@@ -656,7 +744,8 @@
     all.forEach(b => consider(b.att, 'pool'));
     Object.values(opp.units).filter(u => u.gl && !u.ship).forEach(u => consider([u.id], 'gl'));
     S.unseen = Object.values(U).sort((a, b) => b.theirLv - a.theirLv).slice(0, 12)
-      .map(o => ({ ...o, unseen: true, n: 0, held: 0, likely: 0, holdRate: NaN, zone: null, ships: false }));
+      .map(o => ({ ...o, unseen: true, n: 0, held: 0, share: 0, likely: 0, holdRate: NaN, zone: null, ships: false }));
+    likelyModel(S);
     // their attacks
     const A = {};
     oppHist.battles.filter(b => b.side === 'ATT').forEach(b => {
@@ -933,6 +1022,7 @@
   }
 
   function plan(S) {
+    likelyModel(S); // again now the meta hold % has loaded
     assignDcs(S);
     S.defs.forEach(d => (d.counters = counters(S, d.lead, d.squad, d.theirLv)));
     S.unseen.forEach(d => (d.counters = counters(S, d.lead, d.squad, d.theirLv)));
@@ -1333,11 +1423,12 @@
       insight: S.INS ? { league: S.INS.league, division: S.INS.dn || null } : null, hotutils: S.HU ? { league: S.HU.league, season: S.HU.season, loaded: S.HU.auto ? 'automatically (daily copy)' : 'pasted', asOf: S.HU.asOf || null } : null,
       settings: { rank: S.rank, keepGL: S.keepGL, defenceSaved: store.myDefence && store.myDefence.saved || null, eventStart: EVSTART ? new Date(EVSTART).toISOString() : null },
       myDefence: ids(S.locked), myFleet: ids(S.fleet), theirDefenceTickedInGame: [...seenSet()],
-      attackPlan: (S.plan || []).map(p => ({ their: p.d.squad, likely: p.d.likely, held: p.d.held, attacks: p.d.n, zone: zoneTxt(p.d), counter: p.pick ? p.pick.squad : null, datacron: p.dcX ? dcNo(p.dcX.dc) + ' ' + T0(dcTxt(p.dcX, '')) : null, est: p.est ?? null, clash: p.clash ? p.clash.squad : null })),
+      attackPlan: (S.plan || []).map(p => ({ their: p.d.squad, likely: p.d.likely, setShare: p.d.share, setLastRound: !!p.d.lastRound, attackUse: p.d.attackUse != null ? +p.d.attackUse.toFixed(2) : null, held: p.d.held, attacks: p.d.n, zone: zoneTxt(p.d), counter: p.pick ? p.pick.squad : null, datacron: p.dcX ? dcNo(p.dcX.dc) + ' ' + T0(dcTxt(p.dcX, '')) : null, est: p.est ?? null, clash: p.clash ? p.clash.squad : null })),
       suggestedDefence: (S.defPlan || []).map(c => ({ squad: c.squad, holdEst: c.eff ?? c.score, conf: c.conf, datacron: c.useDc && c.dc ? T0(dcTxt(c.dc, '')) : null,
         insight: insEff(c) ? { hold: insEff(c).h, battles: insEff(c).n, datacron: c.useDc && c.dc ? 'with' : 'without' } : null, hotutils: c.hu ? { hold: c.hu.h, battles: c.hu.n } : null,
         swgohggSquads: c.sg ? { hold: c.sg.h, battles: c.sg.n } : null, betterLeadOrder: (c.sgAlt || [])[0] && (!c.sg || c.sgAlt[0].h - c.sg.h >= 0.02) ? { squad: c.sgAlt[0].u, hold: c.sgAlt[0].h, battles: c.sgAlt[0].n } : null })),
       swgohggSquadsSeason: SG.season,
+      likelyModel: S.likelyFit ? { globalFit: { players: LIKELY_FIT.players, rounds: LIKELY_FIT.rounds, decayPerRound: LIKELY_FIT.w, olderSeasonWeight: LIKELY_FIT.qs, shrinkRounds: LIKELY_FIT.kappa, coefficients: Object.fromEntries(LIKELY_FIT.names.map((n, k) => [n, LIKELY_FIT.coef[k]])), leaveOnePlayerOut: LIKELY_FIT.loo }, backtestTopN: S.likelyFit.top, backtestHitRate: S.likelyFit.hit, oldShareHitRate: S.likelyFit.hitOld } : null,
       decisionBrief: (() => { try { const sl = slotCounts(), R = S.review || defReview(); const sum = c => ({ squad: c.squad, score: +effS(c).toFixed(3), swgohggSquads: c.sg ? { hold: c.sg.h, battles: c.sg.n } : null, hotutils: c.hu ? { hold: c.hu.h, battles: c.hu.n } : null, insight: insEff(c) ? { hold: insEff(c).h, battles: insEff(c).n } : null });
         const P = S.pkg, pk = x => x && { expectedHolds: +x.exp.toFixed(2), matchups: x.rows.map(r => ({ squad: r.c.squad, attackedBy: r.att ? r.att.squad : 'other teams', hold: +r.hold.toFixed(3), battlesHere: r.n, leagueBattles: r.gN })) };
         const zs = myZones();
@@ -1868,7 +1959,9 @@
     return h;
   }
 
-  const seenTxt = d => (seenSet().has(d.lead) ? '<b class="opp">seen in game</b>' : d.unseen ? 'never seen on their defence' : `set in ${pct(d.likely)} of rounds`);
+  // why a defence is as likely as it is, in a few words
+  const likelyWhy = d => (d.why || []).join(', ');
+  const seenTxt = d => (seenSet().has(d.lead) ? '<b class="opp">seen in game</b>' : d.unseen ? 'never seen on their defence' : `likely ${pct(d.likely)}${d.lastRound ? ' · set last round' : ''}`);
   function theirDefBox() {
     const seen = seenSet(), pool = seenPool();
     if (!pool.length) return '';
@@ -1938,7 +2031,7 @@
     h += `<h2>Suggested attack plan</h2><p class="sub">The combination of your counters with the best overall result against the defences they usually set, never reusing a unit or anything on your defence.</p>
       ${theirDefBox()}<div class="filters">Rank by: ${chip('odds', 'Best win %')}${chip('banners', 'Most banners')}</div>
       <table class="stack"><tr><th>Their likely defence</th><th>Your counter</th><th>Est. win for you</th><th>Avg banners</th></tr>${S.plan.map(({ d, pick, dcOn, dcX, est, clash, clashWith }) => `<tr>
-      <td>${squadH(d.squad, 'opp')}<div class="sub">${zoneLong(d)} · ${d.unseen ? 'never seen on their defence before' : `set in ${pct(d.likely)} of their last ${S.span} rounds${d.recent ? '' : ' · not used last season'} · held ${pct(d.holdRate)} of ${d.n} attacks`}${seenSet().has(d.lead) ? ' · <b class="opp">seen in game</b>' : ''}</div>${theirDcLine(d.lead)}${theirOmiLine(d)}${dcLine(S.dcDef, d.lead)}</td>
+      <td>${squadH(d.squad, 'opp')}<div class="sub">${zoneLong(d)} · ${d.unseen ? 'never seen on their defence before' : `likely next round ${pct(d.likely)} (set in ${pct(d.share)} of their last ${S.span} rounds${likelyWhy(d) ? '; ' + likelyWhy(d) : ''})${d.recent ? '' : ' · not used last season'} · held ${pct(d.holdRate)} of ${d.n} attacks`}${seenSet().has(d.lead) ? ' · <b class="opp">seen in game</b>' : ''}</div>${theirDcLine(d.lead)}${theirOmiLine(d)}${dcLine(S.dcDef, d.lead)}</td>
       <td>${pick ? squadH(pick.squad, 'me') + `<div class="sub">${recTxt(pick)}</div>` + myDcLine(pick, dcOn, dcX || pick.myDc) + speedH(pick, d) : clash ? `<span class="warn">Best owned counter (${esc(nm(clash.lead))}, ${pct(clash.est)}) needs ${clashWith.map(nm).map(esc).join(', ')}, already on your defence or used above.</span>` : '<span class="warn">No recorded counter you own. Check the counters tab with "All recorded".</span>'}</td>
       <td>${pick ? bar(est) + confH(pick) + (pick.delta ? `<div class="sub">${pick.delta > 0 ? '+' : ''}${pick.delta.toFixed(1)} relic vs their team</div>` : '') : ''}</td>
       <td>${pick ? `<b class="ban">${banTxt(pick)}</b>${pick.avgBan ? '<div class="sub">banners per win</div>' : ''}` : ''}</td></tr>`).join('')}</table>`;
@@ -2044,7 +2137,7 @@
       <div class="filters">Show counters: ${chip('all', 'All recorded')}${chip('own', 'Teams I own')}${chip('ready', 'Teams I own at R5+')}<label class="tog"><input type="checkbox" id="ships" ${store.showShips ? 'checked' : ''}> Show fleets</label></div>
       ${S.defs.filter(d => store.showShips || !d.ships).map(d => {
         const list = pick(d), exact = d.counters.some(c => c.exact && c.gN);
-        return `<section class="card"><div class="dh">${squadH(d.squad, 'opp')}<div class="stats"><div><b>${pct(d.likely)}</b><small>of last ${S.span} rounds</small></div><div><b>${pct(d.holdRate)}</b><small>held (${d.held}/${d.n})</small></div><div><b>${esc(zoneTxt(d))}</b><small>${d.zone ? pct(d.zone.share) + ' of rounds' : 'zone'}</small></div></div></div>${theirDcLine(d.lead)}${theirOmiLine(d)}${dcLine(S.dcDef, d.lead)}
+        return `<section class="card"><div class="dh">${squadH(d.squad, 'opp')}<div class="stats"><div><b>${pct(d.likely)}</b><small>likely next round${likelyWhy(d) ? ': ' + likelyWhy(d) : ''}</small></div><div><b>${pct(d.share)}</b><small>of last ${S.span} rounds</small></div><div><b>${pct(d.holdRate)}</b><small>held (${d.held}/${d.n})</small></div><div><b>${esc(zoneTxt(d))}</b><small>${d.zone ? pct(d.zone.share) + ' of rounds' : 'zone'}</small></div></div></div>${theirDcLine(d.lead)}${theirOmiLine(d)}${dcLine(S.dcDef, d.lead)}
         ${d.counters.some(c => c.gN) ? `<p class="sub">swgoh.gg data: ${exact ? 'this exact squad' : `any ${esc(nm(d.lead))} team`}.</p>` : ''}
         ${list.length ? counterTable(list) : `<p class="sub">No recorded counters${f !== 'all' ? ' that match this filter' : ''}.</p>`}</section>`;
       }).join('')}`;
@@ -2063,6 +2156,11 @@
   }
 
   // Arrikhan's round-by-round report
+  // how well "likely next round" would have predicted their past rounds (export only: the Round by round tab isn't on screen)
+  // how well "likely next round" would have predicted their past rounds (export only: the Round by round tab isn't on screen)
+  // how well "likely next round" would have predicted their past rounds (export only: the Round by round tab isn't on screen)
+  const likelyFitH = () => { const f = S.likelyFit; if (!f || f.hit == null) return ''; const g = LIKELY_FIT.loo;
+    return `<p class="sub">Likely next round: one set of weights fitted on ${LIKELY_FIT.players} Kyber players' 3v3 histories and tested leaving each player out: their top ${g.topK} predicted defences included ${pct(g.recall)} of the defences they were seen setting, vs ${pct(g.recallOld)} counting rounds equally (the old way); its percentages came true about as often as they said (Brier ${g.brier} vs ${g.brierOld} the old way). On ${esc(S.opp.name || 'them')}'s own past rounds its top ${f.top} included ${pct(f.hit)} (old way ${pct(f.hitOld)}).</p>`; };
   function viewRounds() {
     const rs = [...S.oppHist.rounds].sort((a, b) => b.epoch - a.epoch || b.rn - a.rn);
     if (!rs.length) return '<p class="warn">No rounds found.</p>';
@@ -2082,7 +2180,7 @@
       <div class="kpi"><b>${hm(ds.length ? mean(ds) : null)}</b><small>average delay to first attack</small></div></div>
       <div class="zones" style="margin-top:10px"><div class="zone"><b>Their defences that held most</b>${top(holds, 5).map(([id, n]) => `<div>${esc(nm(id))} <small>×${n}</small></div>`).join('') || '<small>None recorded</small>'}</div>
       <div class="zone"><b>Defences they dropped battles to</b>${top(drops, 5).map(([id, n]) => `<div>${esc(nm(id))} <small>×${n}</small></div>`).join('') || '<small>None recorded</small>'}</div></div>
-      <p class="sub">Delay is the time from attacks opening to their first attack. A hold is an attack on their defence that wasn't a win (loss, draw or retreat).</p>`;
+      <p class="sub">Delay is the time from attacks opening to their first attack. A hold is an attack on their defence that wasn't a win (loss, draw or retreat).</p>${likelyFitH()}`;
     const att = b => `<li><span class="${/draw/i.test(b.out) ? 'draw' : 'lose'}">${esc(b.out || 'Loss')}:</span> ${esc(nm(b.att[0]))} <span class="sub">${esc(b.att.slice(1).map(nm).join(', '))}</span></li>`;
     const group = (bs, key) => {
       const g = {};
@@ -2146,7 +2244,7 @@
       VERSION, store, gstore, SHIP, CAP, ALIGN, CATS, OMI, IMG,
       setS: x => (S = x), getS: () => S, setNames: x => (NAME = x), setSets: x => (S0_sets = x), setEvStart: x => (EVSTART = x),
       ldKey, sqKey, metaMap, dcFit, bestDc, assignDcs, defenceCandidates, plan, defReview, packageSim, lastRoundDefence, staleDefence,
-      speedH, seenSet, setSeen, applySwap, effS, insEff, viewBrief, viewRoster, viewPlan, setExporting: v => (EXPORTING = v),
+      speedH, seenSet, setSeen, applySwap, effS, insEff, viewBrief, viewRoster, viewPlan, likelyModel, setExporting: v => (EXPORTING = v),
     });
     return;
   }
