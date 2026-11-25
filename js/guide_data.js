@@ -822,7 +822,7 @@ window.GUIDE = {
    "lead": "Lord Vader",
    "with": "Appo (omicron), CX-2, Disguised Clone Trooper, Scorch",
    "how": "",
-   "notes": "Dark side clone troopers. Auto, don't use Piett."
+   "notes": "Dark side clone troopers. Auto, don't use Piett. Guild tested (FireFight, Nov 2026): easy win."
   }
  ],
  "dathomir:c1": [
