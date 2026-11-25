@@ -801,6 +801,12 @@ window.GUIDE = {
    "with": "SM-33, Captain Silvo, Vane (omicron), Brutus",
    "how": "",
    "notes": ""
+  },
+  {
+   "lead": "Darth Revan",
+   "with": "Sith Eternal Emperor, Yoda (Dark Side Vision) (omicron), Darth Malgus, Darth Malak",
+   "how": "",
+   "notes": "Guild tested (FireFight, Nov 2026): won on full auto. Darth Revan leads, not Sith Eternal Emperor (his lead stops ally revives here). Wat Tambor would likely make it more reliable (stops the enemy revives); not tested."
   }
  ],
  "dathomir:c6": [
@@ -815,6 +821,12 @@ window.GUIDE = {
    "with": "SM-33, Captain Silvo, Vane (omicron), Brutus",
    "how": "",
    "notes": ""
+  },
+  {
+   "lead": "Darth Revan",
+   "with": "Sith Eternal Emperor, Yoda (Dark Side Vision) (omicron), Darth Malgus, Darth Malak",
+   "how": "",
+   "notes": "Guild tested (FireFight, Nov 2026): won on full auto. Darth Revan leads, not Sith Eternal Emperor (his lead stops ally revives here). Wat Tambor would likely make it more reliable (stops the enemy revives); not tested."
   }
  ],
  "dathomir:c3": [
