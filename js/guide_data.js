@@ -827,6 +827,12 @@ window.GUIDE = {
  ],
  "dathomir:c1": [
   {
+   "lead": "Doctor Aphra",
+   "with": "IG-90, IG-88, BT-1, 0-0-0",
+   "how": "",
+   "notes": "Guild tested (FireFight, Nov 2026): easy full auto. Keeps General Grievous and HK-47 free."
+  },
+  {
    "lead": "Aphra (IG 90)",
    "with": "BT1, GG, HK47, IG 90",
    "how": "",
