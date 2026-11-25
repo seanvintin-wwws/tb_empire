@@ -76,6 +76,8 @@ const RESERVED = {
 };
 // Mission notes shown above the team list.
 const NOTES = {
+  'kashyyyk:c2': 'Don\'t use Jedi Master Kenobi with Galactic Republic here: FireFight got only 1/2 on full auto (Nov 2026). Use one of the teams below.',
+  'lothal:c3': 'Bring Captain Rex here (he counts as Phoenix). He is free again in Phase 4 after Zeffo Clones in Phase 3 (FireFight, Nov 2026).',
   'zeffo:c3': 'Captain Rex is essential here (a test with Kix instead lost in wave 1). Only do this once Saw on Kashyyyk is done with the Vel team; otherwise Captain Rex is already used.',
   'zeffo:c2': 'Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.',
   'tatooine:c4': 'Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron.',
@@ -84,6 +86,7 @@ const NOTES = {
 const WARN = {
   'geonosis:c5': 'REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it.',
   'lothal:c3': 'REMODDING NEEDED for this mission. Remod your Phoenix units before you attempt it.',
+  'dathomir:c8': 'REMODDING NEEDED for this mission. Remod this team before you attempt it, and bring Morgan Elsbeth: FireFight lost with Nightsister Spirit in her place.',
 };
 // Manual team lists that replace the guide's for a mission (guild-confirmed picks).
 const OVERRIDES = {
@@ -95,17 +98,19 @@ const OVERRIDES = {
   ],
   'zeffo:c3': [
     { lead: 'Rex', with: 'Captain Rex, Echo, ARC Trooper, Fives', how: 'Clear the target reticule at the start; in wave 2 put it on the Consular (her counterattacks hurt)',
-      notes: 'Auto. swgohrote.com rates this about 75%.' },
+      notes: 'Auto. swgohrote.com rates this about 75%. Guild tested (FireFight, Nov 2026): easy win in Phase 3.' },
     { lead: 'Cody', with: 'Captain Rex, Rex, Echo, Fives', how: '',
       notes: 'Full auto. Most-voted community team on swgohrote.com (not yet rated). Needs Cody at Relic 7+.' },
   ],
   'mustafar:c6': [{ lead: 'Leviathan', with: 'Sith Bomber, MK6 Interceptor, Sith Fighter, TIE Advanced, Scimitar', how: '', notes: '' }],
   'dathomir:c3': [{ lead: 'Lord Vader', with: 'Appo (omicron), CX-2, Disguised Clone Trooper, Scorch', how: '',
-    notes: "Dark side clone troopers. Auto, don't use Piett." }],
+    notes: "Dark side clone troopers. Auto, don't use Piett. Guild tested (FireFight, Nov 2026): easy win." }],
   'tatooine:c1': [{ lead: 'Executor', with: "Start: Hound's Tooth, Razor Crest, Xanadu Blood. Reinforcements: IG-2000 (first), Slave I, +2 any (e.g. Ebon Hawk, Lando's Millennium Falcon)",
     how: 'Target TIE Advanced first, then TIE Bomber, then TIE Fighter Pilot',
     notes: 'Bring in IG-2000 as the first reinforcement. The last two reinforcements rarely matter; you usually win before you need them.' }],
   'kashyyyk:c8': [
+    { lead: 'Saw Gerrera', with: 'Kyle Katarn (omicron), Vel (omicron), Kleya, Luthen', how: '',
+      notes: 'Guild tested (FireFight, Nov 2026): full auto. All Rebel Fighters, so Vel\'s omicron works. Frees Captain Rex for Zeffo Clones, and Captain Drogan and Cassian Andor (Undercover) for other missions.' },
     { lead: 'Saw Gerrera', with: 'Kyle Katarn (omicron), Captain Rex, Luthen, Drogan', how: 'Clear the target reticule at the start',
       notes: 'Use this until Vel has her omicron. It uses Captain Rex, so skip Zeffo Clones.' },
     { lead: 'Saw Gerrera', with: 'Vel (omicron), Kleya, Luthen, Cassian Andor (Undercover)', how: '',
@@ -115,7 +120,7 @@ const OVERRIDES = {
   'kashyyyk:c6': [{ lead: 'Tarfful', with: 'Yoda and Chewie, Chewbacca, Chewpio, Clone Wars Chewie', how: '',
     notes: '2/2 on auto (guild tested). Much easier with Yoda and Chewie. You want decent mods on CWC.' },
     { lead: 'Tarfful', with: '+4 Wookiees', how: '',
-      notes: 'Guild tested (FireFight): Tarfful lead with any four Relic 7+ Light Side Wookiees wins.' }],
+      notes: 'Guild tested (FireFight): Tarfful lead with any four Relic 7+ Light Side Wookiees wins. Easy full auto with Chewbacca, Clone Wars Chewbacca, Zaalbar, Threepio & Chewie (Nov 2026).' }],
 };
 // Guild edits to the guide's list for a mission: drop teams by leader, and move a leader to the top.
 const SEE_HAVEN = { lead: 'Sith Eternal Emperor', with: 'Malak, The Stranger, Darth Revan, Bane', how: '',
@@ -126,7 +131,11 @@ const SLKR_HAVEN = { lead: 'Supreme Leader Kylo Ren', with: 'Dark Side Rey, Kylo
   notes: "Guild tested: only 1/2 (clears wave 1, about 219k points). swgohrote.com says manual play and full platoons are needed. Wait until all 6 operations (platoons) are done before attempting: that disables the enemy's Hope buff, which otherwise gives them up to 100% Turn Meter and 3 Morale at the start. Only use it if you're short a team, for the partial points." };
 const INQ_HAVEN = { lead: 'Third Sister (Reva)', with: 'Grand Inquisitor, Seventh Sister, Ninth Sister, Marrok (omicron)', how: '',
   notes: "Full auto, 2/2 (guild tested). Marrok's omicron is what makes it work. Third Sister and Marrok are also needed for the Inquisitor special mission, and each unit can only be used once per phase, so pick one." };
+const SITH_DATH = { lead: 'Darth Revan', with: 'Sith Eternal Emperor, Yoda (Dark Side Vision) (omicron), Darth Malgus, Darth Malak', how: '', notes: 'Guild tested (FireFight, Nov 2026): won on full auto. Darth Revan leads, not Sith Eternal Emperor (his lead stops ally revives here). Wat Tambor would likely make it more reliable (stops the enemy revives); not tested.' };
 const EDITS = {
+  'tatooine:c3': { add: [[0, { lead: 'Pirate King Hondo Ohnaka', with: 'Vane (omicron), Brutus, Captain Silvo, Fennec Shand', how: '', prio: 1, notes: 'Guild tested (FireFight, Nov 2026): won. Priority team: save Pirate King Hondo Ohnaka for this mission rather than the Dathomir Dark Side combat missions.' }]] },
+  'dathomir:c1': { add: [[0, { lead: 'Doctor Aphra', with: 'IG-90, IG-88, BT-1, 0-0-0', how: '', notes: 'Guild tested (FireFight, Nov 2026): easy full auto. Keeps General Grievous and HK-47 free.' }]] },
+  'kashyyyk:c3': { note: [[/^jedi master mace windu/i, 'Guild tested (FireFight, Nov 2026): easy full auto with Kelleran Beq as the fifth Jedi Vanguard']] },
   'haven:c1': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [3, SEE_YODA_HAVEN], [99, SLKR_HAVEN]] }, 'haven:c2': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [3, SEE_YODA_HAVEN], [99, SLKR_HAVEN]] }, 'haven:c6': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [3, SEE_YODA_HAVEN], [99, SLKR_HAVEN]] },
   'mustafar:c1': { drop: [/dark trooper moff gideon/i, /emperor palpatine/i], top: /pirate king hondo/i },
   'lothal:c1': { top: /^jedi master mace windu/i, note: [[/^jedi master mace windu/i, 'Use this first: super easy full auto, and it saves your GLs (Jedi Master Luke, Jedi Master Kenobi) for elsewhere']] },
@@ -146,8 +155,8 @@ const EDITS = {
   'geonosis:c2': { top: /^great mothers/i, prio: /^great mothers/i, note: [[/^great mothers/i,
     'Priority team here. ANZGC guild-tested (FireFight): Morgan Elsbeth, Night Trooper, Death Trooper (Peridea), Nightsister Zombie']] },
   'geonosis:c3': { fill: [[/^emperor palpatine/i, "Darth Vader Duel's End, Admiral Piett, Gar Saxon, Imperial Super Commando"]] },
-  'dathomir:c2': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
-  'dathomir:c6': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
+  'dathomir:c2': { add: [[2, SITH_DATH]], drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
+  'dathomir:c6': { add: [[2, SITH_DATH]], drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
 };
 const phaseOf = p => PHASES.findIndex(g => g.includes(p));
 const removed = [];

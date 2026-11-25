@@ -21,6 +21,6 @@
 4. Add Discord finds from `rote-discord-findings.md` (Mandalore BKM, Zeffo/Kashyyyk fleets, Lothal Phoenix, Tatooine Krayt; Trench, Bad Batch for Zeffo clones, Talzin, Vel omicron).
 5. Mission-panel warnings (now possible with `WARN`): JML ult soft-lock on Coruscant, Tarpals omicron on Zeffo, Bracca Jedi needs Coruscant platoons, Cere armour 70–74% for the Zeffo unlock.
 6. Hide the amber "your own lineup" line when a guide team is already ready.
-7. Test Sean's Saw idea: Saw Gerrera + Kyle Katarn (omicron), Luthen, Kleya, Vel (omicron). All Rebel Fighters, so Vel's omicron condition is met; frees Captain Rex (Zeffo Clones), Drogan and Cassian (Undercover). If it wins 2/2, add as guild-tested.
+7. DONE 26 Nov 2026: Sean's Saw team (Saw Gerrera + Kyle Katarn (omicron), Vel Sartha (omicron), Kleya Marki, Luthen Rael) won on full auto. Added first on kashyyyk:c8 as guild-tested.
 8. Open questions for other AI tools (prompt in `rote-phase6-teams.md`).
 9. Re-check Sean's roster after adding.

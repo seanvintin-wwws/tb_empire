@@ -801,6 +801,12 @@ window.GUIDE = {
    "with": "SM-33, Captain Silvo, Vane (omicron), Brutus",
    "how": "",
    "notes": ""
+  },
+  {
+   "lead": "Darth Revan",
+   "with": "Sith Eternal Emperor, Yoda (Dark Side Vision) (omicron), Darth Malgus, Darth Malak",
+   "how": "",
+   "notes": "Guild tested (FireFight, Nov 2026): won on full auto. Darth Revan leads, not Sith Eternal Emperor (his lead stops ally revives here). Wat Tambor would likely make it more reliable (stops the enemy revives); not tested."
   }
  ],
  "dathomir:c6": [
@@ -815,6 +821,12 @@ window.GUIDE = {
    "with": "SM-33, Captain Silvo, Vane (omicron), Brutus",
    "how": "",
    "notes": ""
+  },
+  {
+   "lead": "Darth Revan",
+   "with": "Sith Eternal Emperor, Yoda (Dark Side Vision) (omicron), Darth Malgus, Darth Malak",
+   "how": "",
+   "notes": "Guild tested (FireFight, Nov 2026): won on full auto. Darth Revan leads, not Sith Eternal Emperor (his lead stops ally revives here). Wat Tambor would likely make it more reliable (stops the enemy revives); not tested."
   }
  ],
  "dathomir:c3": [
@@ -822,10 +834,16 @@ window.GUIDE = {
    "lead": "Lord Vader",
    "with": "Appo (omicron), CX-2, Disguised Clone Trooper, Scorch",
    "how": "",
-   "notes": "Dark side clone troopers. Auto, don't use Piett."
+   "notes": "Dark side clone troopers. Auto, don't use Piett. Guild tested (FireFight, Nov 2026): easy win."
   }
  ],
  "dathomir:c1": [
+  {
+   "lead": "Doctor Aphra",
+   "with": "IG-90, IG-88, BT-1, 0-0-0",
+   "how": "",
+   "notes": "Guild tested (FireFight, Nov 2026): easy full auto. Keeps General Grievous and HK-47 free."
+  },
   {
    "lead": "Aphra (IG 90)",
    "with": "BT1, GG, HK47, IG 90",
@@ -983,6 +1001,13 @@ window.GUIDE = {
  ],
  "tatooine:c3": [
   {
+   "lead": "Pirate King Hondo Ohnaka",
+   "with": "Vane (omicron), Brutus, Captain Silvo, Fennec Shand",
+   "how": "",
+   "prio": 1,
+   "notes": "Guild tested (FireFight, Nov 2026): won. Priority team: save Pirate King Hondo Ohnaka for this mission rather than the Dathomir Dark Side combat missions."
+  },
+  {
    "lead": "Rey",
    "with": "Fennec, any 3 resistance",
    "how": "",
@@ -1056,6 +1081,12 @@ window.GUIDE = {
  "kashyyyk:c8": [
   {
    "lead": "Saw Gerrera",
+   "with": "Kyle Katarn (omicron), Vel (omicron), Kleya, Luthen",
+   "how": "",
+   "notes": "Guild tested (FireFight, Nov 2026): full auto. All Rebel Fighters, so Vel's omicron works. Frees Captain Rex for Zeffo Clones, and Captain Drogan and Cassian Andor (Undercover) for other missions."
+  },
+  {
+   "lead": "Saw Gerrera",
    "with": "Kyle Katarn (omicron), Captain Rex, Luthen, Drogan",
    "how": "Clear the target reticule at the start",
    "notes": "Use this until Vel has her omicron. It uses Captain Rex, so skip Zeffo Clones."
@@ -1084,7 +1115,7 @@ window.GUIDE = {
    "lead": "Jedi Master Mace Windu",
    "with": "Jocasta Nu, Temple Guard, Depa Billaba (omicron), +1 JV",
    "how": "",
-   "notes": ""
+   "notes": "Guild tested (FireFight, Nov 2026): easy full auto with Kelleran Beq as the fifth Jedi Vanguard"
   },
   {
    "lead": "Kelleran Beq",
@@ -1104,7 +1135,7 @@ window.GUIDE = {
    "lead": "Tarfful",
    "with": "+4 Wookiees",
    "how": "",
-   "notes": "Guild tested (FireFight): Tarfful lead with any four Relic 7+ Light Side Wookiees wins."
+   "notes": "Guild tested (FireFight): Tarfful lead with any four Relic 7+ Light Side Wookiees wins. Easy full auto with Chewbacca, Clone Wars Chewbacca, Zaalbar, Threepio & Chewie (Nov 2026)."
   }
  ],
  "haven:c3": [
@@ -1619,7 +1650,7 @@ window.GUIDE = {
    "lead": "Rex",
    "with": "Captain Rex, Echo, ARC Trooper, Fives",
    "how": "Clear the target reticule at the start; in wave 2 put it on the Consular (her counterattacks hurt)",
-   "notes": "Auto. swgohrote.com rates this about 75%."
+   "notes": "Auto. swgohrote.com rates this about 75%. Guild tested (FireFight, Nov 2026): easy win in Phase 3."
   },
   {
    "lead": "Cody",
@@ -1850,11 +1881,14 @@ window.GUIDE = {
  ]
 };
 window.GUIDE_NOTES = {
+ "kashyyyk:c2": "Don't use Jedi Master Kenobi with Galactic Republic here: FireFight got only 1/2 on full auto (Nov 2026). Use one of the teams below.",
+ "lothal:c3": "Bring Captain Rex here (he counts as Phoenix). He is free again in Phase 4 after Zeffo Clones in Phase 3 (FireFight, Nov 2026).",
  "zeffo:c3": "Captain Rex is essential here (a test with Kix instead lost in wave 1). Only do this once Saw on Kashyyyk is done with the Vel team; otherwise Captain Rex is already used.",
  "zeffo:c2": "Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.",
  "tatooine:c4": "Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron."
 };
 window.GUIDE_WARN = {
  "geonosis:c5": "REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it.",
- "lothal:c3": "REMODDING NEEDED for this mission. Remod your Phoenix units before you attempt it."
+ "lothal:c3": "REMODDING NEEDED for this mission. Remod your Phoenix units before you attempt it.",
+ "dathomir:c8": "REMODDING NEEDED for this mission. Remod this team before you attempt it, and bring Morgan Elsbeth: FireFight lost with Nightsister Spirit in her place."
 };
