@@ -1001,6 +1001,13 @@ window.GUIDE = {
  ],
  "tatooine:c3": [
   {
+   "lead": "Pirate King Hondo Ohnaka",
+   "with": "Vane (omicron), Brutus, Captain Silvo, Fennec Shand",
+   "how": "",
+   "prio": 1,
+   "notes": "Guild tested (FireFight, Nov 2026): won. Priority team: save Pirate King Hondo Ohnaka for this mission rather than the Dathomir Dark Side combat missions."
+  },
+  {
    "lead": "Rey",
    "with": "Fennec, any 3 resistance",
    "how": "",
