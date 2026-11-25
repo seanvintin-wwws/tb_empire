@@ -1135,6 +1135,12 @@ window.GUIDE = {
    "notes": "swgohrote.com rates this about 90% on auto. Needs all platoons. Use The Stranger instead of Dooku to make it consistent. Use this when Lord Vader is needed for platoons."
   },
   {
+   "lead": "Sith Eternal Emperor",
+   "with": "Darth Malak, Yoda (Dark Side Vision) (omicron), Darth Revan, Darth Bane",
+   "how": "",
+   "notes": "Use Yoda (Dark Side Vision) with his Territory Battle omicron in The Stranger's place (gives Sith allies Max Protection, Speed and a dispel of Daze/Stun). Not guild tested on Haven yet."
+  },
+  {
    "lead": "Pirate King Hondo Onaka",
    "with": "SM-33, Vane, Brutus, Silvo",
    "how": "",
@@ -1173,6 +1179,12 @@ window.GUIDE = {
    "notes": "swgohrote.com rates this about 90% on auto. Needs all platoons. Use The Stranger instead of Dooku to make it consistent. Use this when Lord Vader is needed for platoons."
   },
   {
+   "lead": "Sith Eternal Emperor",
+   "with": "Darth Malak, Yoda (Dark Side Vision) (omicron), Darth Revan, Darth Bane",
+   "how": "",
+   "notes": "Use Yoda (Dark Side Vision) with his Territory Battle omicron in The Stranger's place (gives Sith allies Max Protection, Speed and a dispel of Daze/Stun). Not guild tested on Haven yet."
+  },
+  {
    "lead": "Pirate King Hondo Onaka",
    "with": "SM-33, Vane, Brutus, Silvo",
    "how": "",
@@ -1209,6 +1221,12 @@ window.GUIDE = {
    "with": "Malak, The Stranger, Darth Revan, Bane",
    "how": "",
    "notes": "swgohrote.com rates this about 90% on auto. Needs all platoons. Use The Stranger instead of Dooku to make it consistent. Use this when Lord Vader is needed for platoons."
+  },
+  {
+   "lead": "Sith Eternal Emperor",
+   "with": "Darth Malak, Yoda (Dark Side Vision) (omicron), Darth Revan, Darth Bane",
+   "how": "",
+   "notes": "Use Yoda (Dark Side Vision) with his Territory Battle omicron in The Stranger's place (gives Sith allies Max Protection, Speed and a dispel of Daze/Stun). Not guild tested on Haven yet."
   },
   {
    "lead": "Pirate King Hondo Onaka",

@@ -120,12 +120,14 @@ const OVERRIDES = {
 // Guild edits to the guide's list for a mission: drop teams by leader, and move a leader to the top.
 const SEE_HAVEN = { lead: 'Sith Eternal Emperor', with: 'Malak, The Stranger, Darth Revan, Bane', how: '',
   notes: 'swgohrote.com rates this about 90% on auto. Needs all platoons. Use The Stranger instead of Dooku to make it consistent. Use this when Lord Vader is needed for platoons.' };
+const SEE_YODA_HAVEN = { lead: 'Sith Eternal Emperor', with: 'Darth Malak, Yoda (Dark Side Vision) (omicron), Darth Revan, Darth Bane', how: '',
+  notes: "Use Yoda (Dark Side Vision) with his Territory Battle omicron in The Stranger's place (gives Sith allies Max Protection, Speed and a dispel of Daze/Stun). Not guild tested on Haven yet." };
 const SLKR_HAVEN = { lead: 'Supreme Leader Kylo Ren', with: 'Dark Side Rey, Kylo Ren (Unmasked), Hux, Sith Trooper', how: 'Manual play needed',
   notes: "Guild tested: only 1/2 (clears wave 1, about 219k points). swgohrote.com says manual play and full platoons are needed. Wait until all 6 operations (platoons) are done before attempting: that disables the enemy's Hope buff, which otherwise gives them up to 100% Turn Meter and 3 Morale at the start. Only use it if you're short a team, for the partial points." };
 const INQ_HAVEN = { lead: 'Third Sister (Reva)', with: 'Grand Inquisitor, Seventh Sister, Ninth Sister, Marrok (omicron)', how: '',
   notes: "Full auto, 2/2 (guild tested). Marrok's omicron is what makes it work. Third Sister and Marrok are also needed for the Inquisitor special mission, and each unit can only be used once per phase, so pick one." };
 const EDITS = {
-  'haven:c1': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [99, SLKR_HAVEN]] }, 'haven:c2': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [99, SLKR_HAVEN]] }, 'haven:c6': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [99, SLKR_HAVEN]] },
+  'haven:c1': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [3, SEE_YODA_HAVEN], [99, SLKR_HAVEN]] }, 'haven:c2': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [3, SEE_YODA_HAVEN], [99, SLKR_HAVEN]] }, 'haven:c6': { add: [[0, INQ_HAVEN], [2, SEE_HAVEN], [3, SEE_YODA_HAVEN], [99, SLKR_HAVEN]] },
   'mustafar:c1': { drop: [/dark trooper moff gideon/i, /emperor palpatine/i], top: /pirate king hondo/i },
   'lothal:c1': { top: /^jedi master mace windu/i, note: [[/^jedi master mace windu/i, 'Use this first: super easy full auto, and it saves your GLs (Jedi Master Luke, Jedi Master Kenobi) for elsewhere']] },
   'lothal:c2': { top: /^ahsoka tano/i, note: [[/^ahsoka tano/i, 'Use this first: by this point most teams are used, and Ahsoka carries any leftover units']] },
