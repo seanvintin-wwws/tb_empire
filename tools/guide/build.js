@@ -83,6 +83,7 @@ const NOTES = {
 // Big red warning shown at the top of the mission panel (things that cost a failed attempt).
 const WARN = {
   'geonosis:c5': 'REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it.',
+  'lothal:c3': 'REMODDING NEEDED for this mission. Remod your Phoenix units before you attempt it.',
 };
 // Manual team lists that replace the guide's for a mission (guild-confirmed picks).
 const OVERRIDES = {
