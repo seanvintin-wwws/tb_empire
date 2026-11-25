@@ -1110,7 +1110,7 @@ window.GUIDE = {
    "lead": "Tarfful",
    "with": "+4 Wookiees",
    "how": "",
-   "notes": "Guild tested (FireFight): Tarfful lead with any four Relic 7+ Light Side Wookiees wins."
+   "notes": "Guild tested (FireFight): Tarfful lead with any four Relic 7+ Light Side Wookiees wins. Easy full auto with Chewbacca, Clone Wars Chewbacca, Zaalbar, Threepio & Chewie (Nov 2026)."
   }
  ],
  "haven:c3": [
