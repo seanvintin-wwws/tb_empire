@@ -1830,3 +1830,6 @@ window.GUIDE_NOTES = {
  "zeffo:c2": "Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.",
  "tatooine:c4": "Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron."
 };
+window.GUIDE_WARN = {
+ "geonosis:c5": "REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it."
+};

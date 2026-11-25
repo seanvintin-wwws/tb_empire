@@ -80,6 +80,10 @@ const NOTES = {
   'zeffo:c2': 'Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.',
   'tatooine:c4': 'Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron.',
 };
+// Big red warning shown at the top of the mission panel (things that cost a failed attempt).
+const WARN = {
+  'geonosis:c5': 'REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it.',
+};
 // Manual team lists that replace the guide's for a mission (guild-confirmed picks).
 const OVERRIDES = {
   'zeffo:c2': [
@@ -217,7 +221,8 @@ const js = '// Recommended teams per mission, taken from https://swgohrote.com/ 
   '// Generated file: key is "planet:mission" matching the mission names in each planet file.\n' +
   'window.GUIDE_UPDATED = ' + JSON.stringify(updated) + ';\n' +
   'window.GUIDE = ' + JSON.stringify(out, null, 1) + ';\n' +
-  'window.GUIDE_NOTES = ' + JSON.stringify(NOTES, null, 1) + ';\n';
+  'window.GUIDE_NOTES = ' + JSON.stringify(NOTES, null, 1) + ';\n' +
+  'window.GUIDE_WARN = ' + JSON.stringify(WARN, null, 1) + ';\n';
 fs.writeFileSync(__dirname + '/../../js/guide_data.js', js);
 console.log(removed.join('\n'));
 console.log('missions written:', Object.keys(out).length);
