@@ -92,7 +92,7 @@ HotUtils: Sean turned on Grand Arena player events (Discord DM reminders, Accoun
 **Can't see**: mods beyond speed, turn-meter luck, defences nobody attacked, the event in progress, which datacron is actually equipped.
 
 ## Development history
-- 12 Nov: GAC Scout v1. 15 Nov v2.1: merged samobudo's V2 and Arrikhan's round report; self-updating loader.
+- 12 Nov: GAC Scout v1. 15 Nov v2.1: merged Scout+ V2 and the round-by-round report; self-updating loader.
 - 16 Nov v2.2–2.7: hardening, datacrons, HotUtils paste, Insight, datacrons and omicrons in the odds.
 - 17 Nov v2.8–2.8.2: HotUtils beside Insight, more Insight passes, throttle handling.
 - 19 Nov v2.9–3.6.1: export, squads page as third source, Decision brief, package model, zones, freed-datacron fix.

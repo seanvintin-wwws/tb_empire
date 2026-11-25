@@ -37,7 +37,6 @@ When something new is decided or learned, update the matching `docs/claude/` fil
 - Claude sessions push branches, not main. Releases go through a pull request, which Claude merges once tested.
 - After merging, GitHub Pages takes about 90 seconds. Check it with `gh api 'repos/seanvintin-wwws/tb_empire/actions/runs?per_page=1'`, then look at the live page.
 - Don't push more commits to a pull request branch after it's merged; open a new one.
-- Credit samobudo (V2 / defence planner) and Arrikhan (scoutGAC report) in Scout+; their ideas were merged in.
 
 ## ROTE map
 

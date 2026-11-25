@@ -1,15 +1,15 @@
 /* GAC Scout+  (FireFight / ANZGC)
-   Built on samobudo's GAC Scout+ V2, with Arrikhan's round-by-round report, merged with the original GAC Scout.
+   GAC Scout+ for ANZGC.
    Runs on swgoh.gg from a bookmark. Reads public swgoh.gg pages in your own browser; sends nothing anywhere else.
 
-   What's new compared with samobudo's V2:
+   What's new compared with Scout+ V2:
    - Your ally code is asked once and remembered (no hard-coded code), and can be changed in the header.
    - Counter odds blend the two players' own battles with swgoh.gg's GAC counters page (thousands of battles),
      matched to their exact defence squad where swgoh.gg has enough battles for it.
    - Suggested defence uses swgoh.gg hold data too, and stops tiny samples outranking solid ones.
    - "Keep GLs for attack" switch for the suggested defence (on by default).
    - Zones named (North, South, Trap, Fleet) instead of swgoh.gg's numbers.
-   - Round by round report (from Arrikhan): result, score, first attack time and delay, their holds and their drops (export only since v3.7.2).
+   - Round by round report: result, score, first attack time and delay, their holds and their drops (export only since v3.7.2).
 */
 (async () => {
   const VERSION = '3.8.3';
@@ -79,7 +79,7 @@
   const store = load(SKEY);
   const cache = load(RKEY); cache.rounds = cache.rounds || {};
   const gstore = load(GKEY); gstore.leads = gstore.leads || {};
-  try { // carry settings over from v2.1 (and your defence from samobudo's Scout+), then drop the v2.1 cache
+  try { // carry settings over from v2.1 (and your defence from Scout+ V2), then drop the v2.1 cache
     const old = localStorage.getItem('gacScoutPlus:v2');
     if (old) {
       const o = JSON.parse(old);
@@ -2181,7 +2181,7 @@
       <td>${top(a.beat).map(([id, n]) => `${esc(nm(id))} <small>×${n}</small>`).join('<br>') || '–'}</td></tr>`).join('')}</table>`;
   }
 
-  // Arrikhan's round-by-round report
+  // round-by-round report
   // how well "likely next round" would have predicted their past rounds (export only: the Round by round tab isn't on screen)
   // how well "likely next round" would have predicted their past rounds (export only: the Round by round tab isn't on screen)
   // how well "likely next round" would have predicted their past rounds (export only: the Round by round tab isn't on screen)
