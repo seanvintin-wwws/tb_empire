@@ -1090,7 +1090,7 @@ window.GUIDE = {
    "lead": "Jedi Master Mace Windu",
    "with": "Jocasta Nu, Temple Guard, Depa Billaba (omicron), +1 JV",
    "how": "",
-   "notes": ""
+   "notes": "Guild tested (FireFight, Nov 2026): easy full auto with Kelleran Beq as the fifth Jedi Vanguard"
   },
   {
    "lead": "Kelleran Beq",
