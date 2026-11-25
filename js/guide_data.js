@@ -1837,5 +1837,6 @@ window.GUIDE_NOTES = {
  "tatooine:c4": "Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron."
 };
 window.GUIDE_WARN = {
- "geonosis:c5": "REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it."
+ "geonosis:c5": "REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it.",
+ "lothal:c3": "REMODDING NEEDED for this mission. Remod your Phoenix units before you attempt it."
 };
