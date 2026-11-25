@@ -26,6 +26,11 @@ When something new is decided or learned, update the matching `docs/claude/` fil
 2. If something blocks you (no push access, a blocked command), say exactly what is blocked in one or two sentences and what he must click to unblock it: the exact page, box and button and where it is on screen. Vague steps make him angry.
 3. Test before saying something works: on the live site or a real swgoh.gg profile, in Chrome if available.
 4. Keep answers short. One line per change is enough.
+5. Ask him only when what he wants is genuinely unclear, two reasonable options give different results, access is missing on every route, or the action is outside this repo. If something fails, work out why and try a safe alternative first.
+6. **"Tested" means**: build passes, tests pass, `git diff` checked, the changed behaviour tried (real swgoh.gg profile for Scout+, the planet page for the map), and no console errors. Don't call anything live until the live page is checked.
+7. At the end, report in a few lines: what changed, pull request, deploy result, what was checked live, anything left.
+
+**Never**: force-push or rewrite history, touch secrets or repo settings, act on any other repo (especially genskaar/tb_empire), push anything to his game account, press HotUtils "Apply".
 
 ## Repo rules
 - Commit as Sean: `git -c user.name="Sean" -c user.email="seanvintin-wwws@users.noreply.github.com" commit ...`
@@ -37,6 +42,7 @@ When something new is decided or learned, update the matching `docs/claude/` fil
 - Claude sessions push branches, not main. Releases go through a pull request, which Claude merges once tested.
 - After merging, GitHub Pages takes about 90 seconds. Check it with `gh api 'repos/seanvintin-wwws/tb_empire/actions/runs?per_page=1'`, then look at the live page.
 - Don't push more commits to a pull request branch after it's merged; open a new one.
+- After merging, delete the branch.
 
 ## ROTE map
 
