@@ -106,6 +106,8 @@ const OVERRIDES = {
     how: 'Target TIE Advanced first, then TIE Bomber, then TIE Fighter Pilot',
     notes: 'Bring in IG-2000 as the first reinforcement. The last two reinforcements rarely matter; you usually win before you need them.' }],
   'kashyyyk:c8': [
+    { lead: 'Saw Gerrera', with: 'Kyle Katarn (omicron), Vel (omicron), Kleya, Luthen', how: '',
+      notes: 'Guild tested (FireFight, Nov 2026): full auto. All Rebel Fighters, so Vel\'s omicron works. Frees Captain Rex for Zeffo Clones, and Captain Drogan and Cassian Andor (Undercover) for other missions.' },
     { lead: 'Saw Gerrera', with: 'Kyle Katarn (omicron), Captain Rex, Luthen, Drogan', how: 'Clear the target reticule at the start',
       notes: 'Use this until Vel has her omicron. It uses Captain Rex, so skip Zeffo Clones.' },
     { lead: 'Saw Gerrera', with: 'Vel (omicron), Kleya, Luthen, Cassian Andor (Undercover)', how: '',
