@@ -106,6 +106,7 @@ const OVERRIDES = {
     { lead: 'Saw Gerrera', with: 'Vel (omicron), Kleya, Luthen, Cassian Andor (Undercover)', how: '',
       notes: 'Switch to this once Vel has her omicron (all Relic 7+). It frees Captain Rex for Zeffo Clones.' },
   ],
+  'hoth:c4': [{ lead: 'Doctor Aphra', with: 'IG-90, BT-1, 0-0-0, IG-88', notes: 'ANZGC guild-tested (FireFight): wins every time.' }],
   'kashyyyk:c6': [{ lead: 'Tarfful', with: 'Yoda and Chewie, Chewbacca, Chewpio, Clone Wars Chewie', how: '',
     notes: '2/2 on auto (guild tested). Much easier with Yoda and Chewie. You want decent mods on CWC.' }],
 };
@@ -132,6 +133,10 @@ const EDITS = {
       notes: 'Easy full auto (guild tested). Cal Kestis lead omicron is mandatory; Whirlwind Slam helps. Keep Ezra (Exile) for the Ahsoka team on Lothal.' }],
     [1, { lead: 'Jedi Knight Cal Kestis', with: 'Jedi Master Luke Skywalker, Grand Master Yoda, Jedi Knight Luke Skywalker, Shaak Ti', how: '',
       notes: 'auto, lead omi mandatory, probably want Whirlwind Slam as well' }]] },
+  // Geonosis Acklay (bottom): Great Mothers is the priority team here; the phase plan puts it here before c1/c3.
+  'geonosis:c2': { top: /^great mothers/i, prio: /^great mothers/i, note: [[/^great mothers/i,
+    'Priority team here. ANZGC guild-tested (FireFight): Morgan Elsbeth, Night Trooper, Death Trooper (Peridea), Nightsister Zombie']] },
+  'geonosis:c3': { fill: [[/^emperor palpatine/i, "Darth Vader Duel's End, Admiral Piett, Gar Saxon, Imperial Super Commando"]] },
   'dathomir:c2': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
   'dathomir:c6': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
 };
@@ -201,6 +206,7 @@ for (const [k, e] of Object.entries(EDITS)) {
   let rows = (out[k] || []).filter(r => !(e.drop || []).some(re => re.test(r.lead)));
   for (const [re, team] of (e.fill || [])) rows = rows.map(r => re.test(r.lead) ? { ...r, with: team } : r);
   for (const [re, txt] of (e.note || [])) rows = rows.map(r => re.test(r.lead) ? { ...r, notes: (r.notes ? r.notes + '. ' : '') + txt } : r);
+  if (e.prio) rows = rows.map(r => e.prio.test(r.lead) ? { ...r, prio: 1 } : r);
   if (e.top) rows = [...rows.filter(r => e.top.test(r.lead)), ...rows.filter(r => !e.top.test(r.lead))];
   for (const [i, row] of (e.add || [])) rows.splice(i, 0, row);
   out[k] = rows;

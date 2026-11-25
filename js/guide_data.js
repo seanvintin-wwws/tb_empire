@@ -483,7 +483,8 @@ window.GUIDE = {
    "lead": "Great Mothers",
    "with": "Morgan, Night Trooper, Death Trooper, +1 NS",
    "how": "",
-   "notes": "bless morgan, easy auto"
+   "notes": "bless morgan, easy auto. Priority team here. ANZGC guild-tested (FireFight): Morgan Elsbeth, Night Trooper, Death Trooper (Peridea), Nightsister Zombie",
+   "prio": 1
   },
   {
    "lead": "Supreme Leader Kylo Ren",
