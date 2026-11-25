@@ -129,6 +129,7 @@ const SLKR_HAVEN = { lead: 'Supreme Leader Kylo Ren', with: 'Dark Side Rey, Kylo
   notes: "Guild tested: only 1/2 (clears wave 1, about 219k points). swgohrote.com says manual play and full platoons are needed. Wait until all 6 operations (platoons) are done before attempting: that disables the enemy's Hope buff, which otherwise gives them up to 100% Turn Meter and 3 Morale at the start. Only use it if you're short a team, for the partial points." };
 const INQ_HAVEN = { lead: 'Third Sister (Reva)', with: 'Grand Inquisitor, Seventh Sister, Ninth Sister, Marrok (omicron)', how: '',
   notes: "Full auto, 2/2 (guild tested). Marrok's omicron is what makes it work. Third Sister and Marrok are also needed for the Inquisitor special mission, and each unit can only be used once per phase, so pick one." };
+const SITH_DATH = { lead: 'Darth Revan', with: 'Sith Eternal Emperor, Yoda (Dark Side Vision) (omicron), Darth Malgus, Darth Malak', how: '', notes: 'Guild tested (FireFight, Nov 2026): won on full auto. Darth Revan leads, not Sith Eternal Emperor (his lead stops ally revives here). Wat Tambor would likely make it more reliable (stops the enemy revives); not tested.' };
 const EDITS = {
   'dathomir:c1': { add: [[0, { lead: 'Doctor Aphra', with: 'IG-90, IG-88, BT-1, 0-0-0', how: '', notes: 'Guild tested (FireFight, Nov 2026): easy full auto. Keeps General Grievous and HK-47 free.' }]] },
   'kashyyyk:c3': { note: [[/^jedi master mace windu/i, 'Guild tested (FireFight, Nov 2026): easy full auto with Kelleran Beq as the fifth Jedi Vanguard']] },
@@ -151,8 +152,8 @@ const EDITS = {
   'geonosis:c2': { top: /^great mothers/i, prio: /^great mothers/i, note: [[/^great mothers/i,
     'Priority team here. ANZGC guild-tested (FireFight): Morgan Elsbeth, Night Trooper, Death Trooper (Peridea), Nightsister Zombie']] },
   'geonosis:c3': { fill: [[/^emperor palpatine/i, "Darth Vader Duel's End, Admiral Piett, Gar Saxon, Imperial Super Commando"]] },
-  'dathomir:c2': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
-  'dathomir:c6': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
+  'dathomir:c2': { add: [[2, SITH_DATH]], drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
+  'dathomir:c6': { add: [[2, SITH_DATH]], drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
 };
 const phaseOf = p => PHASES.findIndex(g => g.includes(p));
 const removed = [];
