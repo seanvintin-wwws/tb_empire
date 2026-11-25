@@ -15,6 +15,7 @@
 <style>
 .guide-src{font-size:0.8em;opacity:0.8;margin-bottom:4px}
 .guide-src a{color:#8cf}
+.guide-warn{background:#b00020;color:#fff;border:3px solid #ff5252;border-radius:6px;padding:10px 12px;font-size:1.15em;font-weight:bold;text-align:left}
 .guide-note{background:rgba(255,200,0,0.15);border-left:3px solid #fc0;padding:6px 8px;text-align:left}
 .guide-table{width:100%;font-size:0.9em;border-collapse:collapse}
 .guide-table td{border-top:1px solid rgba(255,255,255,0.15);padding:4px;vertical-align:top}
@@ -52,6 +53,7 @@
             <h3><i class="fa fa-window-close fa-fw topcorner" @click="hide"></i></h3>
             </div>
             
+            <div class="mb-3 guide-warn" v-if="guideWarn(selectedMission)">&#9888; {{ guideWarn(selectedMission) }}</div>
             <div class="mb-3 rc-note" v-if="rcNote(selectedMission)" v-html="rcNote(selectedMission)"></div>
             <div class="mb-3" v-if="selectedMission.reqs">
 				<p class="h4">Requirements</p>

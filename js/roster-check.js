@@ -95,7 +95,7 @@
         else flexIds = flexIds.concat(pool.slice(0, f.n));
       });
     }
-    return { name: t.label, ok: !short.length, own: !!t.own, short: short, ids: ids, flex: t.flex || [], flexIds: flexIds };
+    return { name: t.label, ok: !short.length, own: !!t.own, prio: !!t.prio, short: short, ids: ids, flex: t.flex || [], flexIds: flexIds };
   }
   function missionCheck(m, planet) {
     if (!RC.units || !m || m.type === 'platoon' || m.type === 'deploy') return null;
@@ -143,9 +143,11 @@
     items = items.slice().sort(function (a, b) { return a.opts.length - b.opts.length; });
     var best = { s: -1, pick: [] }, used = {}, pick = [], budget = 400000, cut = false;
     // combat and fleet missions earn Territory Points (stars), special missions only tokens: fill points first,
-    // then specials with the units left over. A guide team counts slightly more than a lineup of your own.
+    // then specials with the units left over. A guide team counts slightly more than a lineup of your own, and a
+    // priority team (guild-tested for that mission) slightly more again, so it goes there when nothing is lost.
     var w = items.map(function (it) { return it.kind === 'special' ? 3 : 1000; });
-    var rest = []; for (var i = items.length - 1, acc = 0; i >= 0; i--) { acc += w[i]; rest[i] = acc; } rest[items.length] = 0;
+    var bonus = items.map(function (it) { return it.opts.some(function (o) { return o.prio; }) ? 2 : 0; });
+    var rest = []; for (var i = items.length - 1, acc = 0; i >= 0; i--) { acc += w[i] + bonus[i]; rest[i] = acc; } rest[items.length] = 0;
     (function go(i, s) {
       if (--budget < 0) { cut = true; return; }
       if (s + rest[i] <= best.s) return;
@@ -153,7 +155,7 @@
       items[i].opts.forEach(function (o) {
         if (o.ids.some(function (id) { return used[id]; })) return;
         o.ids.forEach(function (id) { used[id] = 1; }); pick[i] = o;
-        go(i + 1, s + w[i] - (o.own ? 1 : 0));
+        go(i + 1, s + w[i] - (o.own ? 1 : 0) + (o.prio ? 2 : 0));
         o.ids.forEach(function (id) { delete used[id]; }); pick[i] = null;
       });
       pick[i] = null; go(i + 1, s);
@@ -192,7 +194,7 @@
         (d.missions || []).forEach(function (m) {
           var c = missionCheck(m, p); if (!c) return;
           items.push({ planet: p, mission: mlabel(m, c.kind), kind: c.kind,
-            opts: c.res.filter(function (r) { return r.ok; }).map(function (r) { return { name: (r.own ? 'your own lineup: ' : '') + r.name, own: r.own, ids: r.ids, flex: r.flex, T: c.T }; }) });
+            opts: c.res.filter(function (r) { return r.ok; }).map(function (r) { return { name: (r.own ? 'your own lineup: ' : '') + r.name, own: r.own, prio: r.prio, ids: r.ids, flex: r.flex, T: c.T }; }) });
         });
       });
       if (!items.length) return;

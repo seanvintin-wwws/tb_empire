@@ -702,6 +702,7 @@ Vue.component('mission', {
 	template: '#mission',
 	methods: {
 		guide: function(m){ return (window.GUIDE && m && window.GUIDE[window.GUIDE_PLANET + ':' + m.name]) || null; },
+		guideWarn: function(m){ return (window.GUIDE_WARN && m && window.GUIDE_WARN[window.GUIDE_PLANET + ':' + m.name]) || ''; },
 		guideNote: function(m){ return (window.GUIDE_NOTES && m && window.GUIDE_NOTES[window.GUIDE_PLANET + ':' + m.name]) || ''; },
 		guideUpdated: function(){ return window.GUIDE_UPDATED || ''; },
 		

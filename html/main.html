@@ -195,6 +195,7 @@
 		<div v-if="seen" class="description" v-bind:class="'desc_' + selectedMission.position">
 			
 			<p class="h4 mb-3" v-if="selectedMission.planet">{{ selectedMission.planet.join(' ') }}</p>
+            <div class="mb-3 guide-warn" v-if="guideWarn(selectedMission)">&#9888; {{ guideWarn(selectedMission) }}</div>
             <div class="mb-3 rc-note" v-if="rcNote(selectedMission)" v-html="rcNote(selectedMission)"></div>
 		</div>
 	</div>

@@ -80,6 +80,10 @@ const NOTES = {
   'zeffo:c2': 'Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.',
   'tatooine:c4': 'Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron.',
 };
+// Big red warning shown at the top of the mission panel (things that cost a failed attempt).
+const WARN = {
+  'geonosis:c5': 'REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it.',
+};
 // Manual team lists that replace the guide's for a mission (guild-confirmed picks).
 const OVERRIDES = {
   'zeffo:c2': [
@@ -106,8 +110,11 @@ const OVERRIDES = {
     { lead: 'Saw Gerrera', with: 'Vel (omicron), Kleya, Luthen, Cassian Andor (Undercover)', how: '',
       notes: 'Switch to this once Vel has her omicron (all Relic 7+). It frees Captain Rex for Zeffo Clones.' },
   ],
+  'hoth:c4': [{ lead: 'Doctor Aphra', with: 'IG-90, BT-1, 0-0-0, IG-88', notes: 'ANZGC guild-tested (FireFight): wins every time.' }],
   'kashyyyk:c6': [{ lead: 'Tarfful', with: 'Yoda and Chewie, Chewbacca, Chewpio, Clone Wars Chewie', how: '',
-    notes: '2/2 on auto (guild tested). Much easier with Yoda and Chewie. You want decent mods on CWC.' }],
+    notes: '2/2 on auto (guild tested). Much easier with Yoda and Chewie. You want decent mods on CWC.' },
+    { lead: 'Tarfful', with: '+4 Wookiees', how: '',
+      notes: 'Guild tested (FireFight): Tarfful lead with any four Relic 7+ Light Side Wookiees wins.' }],
 };
 // Guild edits to the guide's list for a mission: drop teams by leader, and move a leader to the top.
 const SEE_HAVEN = { lead: 'Sith Eternal Emperor', with: 'Malak, The Stranger, Darth Revan, Bane', how: '',
@@ -132,6 +139,10 @@ const EDITS = {
       notes: 'Easy full auto (guild tested). Cal Kestis lead omicron is mandatory; Whirlwind Slam helps. Keep Ezra (Exile) for the Ahsoka team on Lothal.' }],
     [1, { lead: 'Jedi Knight Cal Kestis', with: 'Jedi Master Luke Skywalker, Grand Master Yoda, Jedi Knight Luke Skywalker, Shaak Ti', how: '',
       notes: 'auto, lead omi mandatory, probably want Whirlwind Slam as well' }]] },
+  // Geonosis Acklay (bottom): Great Mothers is the priority team here; the phase plan puts it here before c1/c3.
+  'geonosis:c2': { top: /^great mothers/i, prio: /^great mothers/i, note: [[/^great mothers/i,
+    'Priority team here. ANZGC guild-tested (FireFight): Morgan Elsbeth, Night Trooper, Death Trooper (Peridea), Nightsister Zombie']] },
+  'geonosis:c3': { fill: [[/^emperor palpatine/i, "Darth Vader Duel's End, Admiral Piett, Gar Saxon, Imperial Super Commando"]] },
   'dathomir:c2': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
   'dathomir:c6': { drop: [/dark trooper moff gideon/i, /grand moff tarkin/i], fill: [[/pirate king hondo/i, 'SM-33, Captain Silvo, Vane (omicron), Brutus']] },
 };
@@ -201,6 +212,7 @@ for (const [k, e] of Object.entries(EDITS)) {
   let rows = (out[k] || []).filter(r => !(e.drop || []).some(re => re.test(r.lead)));
   for (const [re, team] of (e.fill || [])) rows = rows.map(r => re.test(r.lead) ? { ...r, with: team } : r);
   for (const [re, txt] of (e.note || [])) rows = rows.map(r => re.test(r.lead) ? { ...r, notes: (r.notes ? r.notes + '. ' : '') + txt } : r);
+  if (e.prio) rows = rows.map(r => e.prio.test(r.lead) ? { ...r, prio: 1 } : r);
   if (e.top) rows = [...rows.filter(r => e.top.test(r.lead)), ...rows.filter(r => !e.top.test(r.lead))];
   for (const [i, row] of (e.add || [])) rows.splice(i, 0, row);
   out[k] = rows;
@@ -211,7 +223,8 @@ const js = '// Recommended teams per mission, taken from https://swgohrote.com/ 
   '// Generated file: key is "planet:mission" matching the mission names in each planet file.\n' +
   'window.GUIDE_UPDATED = ' + JSON.stringify(updated) + ';\n' +
   'window.GUIDE = ' + JSON.stringify(out, null, 1) + ';\n' +
-  'window.GUIDE_NOTES = ' + JSON.stringify(NOTES, null, 1) + ';\n';
+  'window.GUIDE_NOTES = ' + JSON.stringify(NOTES, null, 1) + ';\n' +
+  'window.GUIDE_WARN = ' + JSON.stringify(WARN, null, 1) + ';\n';
 fs.writeFileSync(__dirname + '/../../js/guide_data.js', js);
 console.log(removed.join('\n'));
 console.log('missions written:', Object.keys(out).length);

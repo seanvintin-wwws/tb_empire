@@ -483,7 +483,8 @@ window.GUIDE = {
    "lead": "Great Mothers",
    "with": "Morgan, Night Trooper, Death Trooper, +1 NS",
    "how": "",
-   "notes": "bless morgan, easy auto"
+   "notes": "bless morgan, easy auto. Priority team here. ANZGC guild-tested (FireFight): Morgan Elsbeth, Night Trooper, Death Trooper (Peridea), Nightsister Zombie",
+   "prio": 1
   },
   {
    "lead": "Supreme Leader Kylo Ren",
@@ -1098,6 +1099,12 @@ window.GUIDE = {
    "with": "Yoda and Chewie, Chewbacca, Chewpio, Clone Wars Chewie",
    "how": "",
    "notes": "2/2 on auto (guild tested). Much easier with Yoda and Chewie. You want decent mods on CWC."
+  },
+  {
+   "lead": "Tarfful",
+   "with": "+4 Wookiees",
+   "how": "",
+   "notes": "Guild tested (FireFight): Tarfful lead with any four Relic 7+ Light Side Wookiees wins."
   }
  ],
  "haven:c3": [
@@ -1828,4 +1835,7 @@ window.GUIDE_NOTES = {
  "zeffo:c3": "Captain Rex is essential here (a test with Kix instead lost in wave 1). Only do this once Saw on Kashyyyk is done with the Vel team; otherwise Captain Rex is already used.",
  "zeffo:c2": "Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.",
  "tatooine:c4": "Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron."
+};
+window.GUIDE_WARN = {
+ "geonosis:c5": "REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it."
 };
