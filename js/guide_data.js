@@ -1881,6 +1881,7 @@ window.GUIDE = {
  ]
 };
 window.GUIDE_NOTES = {
+ "kashyyyk:c2": "Don't use Jedi Master Kenobi with Galactic Republic here: FireFight got only 1/2 on full auto (Nov 2026). Use one of the teams below.",
  "lothal:c3": "Bring Captain Rex here (he counts as Phoenix). He is free again in Phase 4 after Zeffo Clones in Phase 3 (FireFight, Nov 2026).",
  "zeffo:c3": "Captain Rex is essential here (a test with Kix instead lost in wave 1). Only do this once Saw on Kashyyyk is done with the Vel team; otherwise Captain Rex is already used.",
  "zeffo:c2": "Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.",
