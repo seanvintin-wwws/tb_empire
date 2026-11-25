@@ -1099,6 +1099,12 @@ window.GUIDE = {
    "with": "Yoda and Chewie, Chewbacca, Chewpio, Clone Wars Chewie",
    "how": "",
    "notes": "2/2 on auto (guild tested). Much easier with Yoda and Chewie. You want decent mods on CWC."
+  },
+  {
+   "lead": "Tarfful",
+   "with": "+4 Wookiees",
+   "how": "",
+   "notes": "Guild tested (FireFight): Tarfful lead with any four Relic 7+ Light Side Wookiees wins."
   }
  ],
  "haven:c3": [

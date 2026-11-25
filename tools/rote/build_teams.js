@@ -102,7 +102,7 @@ const CATWORD = {
   gungans: 'Gungan', 'other gungans': 'Gungan', 'team of gungans': 'Gungan', spectre: 'Spectre', 'other spectre': 'Spectre', 'any spectre': 'Spectre',
   mercs: 'Mercenary', ns: 'Nightsister', 'galactic republic': 'Galactic Republic', gr: 'Galactic Republic', 'old republic': 'Old Republic',
   jv: 'Jedi Vanguard', constable: 'Constable', empire: 'Empire', ufus: 'Unaligned Force User', 'leftover sith': 'Sith',
-  'whatever other first order you have': 'First Order'
+  'whatever other first order you have': 'First Order', wookiees: 'Wookiee'
 };
 
 // ---------- mission requirements ----------
@@ -292,7 +292,7 @@ const nm = id => (U[id] ? U[id].name : id);
 function slotName(sl) { return sl.ids.map(nm).join(' or ') + (sl.omi === 2 ? ' (leader omicron)' : sl.omi ? ' (omicron)' : '') + (sl.req ? ' (required)' : ''); }
 function flexName(f, req) {
   const cat = f.cat || req.cat, side = req.strict === 'L' || req.alignStrict === 'L' ? 'Light Side ' : req.align === 'L' ? 'Light Side or Neutral ' : req.align === 'D' ? 'Dark Side or Neutral ' : '';
-  return '+' + f.n + ' ' + (f.fill && !cat && !side ? 'more of your choice' : 'any ' + (cat ? (req.strict === 'L' || req.alignStrict === 'L' ? 'Light Side ' : '') + cat : side ? side + (f.n > 1 ? 'units' : 'unit') : 'unit' + (f.n > 1 ? 's' : '')));
+  return '+' + f.n + ' ' + (f.fill && !cat && !side ? 'more of your choice' : 'any ' + (cat ? (req.strict === 'L' || req.alignStrict === 'L' ? 'Light Side ' : '') + cat + (f.n > 1 && cat === 'Wookiee' ? 's' : '') : side ? side + (f.n > 1 ? 'units' : 'unit') : 'unit' + (f.n > 1 ? 's' : '')));
 }
 function display(team, req) {
   const [lead, ...rest] = team.slots;
@@ -355,6 +355,8 @@ fs.readdirSync(path.join(ROOT, 'js')).filter(f => f.endsWith('.js') && !skip.tes
       const leads = new Set();
       teams.filter(t => !t.bad.length && t.slots[0]).forEach(t => {
         const lead = t.slots[0]; const k = lead.ids.join('/'); if (leads.has(k)) return; leads.add(k);
+        // the guide already lists this lead with any faction units: that team is the guide's, so no amber copy
+        if (teams.some(g => !g.own && g.slots.length === 1 && g.slots[0].ids.join('/') === k && g.flex.some(f => f.cat === req.cat))) return;
         const own = { label: lead.ids.map(i => U[i].name).join(' or ') + ' + any ' + (req.max - 1) + ' other ' + (req.alignStrict === 'L' ? 'Light Side ' : '') + ({ Jedi: 'Jedi', Empire: 'Empire units', Inquisitorius: 'Inquisitorius', Phoenix: 'Phoenix', 'Clone Trooper': 'Clone Troopers' }[req.cat] || req.cat + 's'),
           slots: [{ ids: lead.ids.slice(), omi: lead.omi }], flex: [{ n: req.max - 1, cat: req.cat }], fleet: false, own: true };
         own.bad = teamFits(own, req); if (!own.bad.length) teams.push(own);
