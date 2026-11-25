@@ -1650,7 +1650,7 @@ window.GUIDE = {
    "lead": "Rex",
    "with": "Captain Rex, Echo, ARC Trooper, Fives",
    "how": "Clear the target reticule at the start; in wave 2 put it on the Consular (her counterattacks hurt)",
-   "notes": "Auto. swgohrote.com rates this about 75%."
+   "notes": "Auto. swgohrote.com rates this about 75%. Guild tested (FireFight, Nov 2026): easy win in Phase 3."
   },
   {
    "lead": "Cody",
@@ -1881,6 +1881,7 @@ window.GUIDE = {
  ]
 };
 window.GUIDE_NOTES = {
+ "lothal:c3": "Bring Captain Rex here (he counts as Phoenix). He is free again in Phase 4 after Zeffo Clones in Phase 3 (FireFight, Nov 2026).",
  "zeffo:c3": "Captain Rex is essential here (a test with Kix instead lost in wave 1). Only do this once Saw on Kashyyyk is done with the Vel team; otherwise Captain Rex is already used.",
  "zeffo:c2": "Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.",
  "tatooine:c4": "Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron."
