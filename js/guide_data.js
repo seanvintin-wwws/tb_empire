@@ -1862,5 +1862,6 @@ window.GUIDE_NOTES = {
 };
 window.GUIDE_WARN = {
  "geonosis:c5": "REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it.",
- "lothal:c3": "REMODDING NEEDED for this mission. Remod your Phoenix units before you attempt it."
+ "lothal:c3": "REMODDING NEEDED for this mission. Remod your Phoenix units before you attempt it.",
+ "dathomir:c8": "REMODDING NEEDED for this mission. Remod this team before you attempt it, and bring Morgan Elsbeth: FireFight lost with Nightsister Spirit in her place."
 };
