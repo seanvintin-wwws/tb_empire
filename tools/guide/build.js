@@ -117,7 +117,7 @@ const OVERRIDES = {
   'kashyyyk:c6': [{ lead: 'Tarfful', with: 'Yoda and Chewie, Chewbacca, Chewpio, Clone Wars Chewie', how: '',
     notes: '2/2 on auto (guild tested). Much easier with Yoda and Chewie. You want decent mods on CWC.' },
     { lead: 'Tarfful', with: '+4 Wookiees', how: '',
-      notes: 'Guild tested (FireFight): Tarfful lead with any four Relic 7+ Light Side Wookiees wins.' }],
+      notes: 'Guild tested (FireFight): Tarfful lead with any four Relic 7+ Light Side Wookiees wins. Easy full auto with Chewbacca, Clone Wars Chewbacca, Zaalbar, Threepio & Chewie (Nov 2026).' }],
 };
 // Guild edits to the guide's list for a mission: drop teams by leader, and move a leader to the top.
 const SEE_HAVEN = { lead: 'Sith Eternal Emperor', with: 'Malak, The Stranger, Darth Revan, Bane', how: '',
