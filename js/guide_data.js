@@ -1056,6 +1056,12 @@ window.GUIDE = {
  "kashyyyk:c8": [
   {
    "lead": "Saw Gerrera",
+   "with": "Kyle Katarn (omicron), Vel (omicron), Kleya, Luthen",
+   "how": "",
+   "notes": "Guild tested (FireFight, Nov 2026): full auto. All Rebel Fighters, so Vel's omicron works. Frees Captain Rex for Zeffo Clones, and Captain Drogan and Cassian Andor (Undercover) for other missions."
+  },
+  {
+   "lead": "Saw Gerrera",
    "with": "Kyle Katarn (omicron), Captain Rex, Luthen, Drogan",
    "how": "Clear the target reticule at the start",
    "notes": "Use this until Vel has her omicron. It uses Captain Rex, so skip Zeffo Clones."
