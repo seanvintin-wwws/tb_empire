@@ -16,6 +16,8 @@
 
 - 27 Nov: Lothal Phoenix (lothal:c3) note now has a manual wave 1 / wave 2 plan (Death Troopers first, then Stormtroopers, Grand Admiral Thrawn last and kept stunned; Kanan Jarrus taunts for Thrawn's big attack). No written guide for this mission exists online; the plan is adapted from Thrawn legendary event guides (EA forums). Sean lost wave 2 even after remodding. If the plan wins, say so in the note; if not, record what went wrong. `.guide-note` now keeps line breaks (`white-space: pre-line` in css/fit.css).
 
+- 27 Nov: Kessel fleet (kessel:c1, Ghost required, enemy Executor fleet): Sean says Profundity is unreliable here. Yellow note now gives an untested lineup from player write-ups (gaming-fans.com P4 Kessel walkthrough, a YouTube full-auto clip, EA forum Profundity tips): start Rebel Y-wing, Ghost, Han's Millennium Falcon; reinforce Rogue One, Cassian's U-wing, Outrider, Phantom II. If it wins, mark it guild tested; if not, record what went wrong.
+
 ## To do at the next ROTE (try on live planets as they open)
 1. "Done this TB" tick per special mission (one attempt per TB, win or lose).
 2. Death Star fleet: note that Imperial TIE Fighter must be in the starting three.
