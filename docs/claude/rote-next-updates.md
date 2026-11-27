@@ -14,6 +14,8 @@
 
 - 25 Nov: Haven c1/c2/c6 have a second Sith Eternal Emperor team with Yoda (Dark Side Vision) (TB omicron) in The Stranger's place. Sean has Yoda DSV at R8 with the omicron; his Stranger is R7, below these missions' R8. Not guild tested on Haven yet: if it wins 2/2, mark it guild tested.
 
+- 27 Nov: Lothal Phoenix (lothal:c3) note now has a manual wave 1 / wave 2 plan (Death Troopers first, then Stormtroopers, Grand Admiral Thrawn last and kept stunned; Kanan Jarrus taunts for Thrawn's big attack). No written guide for this mission exists online; the plan is adapted from Thrawn legendary event guides (EA forums). Sean lost wave 2 even after remodding. If the plan wins, say so in the note; if not, record what went wrong. `.guide-note` now keeps line breaks (`white-space: pre-line` in css/fit.css).
+
 ## To do at the next ROTE (try on live planets as they open)
 1. "Done this TB" tick per special mission (one attempt per TB, win or lose).
 2. Death Star fleet: note that Imperial TIE Fighter must be in the starting three.

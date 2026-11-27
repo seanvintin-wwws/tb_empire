@@ -33,4 +33,4 @@ body { background-color: #000; }
 .guide-src { font-size: 0.95rem !important; }
 .guide-table, .guide-table td, .guide-table b { font-size: 1.1rem !important; }
 .guide-table .guide-how, .guide-table .guide-notes { font-size: 0.95rem !important; }
-.guide-note { font-size: 1rem; }
+.guide-note { font-size: 1rem; white-space: pre-line; }
