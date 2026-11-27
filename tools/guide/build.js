@@ -89,6 +89,7 @@ const NOTES = {
     'Chopper (needs Relic 8) would add a second dispel; at Relic 6 he can\'t enter.',
   'zeffo:c3': 'Captain Rex is essential here (a test with Kix instead lost in wave 1). Only do this once Saw on Kashyyyk is done with the Vel team; otherwise Captain Rex is already used.',
   'zeffo:c2': 'Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.',
+  'mandalore:c6': 'Remod for safety. FireFight\'s team (first below) won on full auto with no remodding, but it was close (Nov 2026).',
   'tatooine:c4': 'Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron.',
 };
 // Big red warning shown at the top of the mission panel (things that cost a failed attempt).
@@ -144,6 +145,7 @@ const INQ_HAVEN = { lead: 'Third Sister (Reva)', with: 'Grand Inquisitor, Sevent
   notes: "Full auto, 2/2 (guild tested). Marrok's omicron is what makes it work. Third Sister and Marrok are also needed for the Inquisitor special mission, and each unit can only be used once per phase, so pick one." };
 const SITH_DATH = { lead: 'Darth Revan', with: 'Sith Eternal Emperor, Yoda (Dark Side Vision) (omicron), Darth Malgus, Darth Malak', how: '', notes: 'Guild tested (FireFight, Nov 2026): won on full auto. Darth Revan leads, not Sith Eternal Emperor (his lead stops ally revives here). Wat Tambor would likely make it more reliable (stops the enemy revives); not tested.' };
 const EDITS = {
+  'mandalore:c6': { add: [[0, { lead: 'Dark Trooper Moff Gideon', with: 'Moff Gideon, Captain Enoch (omicron), Night Trooper, Scout Trooper', how: '', notes: 'Guild tested (FireFight, Nov 2026): won on full auto with no remodding, but only just. No Death Trooper (Peridea) needed.' }]] },
   'tatooine:c3': { add: [[0, { lead: 'Pirate King Hondo Ohnaka', with: 'Vane (omicron), Brutus, Captain Silvo, Fennec Shand', how: '', prio: 1, notes: 'Guild tested (FireFight, Nov 2026): won. Priority team: save Pirate King Hondo Ohnaka for this mission rather than the Dathomir Dark Side combat missions.' }]] },
   'dathomir:c1': { add: [[0, { lead: 'Doctor Aphra', with: 'IG-90, IG-88, BT-1, 0-0-0', how: '', notes: 'Guild tested (FireFight, Nov 2026): easy full auto. Keeps General Grievous and HK-47 free.' }]] },
   'kashyyyk:c3': { note: [[/^jedi master mace windu/i, 'Guild tested (FireFight, Nov 2026): easy full auto with Kelleran Beq as the fifth Jedi Vanguard']] },
