@@ -1891,5 +1891,6 @@ window.GUIDE_WARN = {
  "geonosis:c5": "REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it.",
  "lothal:c3": "REMODDING NEEDED for this mission. Remod your Phoenix units before you attempt it.",
  "mandalore:c3": "REMODDING NEEDED for this mission. Remod your Mandalorians before you attempt it. FireFight got only 1/2 on full auto (Nov 2026): wave 1 was fine, wave 2 battered the team.",
+ "zeffo:c2": "COMMANDER AHSOKA TANO (CAT) NEEDED for this mission. Save her for Zeffo: don't use her on any other mission this phase. Without her the Rey team won't win and the Ahsoka Tano team usually only gets 1/2 (FireFight lost after using her elsewhere, Nov 2026).",
  "dathomir:c8": "REMODDING NEEDED for this mission. Remod this team before you attempt it, and bring Morgan Elsbeth: FireFight lost with Nightsister Spirit in her place."
 };

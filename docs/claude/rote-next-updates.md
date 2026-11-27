@@ -26,3 +26,4 @@
 7. DONE 26 Nov 2026: Sean's Saw team (Saw Gerrera + Kyle Katarn (omicron), Vel Sartha (omicron), Kleya Marki, Luthen Rael) won on full auto. Added first on kashyyyk:c8 as guild-tested.
 8. Open questions for other AI tools (prompt in `rote-phase6-teams.md`).
 9. Re-check Sean's roster after adding.
+10. DONE 27 Nov 2026: red WARN box on zeffo:c2 (Unaligned Force Users): Commander Ahsoka Tano is needed, save her for Zeffo. Sean lost it after using her elsewhere. Possible follow-up: reserve her for Zeffo in the phase planner (RESERVED).
