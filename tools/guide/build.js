@@ -87,6 +87,16 @@ const NOTES = {
     '4. Kanan Jarrus taunts before Thrawn\'s turn so Kanan, not Ezra or Zeb, takes Thrawn\'s big attack. If Ezra or Zeb eats it early, restart.\n' +
     'If the troopers have Endless Ranks (they do in the other two Lothal missions), each trooper kill revives the others at 60%: get every trooper low first, then finish them back to back.\n' +
     'Chopper (needs Relic 8) would add a second dispel; at Relic 6 he can\'t enter.',
+  'kessel:c1': 'PROFUNDITY HERE IS UNRELIABLE (FireFight, Nov 2026). Untested alternative lineup, put together from player write-ups (not yet guild tested):\n' +
+    'Start: Rebel Y-wing, Ghost, Han\'s Millennium Falcon.\n' +
+    'Reinforcements, in this order: Rogue One, Cassian\'s U-wing, Outrider, Phantom II.\n' +
+    'Play manually until your ultimate, then auto:\n' +
+    '1. Open defensively. If you lose a ship before your first reinforcement arrives, restart.\n' +
+    '2. Han\'s Millennium Falcon cleanses Confuse; a player whose Falcon sat in reinforcements lost before it arrived.\n' +
+    '3. Save Rebel Y-wing\'s Protection Disruption for Hound\'s Tooth, or Xanadu Blood when it drops Stealth (Xanadu Blood heals and re-stealths).\n' +
+    '4. Rogue One early stops the enemy Executor\'s Breach.\n' +
+    '5. Cassian\'s U-wing calls an Outrider assist once Outrider is in.\n' +
+    'If your Executor or Leviathan is free this phase, Executor with Ghost added is worth a try (only 1 battle logged, so thin data).',
   'zeffo:c3': 'Captain Rex is essential here (a test with Kix instead lost in wave 1). Only do this once Saw on Kashyyyk is done with the Vel team; otherwise Captain Rex is already used.',
   'zeffo:c2': 'Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.',
   'tatooine:c4': 'Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron.',
