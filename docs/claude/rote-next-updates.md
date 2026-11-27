@@ -30,3 +30,4 @@
 11. DONE 27 Nov 2026: guild-tested results recorded on the map: Mandalore Dark Trooper Moff Gideon (FireFight team, won full auto unremodded but close, PR #43) and Haven Supreme Leader Kylo Ren (won 2/2 with full platoons after remodding).
 12. DONE 27 Nov 2026: mandalore:c2 Rotta the Hutt Hutt Cartel team added last with a warning: only attempt after remodding and with Gamorrean Guard's TB omicron (FireFight lost heavily without both).
 13. DONE 27 Nov 2026: zeffo:c8 FireFight team (Cal Kestis lead omicron, Jedi Master Luke, Leia (Jedi Training), Jedi Knight Luke, Hermit Yoda) added first: easy full auto, no remodding.
+14. DONE 27 Nov 2026: zeffo:c6 yellow note: Satele Shan + Jedi Knight Revan, Bastila Shan, Kyle Katarn (omicron), General Skywalker lost heavily, don't use.

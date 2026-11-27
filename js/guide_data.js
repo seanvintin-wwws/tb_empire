@@ -1904,6 +1904,7 @@ window.GUIDE_NOTES = {
  "zeffo:c3": "Captain Rex is essential here (a test with Kix instead lost in wave 1). Only do this once Saw on Kashyyyk is done with the Vel team; otherwise Captain Rex is already used.",
  "zeffo:c2": "Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.",
  "mandalore:c6": "Remod for safety. FireFight's team (first below) won on full auto with no remodding, but it was close (Nov 2026).",
+ "zeffo:c6": "Don't use Satele Shan with Jedi Knight Revan, Bastila Shan, Kyle Katarn (omicron) and General Skywalker here: FireFight lost heavily (Nov 2026). Use one of the teams below.",
  "tatooine:c4": "Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron."
 };
 window.GUIDE_WARN = {
