@@ -1882,7 +1882,7 @@ window.GUIDE = {
 };
 window.GUIDE_NOTES = {
  "kashyyyk:c2": "Don't use Jedi Master Kenobi with Galactic Republic here: FireFight got only 1/2 on full auto (Nov 2026). Use one of the teams below.",
- "lothal:c3": "Bring Captain Rex here (he counts as Phoenix). He is free again in Phase 4 after Zeffo Clones in Phase 3 (FireFight, Nov 2026).",
+ "lothal:c3": "Bring Captain Rex here (he counts as Phoenix). He is free again in Phase 4 after Zeffo Clones in Phase 3 (FireFight, Nov 2026).\n\nPLAY MANUALLY. FireFight lost wave 2 even after remodding (Nov 2026). No written guide exists for this mission; this plan is adapted from player guides for the Grand Admiral Thrawn event, where Phoenix also fight Grand Admiral Thrawn, Death Troopers and Stormtroopers. Not yet tested here.\n\nWave 1: win it without spending cooldowns. Kill one enemy at a time (each kill on Lothal gives your team Rebellious stacks: more Critical Chance and Critical Damage). Only use basics once the last enemy is low, so Garazeb \"Zeb\" Orrelios, Ezra Bridger and Hera Syndulla start wave 2 with every ability ready and nobody hurt.\n\nWave 2 (Grand Admiral Thrawn, 2 Death Troopers, 2 Stormtroopers):\n1. Death Troopers first. Zeb staggers them (removes their special buff), Ezra dispels them, then focus one down at a time.\n2. Then the two Stormtroopers: the one with the backpack first if it is a Stormtrooper Commander (it can heal), the plain Stormtrooper after.\n3. Grand Admiral Thrawn last. Do not race him: keep him stunned. Hera puts Expose on him and Zeb stuns him off it.\n4. Kanan Jarrus taunts before Thrawn's turn so Kanan, not Ezra or Zeb, takes Thrawn's big attack. If Ezra or Zeb eats it early, restart.\nIf the troopers have Endless Ranks (they do in the other two Lothal missions), each trooper kill revives the others at 60%: get every trooper low first, then finish them back to back.\nChopper (needs Relic 8) would add a second dispel; at Relic 6 he can't enter.",
  "zeffo:c3": "Captain Rex is essential here (a test with Kix instead lost in wave 1). Only do this once Saw on Kashyyyk is done with the Vel team; otherwise Captain Rex is already used.",
  "zeffo:c2": "Do this one FIRST in Zeffo, and use a Galactic Legend (Rey or Ahsoka Tano). Very few units are valid here, and without a GL you will struggle.",
  "tatooine:c4": "Low priority: everyone already has Reva. Put your effort into the Dark Side missions instead, using Inquisitor teams with Marrok and his omicron."
@@ -1890,5 +1890,6 @@ window.GUIDE_NOTES = {
 window.GUIDE_WARN = {
  "geonosis:c5": "REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it.",
  "lothal:c3": "REMODDING NEEDED for this mission. Remod your Phoenix units before you attempt it.",
+ "mandalore:c3": "REMODDING NEEDED for this mission. Remod your Mandalorians before you attempt it. FireFight got only 1/2 on full auto (Nov 2026): wave 1 was fine, wave 2 battered the team.",
  "dathomir:c8": "REMODDING NEEDED for this mission. Remod this team before you attempt it, and bring Morgan Elsbeth: FireFight lost with Nightsister Spirit in her place."
 };
