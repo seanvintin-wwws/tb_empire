@@ -82,7 +82,7 @@ const NOTES = {
     'Wave 1: win it without spending cooldowns. Kill one enemy at a time (each kill on Lothal gives your team Rebellious stacks: more Critical Chance and Critical Damage). Only use basics once the last enemy is low, so Garazeb "Zeb" Orrelios, Ezra Bridger and Hera Syndulla start wave 2 with every ability ready and nobody hurt.\n\n' +
     'Wave 2 (Grand Admiral Thrawn, 2 Death Troopers, 2 Stormtroopers):\n' +
     '1. Death Troopers first. Zeb staggers them (removes their special buff), Ezra dispels them, then focus one down at a time.\n' +
-    '2. Then the two Stormtroopers.\n' +
+    '2. Then the two Stormtroopers: the one with the backpack first if it is a Stormtrooper Commander (it can heal), the plain Stormtrooper after.\n' +
     '3. Grand Admiral Thrawn last. Do not race him: keep him stunned. Hera puts Expose on him and Zeb stuns him off it.\n' +
     '4. Kanan Jarrus taunts before Thrawn\'s turn so Kanan, not Ezra or Zeb, takes Thrawn\'s big attack. If Ezra or Zeb eats it early, restart.\n' +
     'If the troopers have Endless Ranks (they do in the other two Lothal missions), each trooper kill revives the others at 60%: get every trooper low first, then finish them back to back.\n' +
