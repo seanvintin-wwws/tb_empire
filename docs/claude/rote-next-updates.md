@@ -28,3 +28,4 @@
 9. Re-check Sean's roster after adding.
 10. DONE 27 Nov 2026: red WARN box on zeffo:c2 (Unaligned Force Users): Commander Ahsoka Tano is needed, save her for Zeffo. Sean lost it after using her elsewhere. Possible follow-up: reserve her for Zeffo in the phase planner (RESERVED).
 11. DONE 27 Nov 2026: guild-tested results recorded on the map: Mandalore Dark Trooper Moff Gideon (FireFight team, won full auto unremodded but close, PR #43) and Haven Supreme Leader Kylo Ren (won 2/2 with full platoons after remodding).
+12. DONE 27 Nov 2026: mandalore:c2 Rotta the Hutt Hutt Cartel team added last with a warning: only attempt after remodding and with Gamorrean Guard's TB omicron (FireFight lost heavily without both).

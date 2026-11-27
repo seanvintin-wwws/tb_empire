@@ -1876,6 +1876,12 @@ window.GUIDE = {
    "with": "Bad Batch Mercenaries",
    "how": "Pause & target in wave 2",
    "notes": ""
+  },
+  {
+   "lead": "Rotta the Hutt",
+   "with": "Embo, Greedo, Gamorrean Guard (omicron), Mob Enforcer",
+   "how": "Remod first",
+   "notes": "Only attempt after remodding and with Gamorrean Guard's Territory Battle omicron. Guild tested (FireFight, Nov 2026): a heavy loss without the omicron and without remodding. Last resort when Pirate King Hondo Ohnaka and Lord Vader are used elsewhere."
   }
  ],
  "hoth:c4": [
