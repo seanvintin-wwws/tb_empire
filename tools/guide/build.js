@@ -161,9 +161,10 @@ const EDITS = {
     [/^negotiator/i, 'Better saved for the Zeffo fleet mission.'],
     [/^profundity/i, 'Better saved for the Kessel fleet mission (same phase) if you have no Executor.']] },
   'zeffo:c8': { drop: [/.*/], add: [
-    [0, { lead: 'Jedi Knight Cal Kestis', with: 'Jedi Master Luke Skywalker, Leia (Jedi Training), Jedi Knight Luke Skywalker, Grand Master Yoda', how: '',
+    [0, { lead: 'Jedi Knight Cal Kestis', with: 'Jedi Master Luke Skywalker, Leia (Jedi Training), Jedi Knight Luke Skywalker, Hermit Yoda', how: '', notes: 'Guild tested (FireFight, Nov 2026): won really well on full auto with no remodding. Hermit Yoda in place of Grand Master Yoda. Cal Kestis lead omicron is mandatory.' }],
+    [1, { lead: 'Jedi Knight Cal Kestis', with: 'Jedi Master Luke Skywalker, Leia (Jedi Training), Jedi Knight Luke Skywalker, Grand Master Yoda', how: '',
       notes: 'Easy full auto (guild tested). Cal Kestis lead omicron is mandatory; Whirlwind Slam helps. Keep Ezra (Exile) for the Ahsoka team on Lothal.' }],
-    [1, { lead: 'Jedi Knight Cal Kestis', with: 'Jedi Master Luke Skywalker, Grand Master Yoda, Jedi Knight Luke Skywalker, Shaak Ti', how: '',
+    [2, { lead: 'Jedi Knight Cal Kestis', with: 'Jedi Master Luke Skywalker, Grand Master Yoda, Jedi Knight Luke Skywalker, Shaak Ti', how: '',
       notes: 'auto, lead omi mandatory, probably want Whirlwind Slam as well' }]] },
   // Geonosis Acklay (bottom): Great Mothers is the priority team here; the phase plan puts it here before c1/c3.
   'geonosis:c2': { top: /^great mothers/i, prio: /^great mothers/i, note: [[/^great mothers/i,
