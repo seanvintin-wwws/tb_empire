@@ -1890,5 +1890,6 @@ window.GUIDE_NOTES = {
 window.GUIDE_WARN = {
  "geonosis:c5": "REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it.",
  "lothal:c3": "REMODDING NEEDED for this mission. Remod your Phoenix units before you attempt it.",
+ "mandalore:c3": "REMODDING NEEDED for this mission. Remod your Mandalorians before you attempt it. FireFight got only 1/2 on full auto (Nov 2026): wave 1 was fine, wave 2 battered the team.",
  "dathomir:c8": "REMODDING NEEDED for this mission. Remod this team before you attempt it, and bring Morgan Elsbeth: FireFight lost with Nightsister Spirit in her place."
 };

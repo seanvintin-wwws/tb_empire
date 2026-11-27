@@ -86,6 +86,7 @@ node tools/rote/build_teams.js
 - Geonosis Acklay (`geonosis:c2`): **priority team** Great Mothers + Morgan Elsbeth, Night Trooper, Death Trooper (Peridea), Nightsister Zombie. Easy full auto.
 - Geonosis Geonosians (`geonosis:c5`, 5x Geonosians R7+): red warning "REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it." Sean failed his first attempt.
 - Lothal Phoenix (`lothal:c3`): red warning "REMODDING NEEDED for this mission. Remod your Phoenix units before you attempt it." (25 Nov 2026)
+- Mandalore Bo-Katan (`mandalore:c3`): red warning to remod; Sean got 1/2 on full auto with Bo-Katan (Mand'alor), The Mandalorian, The Mandalorian (Beskar Armor), IG-12 & Grogu, Padawan Sabine Wren (27 Nov 2026).
 - Kashyyyk Tarfful (`kashyyyk:c6`, 5x Light Side Wookiees R7+): Tarfful + any 4 Relic 7 Light Side Wookiees wins, so it must show **green**. Sean had to say this more than once.
 - Also in `tools/guide/build.js`: Zeffo, Kashyyyk Saw, Haven, Lothal, Vandor, Dathomir and Mustafar guild edits, with reasons in their notes.
 
