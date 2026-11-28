@@ -61,6 +61,7 @@ const CH = {
   'hera': 'HERASYNDULLAS3', 'sabine': ['PADAWANSABINE', 'SABINEWRENS3'], 'padawan sabine': 'PADAWANSABINE', 'huyang': 'HUYANG', 'fulcrum': 'FULCRUMAHSOKA',
   'ezra': ['EZRAEXILE', 'EZRABRIDGERS3'], 'ezra exile': 'EZRAEXILE', 'commander ahsoka tano': 'COMMANDERAHSOKA', 'cat': 'COMMANDERAHSOKA',
   'jtr': 'REYJEDITRAINING', 'jedi training rey': 'REYJEDITRAINING', 'ben': ['BENSOLO', 'OLDBENKENOBI'], 'ben solo': 'BENSOLO', 'bb8': 'BB8', 'c3po': 'C3POLEGENDARY',
+  'the mandalorian grogu': 'GLMANDOGROGU', 'mando and grogu': 'GLMANDOGROGU', 'gl mando': 'GLMANDOGROGU',
   'han': 'HANSOLO', 'chewbacca': 'CHEWBACCALEGENDARY', 'chewpio': 'C3POCHEWBACCA', 'yoda and chewie': 'YODACHEWBACCA', 'yoda chewie': 'YODACHEWBACCA', 'clone wars chewie': 'CLONEWARSCHEWBACCA',
   'princess leia': 'PRINCESSLEIA', 'stormtrooper han': 'STORMTROOPERHAN',
   'captain rex': 'CAPTAINREX', 'capt rex': 'CAPTAINREX', 'echo': 'CT210408', 'fives': 'CT5555', 'arc trooper': 'ARCTROOPER501ST', 'tech': 'BADBATCHTECH',
@@ -191,7 +192,7 @@ function parseTeam(g, key, req) {
   leadExtra.forEach(x => { if (!add(x, /depa/i.test(x) && /omicron/i.test(g.lead) ? 1 : 0)) problems.push(key + ': unit not found: ' + x + '  [' + team.label + ']'); });
   if (/depa billaba omicron/i.test(g.lead || '')) { const s = team.slots.find(s => s.ids[0] === 'DEPABILLABA'); if (s) s.omi = 1; }
   // body: drop sentences after a full stop that start a remark, and bracketed asides
-  withTxt = withTxt.replace(/Yoda and Chewie/gi, 'Yoda & Chewie').replace(/(^|,)\s*and\s+/gi, '$1 ').replace(/\((use|e\.g)[^)]*\)/gi, '').replace(/\. (Millennium|I had)[^]*$/i, '').replace(/really speed this up/i, '');
+  withTxt = withTxt.replace(/Yoda and Chewie/gi, 'Yoda & Chewie').replace(/The Mandalorian and Grogu/gi, 'The Mandalorian & Grogu').replace(/(^|,)\s*and\s+/gi, '$1 ').replace(/\((use|e\.g)[^)]*\)/gi, '').replace(/\. (Millennium|I had)[^]*$/i, '').replace(/really speed this up/i, '');
   if (/^any r9s/i.test(withTxt)) withTxt = 'any 4';
   if (/^any resistance/i.test(withTxt)) withTxt = '+4 resistance';
   if (/^any$/i.test(withTxt.trim())) withTxt = '+4';

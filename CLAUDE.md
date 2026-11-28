@@ -85,8 +85,9 @@ node tools/rote/build_teams.js
 - Hoth Aphra (`hoth:c4`): Doctor Aphra + IG-90, BT-1, 0-0-0, IG-88. Wins every time.
 - Geonosis Acklay (`geonosis:c2`): **priority team** Great Mothers + Morgan Elsbeth, Night Trooper, Death Trooper (Peridea), Nightsister Zombie. Easy full auto.
 - Geonosis Geonosians (`geonosis:c5`, 5x Geonosians R7+): red warning "REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it." Sean failed his first attempt.
-- Lothal Phoenix (`lothal:c3`): red warning "REMODDING NEEDED for this mission. Remod your Phoenix units before you attempt it." (25 Nov 2026)
-- Mandalore Bo-Katan (`mandalore:c3`): red warning to remod; Sean got 1/2 on full auto with Bo-Katan (Mand'alor), The Mandalorian, The Mandalorian (Beskar Armor), IG-12 & Grogu, Padawan Sabine Wren (27 Nov 2026).
+- Lothal Phoenix (`lothal:c3`): red warning "REMODDING NEEDED for this mission. Remod your Phoenix units before you attempt it." (25 Nov 2026). Guild tested 2/2 (28 Nov 2026): Hera Syndulla, Captain Rex, Ezra Bridger, Kanan Jarrus, Garazeb "Zeb" Orrelios, all R8, remodded, platoons 6/6.
+- Mandalore Bo-Katan (`mandalore:c3`): red warning to remod; Sean got 1/2 on full auto unremodded with Padawan Sabine Wren (27 Nov 2026). **Top team, guild tested 2/2 full auto (28 Nov 2026)**: Bo-Katan (Mand'alor) + The Mandalorian and Grogu, The Mandalorian, The Mandalorian (Beskar Armor), IG-12 & Grogu, remodded, platoons 4/6. `build_teams.js` maps "The Mandalorian and Grogu" to GLMANDOGROGU (it used to split on " and ").
+- Mandalore combat (`mandalore:c2`): red warning to wait for platoons to fill and remod before the Rotta the Hutt team; Rotta got 1/2 with Gamorrean Guard's omicron, unremodded, platoons 4/6 (28 Nov 2026).
 - Kashyyyk Tarfful (`kashyyyk:c6`, 5x Light Side Wookiees R7+): Tarfful + any 4 Relic 7 Light Side Wookiees wins, so it must show **green**. Sean had to say this more than once.
 - Also in `tools/guide/build.js`: Zeffo, Kashyyyk Saw, Haven, Lothal, Vandor, Dathomir and Mustafar guild edits, with reasons in their notes.
 
