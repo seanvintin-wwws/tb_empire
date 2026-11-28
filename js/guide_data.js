@@ -1727,7 +1727,14 @@ window.GUIDE = {
    "notes": "easy after Levi buffs"
   }
  ],
- "mandalore:c3": [],
+ "mandalore:c3": [
+  {
+   "lead": "Bo-Katan (Mand'alor)",
+   "with": "The Mandalorian and Grogu, The Mandalorian, The Mandalorian (Beskar Armor), IG-12 & Grogu",
+   "how": "Remod first",
+   "notes": "Guild tested (FireFight, Nov 2026): 2/2 on full auto (1,480,782 points), remodded, with the Mandalore platoons only at 4/6. Bo-Katan (Mand'alor) and The Mandalorian and Grogu at Relic 9, the other three at Relic 10. The same mission gave only 1/2 on an earlier attempt without remodding and without The Mandalorian and Grogu."
+  }
+ ],
  "kashyyyk:c1": [],
  "kessel:c2": [
   {
@@ -1910,7 +1917,7 @@ window.GUIDE_NOTES = {
 window.GUIDE_WARN = {
  "geonosis:c5": "REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it.",
  "lothal:c3": "REMODDING NEEDED for this mission. Remod your Phoenix units before you attempt it.",
- "mandalore:c3": "REMODDING NEEDED for this mission. Remod your Mandalorians before you attempt it. FireFight got only 1/2 on full auto (Nov 2026): wave 1 was fine, wave 2 battered the team.",
+ "mandalore:c3": "REMODDING NEEDED for this mission. Remod your Mandalorians before you attempt it. FireFight got only 1/2 on full auto without remodding (Nov 2026): wave 1 was fine, wave 2 battered the team. Remodded, the first team below won 2/2 on full auto.",
  "mandalore:c2": "WAIT FOR PLATOONS TO FILL and REMOD FIRST if you use the Rotta the Hutt team on this mission. It is a hard one and needs every platoon assist. FireFight got only 1/2 with Gamorrean Guard's omicron, without remodding and with the Mandalore platoons at 4/6 (Level 2), Nov 2026: wave 1 was fine, wave 2 battered the team.",
  "zeffo:c2": "COMMANDER AHSOKA TANO (CAT) NEEDED for this mission. Save her for Zeffo: don't use her on any other mission this phase. Without her the Rey team won't win and the Ahsoka Tano team usually only gets 1/2 (FireFight lost after using her elsewhere, Nov 2026).",
  "dathomir:c8": "REMODDING NEEDED for this mission. Remod this team before you attempt it, and bring Morgan Elsbeth: FireFight lost with Nightsister Spirit in her place."
