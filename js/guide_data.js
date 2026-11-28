@@ -1887,7 +1887,7 @@ window.GUIDE = {
    "lead": "Rotta the Hutt",
    "with": "Embo, Greedo, Gamorrean Guard (omicron), Mob Enforcer",
    "how": "Remod first",
-   "notes": "Only attempt after remodding and with Gamorrean Guard's Territory Battle omicron. Guild tested (FireFight, Nov 2026): a heavy loss without the omicron and without remodding; 1/2 with the omicron but without remodding (wave 2 lost). Last resort when Pirate King Hondo Ohnaka and Lord Vader are used elsewhere."
+   "notes": "Only attempt after remodding and with Gamorrean Guard's Territory Battle omicron. Guild tested (FireFight, Nov 2026): a heavy loss without the omicron and without remodding; 1/2 with the omicron but without remodding and with platoons at 4/6 (wave 2 lost). Wait for the platoons to fill. Last resort when Pirate King Hondo Ohnaka and Lord Vader are used elsewhere."
   }
  ],
  "hoth:c4": [
@@ -1911,7 +1911,7 @@ window.GUIDE_WARN = {
  "geonosis:c5": "REMODDING NEEDED for this mission. Remod your Geonosians before you attempt it.",
  "lothal:c3": "REMODDING NEEDED for this mission. Remod your Phoenix units before you attempt it.",
  "mandalore:c3": "REMODDING NEEDED for this mission. Remod your Mandalorians before you attempt it. FireFight got only 1/2 on full auto (Nov 2026): wave 1 was fine, wave 2 battered the team.",
- "mandalore:c2": "REMODDING NEEDED if you use the Rotta the Hutt team on this mission. Remod that team before you attempt it. FireFight got only 1/2 with Gamorrean Guard's omicron but without remodding (Nov 2026): wave 1 was fine, wave 2 battered the team.",
+ "mandalore:c2": "WAIT FOR PLATOONS TO FILL and REMOD FIRST if you use the Rotta the Hutt team on this mission. It is a hard one and needs every platoon assist. FireFight got only 1/2 with Gamorrean Guard's omicron, without remodding and with the Mandalore platoons at 4/6 (Level 2), Nov 2026: wave 1 was fine, wave 2 battered the team.",
  "zeffo:c2": "COMMANDER AHSOKA TANO (CAT) NEEDED for this mission. Save her for Zeffo: don't use her on any other mission this phase. Without her the Rey team won't win and the Ahsoka Tano team usually only gets 1/2 (FireFight lost after using her elsewhere, Nov 2026).",
  "dathomir:c8": "REMODDING NEEDED for this mission. Remod this team before you attempt it, and bring Morgan Elsbeth: FireFight lost with Nightsister Spirit in her place."
 };
